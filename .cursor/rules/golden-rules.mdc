@@ -1,0 +1,37 @@
+---
+description: GradeBoss golden rules — every change must be responsive/adaptive and PWA installable + offline-capable
+alwaysApply: true
+---
+
+# GradeBoss golden rules (always apply)
+
+Every feature, page, component, and change in this app MUST satisfy both rules
+below. A change is not complete until both hold. See `AGENTS.md` for full detail.
+
+## 1. Responsive & adaptive (desktop, macOS, Android, iOS)
+
+- Write CSS mobile-first; add larger layouts with `min-width` media queries.
+  Reuse the existing breakpoints: `600px` (tablet) and `900px` (desktop).
+- Adapt navigation by form factor (bottom tab bar + top bar on phones,
+  sidebar on desktop) as implemented in `client/src/App.tsx` and
+  `client/src/styles.css`.
+- Use fluid sizing (`clamp()`, `%`, `fr`, `minmax()`); avoid fixed pixel widths
+  for viewport-spanning elements.
+- Honor safe areas via the `--safe-*` variables (`env(safe-area-inset-*)`) and
+  keep `viewport-fit=cover`. Prefer `100dvh` over `100vh`.
+- Touch targets ~44px; form inputs `font-size: 16px` to avoid iOS zoom.
+- Make wide content (tables) scroll instead of overflowing on small screens.
+
+## 2. Installable & offline-capable (PWA)
+
+- Maintain the PWA setup in `client/vite.config.ts` (`vite-plugin-pwa`):
+  manifest, icons, service worker.
+- Precache new static assets; add new offline-relevant API calls to the Workbox
+  `runtimeCaching` rules (API GETs use `NetworkFirst`).
+- Keep the app shell working offline and surface offline state to the user.
+- Ensure `navigateFallback` covers any new routes so refresh works offline.
+
+## Verify before finishing
+
+Check phone (~390px), tablet (~768px), and desktop (~1280px) widths, and confirm
+the built app registers a service worker and loads offline.

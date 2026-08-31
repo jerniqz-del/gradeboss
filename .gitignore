@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+dev-dist/
+*.log
+.env
+.env.local
+.DS_Store
+coverage/
+
+# Runtime data store (seeded on first run)
+server/data/gradeboss.json
