@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GradeBoss — Sync Pricing &amp; Economics Calculator</title>
+    <style>
+      :root {
+        --bg: #0f1220;
+        --surface: #191d30;
+        --surface-2: #212640;
+        --border: #2c3252;
+        --text: #eef1f8;
+        --muted: #99a0bd;
+        --primary: #6d5efc;
+        --green: #22c55e;
+        --red: #ef4444;
+        --amber: #eab308;
+        --radius: 14px;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        background: radial-gradient(1200px 600px at 100% -10%, #23284a 0%, var(--bg) 55%);
+        color: var(--text);
+        min-height: 100vh;
+        padding: clamp(16px, 4vw, 40px);
+      }
+      .wrap { max-width: 1100px; margin: 0 auto; }
+      h1 { font-size: clamp(22px, 5vw, 30px); margin: 0 0 4px; }
+      .sub { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+      .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+      @media (min-width: 860px) { .grid { grid-template-columns: 360px 1fr; } }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 20px;
+      }
+      .card h2 { font-size: 16px; margin: 0 0 16px; }
+      label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+      input, select {
+        width: 100%;
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 10px;
+        font-size: 15px;
+        outline: none;
+      }
+      input:focus, select:focus { border-color: var(--primary); }
+      .row { display: flex; gap: 10px; }
+      .row > div { flex: 1; }
+      .results { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      @media (max-width: 620px) { .results { grid-template-columns: 1fr; } }
+      .plan {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px;
+      }
+      .plan h3 { margin: 0 0 12px; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+      .tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--primary); }
+      .line { display: flex; justify-content: space-between; padding: 7px 0; font-size: 14px; border-bottom: 1px solid rgba(44,50,82,.5); }
+      .line:last-child { border-bottom: none; }
+      .line .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+      .net { font-size: 22px; font-weight: 800; }
+      .pos { color: var(--green); }
+      .neg { color: var(--red); }
+      .muted { color: var(--muted); }
+      .warn {
+        margin-top: 12px; padding: 10px 12px; border-radius: 10px;
+        background: rgba(234,179,8,.12); border: 1px solid var(--amber);
+        color: #fde68a; font-size: 13px; display: none;
+      }
+      .warn.show { display: block; }
+      .note { color: var(--muted); font-size: 12px; margin-top: 16px; line-height: 1.5; }
+      .best { color: var(--green); font-weight: 700; }
+      .pill { display:inline-block; font-size:12px; color:var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>GradeBoss — Sync Pricing &amp; Economics</h1>
+      <p class="sub">
+        Model net revenue for the paid multi-device sync bridge. Free tier = 1 device (local/offline);
+        paying users pay per <em>extra</em> device. All amounts in PHP (₱). Fee presets are approximate — edit them.
+      </p>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Inputs</h2>
+
+          <label for="payingUsers">Paying users</label>
+          <input id="payingUsers" type="number" min="0" value="1000" />
+
+          <label for="extraDevices">Avg. extra paid devices per user</label>
+          <input id="extraDevices" type="number" min="1" step="1" value="1" />
+
+          <div class="row">
+            <div>
+              <label for="priceAnnual">Price / device / year (₱)</label>
+              <input id="priceAnnual" type="number" min="0" step="1" value="50" />
+            </div>
+            <div>
+              <label for="priceMonthly">Price / device / month (₱)</label>
+              <input id="priceMonthly" type="number" min="0" step="1" value="5" />
+            </div>
+          </div>
+
+          <label for="method">Payment method (fee preset)</label>
+          <select id="method">
+            <option value="2.5,0">GCash via PayMongo — 2.5% + ₱0</option>
+            <option value="2.4,0">GCash/Maya via Xendit — 2.4% + ₱0</option>
+            <option value="2.0,0">Maya — 2.0% + ₱0</option>
+            <option value="3.5,15">Local card — 3.5% + ₱15</option>
+            <option value="3.9,15">Intl card — 3.9% + ₱15</option>
+            <option value="custom">Custom…</option>
+          </select>
+
+          <div class="row">
+            <div>
+              <label for="feePct">Fee %</label>
+              <input id="feePct" type="number" min="0" step="0.1" value="2.5" />
+            </div>
+            <div>
+              <label for="feeFixed">Fixed fee / txn (₱)</label>
+              <input id="feeFixed" type="number" min="0" step="0.5" value="0" />
+            </div>
+          </div>
+
+          <label for="infra">Infra cost / paying user / year (₱)</label>
+          <input id="infra" type="number" min="0" step="0.5" value="1" />
+
+          <p class="note">
+            Assumptions: annual = 1 charge/year (all devices billed together); monthly = 12 charges/year.
+            Infra (Cloudflare bridge) is typically a few centavos/user/year — ₱1 is a conservative placeholder.
+          </p>
+        </div>
+
+        <div class="card">
+          <h2>Net revenue per year <span class="pill">(annual vs monthly billing)</span></h2>
+          <div class="results">
+            <div class="plan">
+              <h3>Annual plan <span class="tag" id="tagAnnual" style="display:none">Best</span></h3>
+              <div class="line"><span>Gross revenue</span><span class="v" id="a_gross"></span></div>
+              <div class="line"><span>Payment fees</span><span class="v neg" id="a_fees"></span></div>
+              <div class="line"><span>Infra cost</span><span class="v neg" id="a_infra"></span></div>
+              <div class="line"><span>Net revenue</span><span class="v net pos" id="a_net"></span></div>
+              <div class="line muted"><span>Net / paying user</span><span class="v" id="a_per"></span></div>
+              <div class="line muted"><span>Fees as % of gross</span><span class="v" id="a_feepct"></span></div>
+              <div class="warn" id="a_warn"></div>
+            </div>
+
+            <div class="plan">
+              <h3>Monthly plan <span class="tag" id="tagMonthly" style="display:none">Best</span></h3>
+              <div class="line"><span>Gross revenue</span><span class="v" id="m_gross"></span></div>
+              <div class="line"><span>Payment fees</span><span class="v neg" id="m_fees"></span></div>
+              <div class="line"><span>Infra cost</span><span class="v neg" id="m_infra"></span></div>
+              <div class="line"><span>Net revenue</span><span class="v net" id="m_net"></span></div>
+              <div class="line muted"><span>Net / paying user</span><span class="v" id="m_per"></span></div>
+              <div class="line muted"><span>Fees as % of gross</span><span class="v" id="m_feepct"></span></div>
+              <div class="warn" id="m_warn"></div>
+            </div>
+          </div>
+
+          <p class="note" id="verdict"></p>
+          <p class="note">
+            Rule of thumb this reveals: a fixed per-transaction fee (cards) is brutal for small monthly charges
+            (12 charges/year), while wallet rails with no fixed fee (GCash/Maya) keep monthly viable. Annual billing
+            is safe on every rail because it's one transaction.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const peso = (n) =>
+        "₱" + n.toLocaleString("en-PH", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+      function scenario({ users, devices, price, txnsPerYear, feePct, feeFixed, infra }) {
+        // Amount per charge covers all of a user's extra devices for the period.
+        const chargeAmount = devices * price;
+        const grossPerUser = chargeAmount * txnsPerYear;
+        const feePerTxn = chargeAmount * (feePct / 100) + feeFixed;
+        const feesPerUser = feePerTxn * txnsPerYear;
+        const netPerUser = grossPerUser - feesPerUser - infra;
+        return {
+          gross: grossPerUser * users,
+          fees: feesPerUser * users,
+          infra: infra * users,
+          net: netPerUser * users,
+          perUser: netPerUser,
+          feePctOfGross: grossPerUser > 0 ? (feesPerUser / grossPerUser) * 100 : 0,
+        };
+      }
+
+      function render() {
+        const users = Math.max(0, +$("payingUsers").value || 0);
+        const devices = Math.max(1, +$("extraDevices").value || 1);
+        const priceAnnual = Math.max(0, +$("priceAnnual").value || 0);
+        const priceMonthly = Math.max(0, +$("priceMonthly").value || 0);
+        const feePct = Math.max(0, +$("feePct").value || 0);
+        const feeFixed = Math.max(0, +$("feeFixed").value || 0);
+        const infra = Math.max(0, +$("infra").value || 0);
+
+        const annual = scenario({ users, devices, price: priceAnnual, txnsPerYear: 1, feePct, feeFixed, infra });
+        const monthly = scenario({ users, devices, price: priceMonthly, txnsPerYear: 12, feePct, feeFixed, infra });
+
+        const put = (p, s) => {
+          $(p + "_gross").textContent = peso(s.gross);
+          $(p + "_fees").textContent = "-" + peso(s.fees);
+          $(p + "_infra").textContent = "-" + peso(s.infra);
+          const net = $(p + "_net");
+          net.textContent = peso(s.net);
+          net.classList.toggle("pos", s.net >= 0);
+          net.classList.toggle("neg", s.net < 0);
+          $(p + "_per").textContent = peso(s.perUser) + " / yr";
+          $(p + "_feepct").textContent = s.feePctOfGross.toFixed(1) + "%";
+          const warn = $(p + "_warn");
+          if (s.feePctOfGross >= 30) {
+            warn.classList.add("show");
+            warn.textContent =
+              "⚠ Fees eat " + s.feePctOfGross.toFixed(0) + "% of gross — this billing/rail combo is uneconomic.";
+          } else {
+            warn.classList.remove("show");
+          }
+        };
+        put("a", annual);
+        put("m", monthly);
+
+        const aBest = annual.net >= monthly.net;
+        $("tagAnnual").style.display = aBest ? "inline-block" : "none";
+        $("tagMonthly").style.display = aBest ? "none" : "inline-block";
+
+        const diff = Math.abs(annual.net - monthly.net);
+        $("verdict").innerHTML =
+          "<span class='best'>" +
+          (aBest ? "Annual" : "Monthly") +
+          "</span> nets more here by " +
+          peso(diff) +
+          "/yr (" +
+          peso(annual.net) +
+          " vs " +
+          peso(monthly.net) +
+          ").";
+      }
+
+      const methodPresets = {
+        "2.5,0": [2.5, 0], "2.4,0": [2.4, 0], "2.0,0": [2.0, 0],
+        "3.5,15": [3.5, 15], "3.9,15": [3.9, 15],
+      };
+      $("method").addEventListener("change", (e) => {
+        const v = e.target.value;
+        if (methodPresets[v]) {
+          $("feePct").value = methodPresets[v][0];
+          $("feeFixed").value = methodPresets[v][1];
+        }
+        render();
+      });
+
+      document.querySelectorAll("input").forEach((el) => el.addEventListener("input", render));
+      render();
+    </script>
+  </body>
+</html>
