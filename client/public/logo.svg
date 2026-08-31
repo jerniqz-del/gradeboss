@@ -1,0 +1,13 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="GradeBoss logo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6d5efc"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M256 96 L432 176 L256 256 L80 176 Z" fill="#ffffff" opacity="0.95"/>
+  <path d="M144 212 L144 300 C144 336 196 360 256 360 C316 360 368 336 368 300 L368 212" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="432" y1="176" x2="432" y2="272" stroke="#ffffff" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="432" cy="292" r="18" fill="#ffffff"/>
+</svg>
