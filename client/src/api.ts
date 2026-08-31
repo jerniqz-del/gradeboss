@@ -47,17 +47,51 @@ export interface Stats {
   }>;
 }
 
+const CACHE_PREFIX = "gradeboss:cache:";
+
+function readCache<T>(path: string): T | null {
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + path);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(path: string, data: unknown): void {
+  try {
+    localStorage.setItem(CACHE_PREFIX + path, JSON.stringify(data));
+  } catch {
+    // Storage may be unavailable (private mode / quota); caching is best-effort.
+  }
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`/api${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
+  const method = (options?.method ?? "GET").toUpperCase();
+  let res: Response;
+  try {
+    res = await fetch(`/api${path}`, {
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+  } catch (networkError) {
+    // Offline (or the network is unreachable): fall back to the last data we
+    // successfully fetched so the app stays usable without a connection.
+    if (method === "GET") {
+      const cached = readCache<T>(path);
+      if (cached !== null) return cached;
+    }
+    throw networkError;
+  }
+
   if (!res.ok) {
     const detail = await res.json().catch(() => ({}));
     throw new Error(detail.error ?? `Request failed: ${res.status}`);
   }
   if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+  const data = (await res.json()) as T;
+  if (method === "GET") writeCache(path, data);
+  return data;
 }
 
 export const api = {
