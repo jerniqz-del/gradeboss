@@ -69,7 +69,7 @@ export function DashboardView({
   }
 
   const cards = [
-    { label: "Teaching loads", value: insights.loadCount, hint: "active subjects" },
+    { label: "Teaching loads", value: insights.loadCount, hint: insights.loadCount === 1 ? "active subject" : "active subjects" },
     { label: "Learners", value: insights.learnerCount, hint: `${insights.enrollmentCount} enrollments` },
     {
       label: "Completion",
