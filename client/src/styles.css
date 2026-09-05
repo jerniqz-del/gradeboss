@@ -809,6 +809,18 @@ button.ghost.back {
   transform: translateY(-1px);
 }
 
+.bottom-nav .tab .avatar {
+  border: 2px solid transparent;
+}
+
+.bottom-nav .tab.active .avatar {
+  border-color: var(--primary);
+}
+
+.bottom-nav .tab .avatar.fallback {
+  font-size: 9px;
+}
+
 /* Side nav shared item style (used on desktop) */
 .side-nav {
   display: flex;
@@ -1063,6 +1075,51 @@ button.ghost.back {
   border-radius: 50%;
   background: var(--surface-2);
   cursor: pointer;
+}
+
+.profile-topbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  max-width: min(46vw, 180px);
+  padding: 4px 10px 4px 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.profile-topbar-btn.active {
+  border-color: var(--primary);
+}
+
+.profile-topbar-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  gap: 1px;
+}
+
+.profile-topbar-name {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.profile-topbar-role {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .role-badge {

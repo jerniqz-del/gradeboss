@@ -41,6 +41,7 @@ const NAV: Array<{ id: View; label: string; icon: string }> = [
   { id: "students", label: "Students", icon: "users" },
   { id: "courses", label: "Courses", icon: "book" },
   { id: "gradebook", label: "Gradebook", icon: "pencil" },
+  { id: "profile", label: "Profile", icon: "user" },
 ];
 
 const SYNC_PRICE_ANNUAL = 50; // PHP per extra device per year
@@ -196,17 +197,6 @@ export default function App() {
             <Icon name="spark" />
             Plans
           </button>
-          <button
-            type="button"
-            className={view === "profile" ? "user-chip active" : "user-chip"}
-            onClick={() => setView("profile")}
-          >
-            <Avatar user={user} size={36} />
-            <span className="user-chip-text">
-              <span className="user-chip-name">{user.name}</span>
-              <span className="user-chip-role">{roleLabel(user.role)}</span>
-            </span>
-          </button>
         </div>
       </aside>
 
@@ -222,11 +212,16 @@ export default function App() {
           {showInstall && <InstallButton onInstall={install} />}
           <button
             type="button"
-            className="avatar-btn"
+            className={view === "profile" ? "profile-topbar-btn active" : "profile-topbar-btn"}
             aria-label="Profile"
+            aria-current={view === "profile" ? "page" : undefined}
             onClick={() => setView("profile")}
           >
-            <Avatar user={user} size={36} />
+            <Avatar user={user} size={32} />
+            <span className="profile-topbar-text">
+              <span className="profile-topbar-name">{user.name}</span>
+              <span className="profile-topbar-role">{roleLabel(user.role)}</span>
+            </span>
           </button>
         </div>
       </header>
@@ -259,8 +254,13 @@ export default function App() {
             className={view === item.id ? "tab active" : "tab"}
             onClick={() => setView(item.id)}
             aria-label={item.label}
+            aria-current={view === item.id ? "page" : undefined}
           >
-            <Icon name={item.icon} />
+            {item.id === "profile" ? (
+              <Avatar user={user} size={22} />
+            ) : (
+              <Icon name={item.icon} />
+            )}
             <span>{item.label}</span>
           </button>
         ))}
