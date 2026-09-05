@@ -129,6 +129,8 @@ select:focus:not(:focus-visible) {
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .sidebar {
@@ -231,6 +233,7 @@ select:focus:not(:focus-visible) {
 .content {
   flex: 1;
   width: 100%;
+  min-width: 0;
   max-width: 1200px;
   margin: 0 auto;
   padding: clamp(var(--space-4), 4vw, var(--space-6));
@@ -283,6 +286,8 @@ select:focus:not(:focus-visible) {
 }
 
 .card {
+  min-width: 0;
+  max-width: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1655,9 +1660,20 @@ button.ghost.back {
   flex: 1 1 140px;
 }
 
+.roster-table {
+  min-width: 520px;
+}
+
 .roster-table td,
 .roster-table th {
   vertical-align: middle;
+}
+
+@media (max-width: 599px) {
+  .roster-table th:nth-child(6),
+  .roster-table td:nth-child(6) {
+    display: none;
+  }
 }
 
 .row-actions {
