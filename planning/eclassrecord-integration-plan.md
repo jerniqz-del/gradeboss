@@ -11,7 +11,7 @@
 | **Last updated** | 2026-09-05 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 2 complete — Phase 3 next |
+| **Overall status** | 🔄 Phase 3 in progress |
 | **Active phase** | 3 (Teaching loads & score grid UI) |
 
 ---
@@ -111,7 +111,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 0 | Discovery & parity mapping | ✅ Complete | 2026-09-05 | 2026-09-05 | This document |
 | 1 | Data foundation & storage | ✅ Complete | 2026-09-05 | 2026-09-05 | PR #4 |
 | 2 | DepEd grading engine (domain) | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #5](https://github.com/jerniqz-del/gradeboss/pull/5) (stacked on #4) |
-| 3 | Teaching loads & score grid UI | ⬜ Not started | — | — | |
+| 3 | Teaching loads & score grid UI | 🔄 In progress | 2026-09-05 | — | |
 | 4 | Roster operations & SF1 linking | ⬜ Not started | — | — | |
 | 5 | Term summary, pass/fail & dashboard | ⬜ Not started | — | — | |
 | 6 | Export, print & backup (CSV/JSON) | ⬜ Not started | — | — | |
@@ -672,6 +672,7 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | 1 | Phase 1 complete — IndexedDB schema v1, models, migration, repositories, Vitest | Agent |
 | 2026-09-05 | 2 | Started Phase 2 — DepEd grading engine (domain) | Agent |
 | 2026-09-05 | 2 | Phase 2 complete — TS grading engine, transmutation tables, golden-file tests vs eclassrecord `grading.js` | Agent |
+| 2026-09-05 | 3 | Started Phase 3 — teaching loads & score grid UI | Agent |
 
 ### How to update when a phase finishes
 
