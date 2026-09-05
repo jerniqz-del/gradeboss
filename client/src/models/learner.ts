@@ -20,11 +20,16 @@ export interface Learner {
   transferredInGrades?: Partial<Record<Term, number>>;
 }
 
+/** "Last, First Jr. M." — port of eclassrecord `formatLearnerName` plus extension. */
 export function learnerDisplayName(learner: Learner): string {
-  const parts = [learner.lastName, learner.firstName, learner.middleName].filter(Boolean);
-  if (learner.lastName && learner.firstName) {
-    const middle = learner.middleName ? ` ${learner.middleName.charAt(0)}.` : "";
-    return `${learner.lastName}, ${learner.firstName}${middle}`;
+  const last = (learner.lastName || "").trim();
+  const first = (learner.firstName || "").trim();
+  const ext = (learner.extensionName || "").trim();
+  const middle = (learner.middleName || "").trim();
+  if (last && first) {
+    const extPart = ext ? ` ${ext}` : "";
+    const midPart = middle ? ` ${middle.charAt(0)}.` : "";
+    return `${last}, ${first}${extPart}${midPart}`;
   }
-  return parts.join(" ") || "Unnamed learner";
+  return [last, first, ext, middle].filter(Boolean).join(" ") || "Unnamed learner";
 }

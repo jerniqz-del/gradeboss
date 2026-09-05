@@ -7,16 +7,20 @@ import {
 } from "../../domain/grading";
 import { Icon } from "../../Icon";
 import type { TeachingLoad } from "../../models/teaching-load";
+import { RosterPanel } from "../roster/RosterPanel";
 import { SCHOOL_YEARS, subjectsForGrade } from "./catalog";
 import { createTeachingLoad, formatWeights, policyLabel } from "./create-load";
 
 export function TeachingLoadsView({
   onOpenSheet,
+  initialRosterLoadId,
 }: {
   onOpenSheet: (loadId: string) => void;
+  initialRosterLoadId?: string | null;
 }) {
   const [loads, setLoads] = useState<TeachingLoad[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [rosterLoadId, setRosterLoadId] = useState<string | null>(initialRosterLoadId ?? null);
   const [gradeLevel, setGradeLevel] = useState("10");
   const [section, setSection] = useState("");
   const [subject, setSubject] = useState("Mathematics");
@@ -42,6 +46,10 @@ export function TeachingLoadsView({
   }, []);
 
   useEffect(() => {
+    if (initialRosterLoadId) setRosterLoadId(initialRosterLoadId);
+  }, [initialRosterLoadId]);
+
+  useEffect(() => {
     if (!subjects.includes(subject)) setSubject(subjects[0] || "");
   }, [subjects, subject]);
 
@@ -64,14 +72,39 @@ export function TeachingLoadsView({
   const remove = async (id: string) => {
     if (!window.confirm("Delete this teaching load and its scores?")) return;
     await api.deleteTeachingLoad(id);
+    if (rosterLoadId === id) setRosterLoadId(null);
     await refresh();
   };
+
+  const persistLoad = async (next: TeachingLoad) => {
+    await api.saveTeachingLoad(next);
+    await refresh();
+  };
+
+  const persistLoads = async (next: TeachingLoad[]) => {
+    for (const load of next) await api.saveTeachingLoad(load);
+    await refresh();
+  };
+
+  const rosterLoad = loads.find((item) => item.id === rosterLoadId) ?? null;
+  if (rosterLoad) {
+    return (
+      <RosterPanel
+        load={rosterLoad}
+        loads={loads}
+        onChange={persistLoad}
+        onChangeMany={persistLoads}
+        onBack={() => setRosterLoadId(null)}
+        onOpenSheet={() => onOpenSheet(rosterLoad.id)}
+      />
+    );
+  }
 
   return (
     <section>
       <div className="page-header">
         <h2>Teaching loads</h2>
-        <p>Create a class + subject, then open the grading sheet to enter scores.</p>
+        <p>Create a class + subject, import an SF1 roster, then open the grading sheet.</p>
       </div>
 
       {error && <div className="banner error">{error}</div>}
@@ -163,6 +196,9 @@ export function TeachingLoadsView({
               <div className="load-actions">
                 <button type="button" className="primary" onClick={() => onOpenSheet(load.id)}>
                   Open sheet
+                </button>
+                <button type="button" className="ghost" onClick={() => setRosterLoadId(load.id)}>
+                  Roster
                 </button>
                 <button type="button" className="ghost danger" onClick={() => void remove(load.id)}>
                   Delete

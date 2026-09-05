@@ -1,8 +1,7 @@
 import type { SchoolClass } from "../classes";
-import type { Sf1Learner } from "../sf1";
 import { defaultSubjectGroup, detectPolicy, parseGradeLevel } from "../domain/policy";
+import { assignRoster, sf1LearnerToLearner, sortDepEdRoster } from "../features/roster";
 import type { Assessment } from "../models/assessment";
-import type { Learner } from "../models/learner";
 import type { LegacyGradebook } from "../models/legacy";
 import type { TeachingLoad } from "../models/teaching-load";
 
@@ -42,24 +41,6 @@ export function readLocalStorageSnapshot(): LocalStorageSnapshot {
   }
 
   return { legacy, schoolClasses };
-}
-
-function sf1LearnerToLearner(learner: Sf1Learner): Learner {
-  return {
-    id: crypto.randomUUID(),
-    lrn: learner.lrn,
-    lastName: learner.lastName,
-    firstName: learner.firstName,
-    middleName: learner.middleName,
-    sex: learner.sex,
-    birthdate: learner.birthdate,
-    age: learner.age,
-    religion: learner.religion,
-    motherTongue: learner.motherTongue,
-    modality: learner.modality,
-    remarks: learner.remarks,
-    avatarAssignment: "auto",
-  };
 }
 
 function defaultTermAssessments(term: "1" | "2" | "3"): Assessment[] {
@@ -113,7 +94,7 @@ export function schoolClassToTeachingLoad(cls: SchoolClass): TeachingLoad {
       adviser: cls.adviser,
       schoolHead: cls.schoolHead,
     },
-    learners: cls.learners.map(sf1LearnerToLearner),
+    learners: assignRoster(sortDepEdRoster(cls.learners.map(sf1LearnerToLearner))),
     assessments,
     scores: {},
     createdAt: now,

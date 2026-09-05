@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-05 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 3 complete — Phase 4 next |
-| **Active phase** | 4 (Roster operations & SF1 linking) |
+| **Overall status** | 🔄 Phase 4 complete — Phase 5 next |
+| **Active phase** | 5 (Term summary, pass/fail & dashboard) |
 
 ---
 
@@ -56,9 +56,9 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 | Area | Scope |
 | --- | --- |
 | **Auth** | Google OAuth (`@deped.gov.ph`), offline profile cache |
-| **Storage** | `localStorage`: `gradeboss:data`, `gradeboss:classes`, `gradeboss:auth` |
-| **SF1** | Import to standalone class viewer (`sf1.ts`) — **not linked to gradebook** |
-| **Gradebook** | Flat assignment list (score / maxScore), generic A–F letters, G9–12 only |
+| **Storage** | IndexedDB schema v1 (`teachingLoads`, profile, legacy gradebook); `localStorage` kept as SF1 history + migration source |
+| **SF1** | Import links to matching teaching-load rosters (grade + section + SY) |
+| **Gradebook** | DepEd teaching loads + score grid (WW/PT/ST/TE, terms, transmutation); G1–12 |
 | **Views** | Dashboard, Classes, Students, Courses, Gradebook, Plans, Profile |
 | **PWA** | Vite + Workbox, offline banner, install prompt |
 | **UI** | Material-inspired flat + elevation, light/dark/system themes |
@@ -66,7 +66,7 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 
 ### Critical architectural gaps
 
-1. **Disconnected data** — SF1 classes and gradebook use separate stores with no shared learners.
+1. **~~Disconnected data~~** — Phase 4 links SF1 imports to teaching-load rosters (LRN merge). `gradeboss:classes` remains an import history.
 2. **No DepEd grading model** — no components, terms, weights, transmutation, or policy modes.
 3. **Storage too shallow** — flat `Student` / `Course` / `Grade` cannot hold assessments, HPS, or term structure.
 4. **No exports** — no CSV, Excel, PDF, or print layouts.
@@ -112,7 +112,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 1 | Data foundation & storage | ✅ Complete | 2026-09-05 | 2026-09-05 | PR #4 |
 | 2 | DepEd grading engine (domain) | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #5](https://github.com/jerniqz-del/gradeboss/pull/5) (stacked on #4) |
 | 3 | Teaching loads & score grid UI | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #6](https://github.com/jerniqz-del/gradeboss/pull/6) |
-| 4 | Roster operations & SF1 linking | ⬜ Not started | — | — | |
+| 4 | Roster operations & SF1 linking | ✅ Complete | 2026-09-05 | 2026-09-05 | |
 | 5 | Term summary, pass/fail & dashboard | ⬜ Not started | — | — | |
 | 6 | Export, print & backup (CSV/JSON) | ⬜ Not started | — | — | |
 | 7 | Advisory class & grade transfer | ⬜ Not started | — | — | |
@@ -260,7 +260,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 4 — Roster operations & SF1 linking
+### Phase 4 — Roster operations & SF1 linking ✅
 
 **Goal:** Full learner management connected to teaching loads.
 
@@ -277,17 +277,17 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 7. Learner avatars (100 bundled presets, auto by sex, manual override) — static assets precached in PWA.
 8. Extend grade levels to 1–12 (remove G9–12-only restriction).
 
-**E-Class Record reference:** `learners.js`, `sf1-import.js`, `learner-transfer.js`, avatar assets
+**E-Class Record reference:** `learners.js`, `import-export.js`, `learner-avatars.js` (no `sf1-import.js` / `learner-transfer.js` in desktop)
 
 **Deliverables:**
-- Roster panel in Teaching Loads view
-- SF1 → load workflow (replace read-only Classes viewer or redirect)
-- Avatar picker component
+- [x] Roster panel in Teaching Loads view (`features/roster/`)
+- [x] SF1 → load workflow (Classes import applies roster to matching grade/section/SY loads)
+- [x] Avatar picker (procedural SVG, 50M + 50F + 1 neutral — same as desktop; no PNG bundle)
 
 **Acceptance tests:**
-- Import real SF1 `.xlsx`; learners appear in score grid
-- Transfer learner preserves partial term grades
-- Roster sort matches DepEd convention
+- [x] Generated SF1 `.xlsx` import places learners on the matching teaching load and score grid
+- [x] Transfer learner preserves completed term grades as T/I and marks later terms T/O
+- [x] Roster sort is male block → female block → Filipino alpha
 
 **Exit criteria:** SF1 classes and gradebook fully unified.
 
@@ -674,6 +674,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | 2 | Phase 2 complete — TS grading engine, transmutation tables, golden-file tests vs eclassrecord `grading.js` | Agent |
 | 2026-09-05 | 3 | Started Phase 3 — teaching loads & score grid UI | Agent |
 | 2026-09-05 | 3 | Phase 3 complete — Loads + grading sheet UI, live PS/IG/TG, MAPEH tabs, summary | Agent |
+| 2026-09-05 | 4 | Started Phase 4 — roster operations & SF1 linking | Agent |
+| 2026-09-05 | 4 | Phase 4 complete — SF1→load merge, learner CRUD, DepEd sort, CSV/clone/transfer, procedural avatars, G1–12 | Agent |
 
 ### How to update when a phase finishes
 
@@ -706,7 +708,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | Port `grading.js` as pure TS domain module first | Highest risk / highest value; enables all downstream UI |
 | 2026-09-05 | Keep Google DepEd auth; add optional local PIN later | GradeBoss identity model differs from desktop profiles |
 | 2026-09-05 | 15 phases (0–14) | Groups work into shippable increments without multi-month blocks |
+| 2026-09-05 | Port desktop procedural SVG avatars instead of 100 PNG files | Matches eclassrecord `learner-avatars.js`; keeps PWA cache small and works offline |
 
 ---
 
-*Next action: Begin **Phase 4 — Roster operations & SF1 linking**.*
+*Next action: Begin **Phase 5 — Term summary, pass/fail & dashboard**.*

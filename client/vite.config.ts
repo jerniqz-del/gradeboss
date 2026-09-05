@@ -34,6 +34,7 @@ export default defineConfig({
       workbox: {
         // Primary data lives in IndexedDB; localStorage retains SF1 class list
         // and is read once on first launch for migration.
+        // Learner avatars are procedural SVG (no extra image assets to precache).
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         navigateFallback: "index.html",
       },
