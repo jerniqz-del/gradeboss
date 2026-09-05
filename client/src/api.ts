@@ -19,6 +19,7 @@ import {
   listTeachingLoads,
   getTeachingLoad,
   saveTeachingLoad,
+  deleteTeachingLoad,
 } from "./storage";
 
 export type { Student, Course, Grade, TeachingLoad };
@@ -86,5 +87,8 @@ export const api = {
   },
   async saveTeachingLoad(load: TeachingLoad): Promise<TeachingLoad> {
     return saveTeachingLoad(load);
+  },
+  async deleteTeachingLoad(id: string): Promise<void> {
+    return deleteTeachingLoad(id);
   },
 };

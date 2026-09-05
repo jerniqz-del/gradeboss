@@ -1458,3 +1458,183 @@ button.ghost.back {
     width: auto;
   }
 }
+
+/* Teaching loads + grading sheet (Phase 3) */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.form-grid label,
+.sheet-toolbar label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.form-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.load-card p {
+  word-break: break-word;
+}
+
+.load-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.load-actions .primary,
+.load-actions .ghost {
+  width: auto;
+  flex: 1 1 120px;
+}
+
+.sheet-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.sheet-tabs {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: var(--space-3);
+  padding-bottom: 2px;
+}
+
+.sheet-tab {
+  flex: 1 0 auto;
+  min-height: 44px;
+  min-width: 72px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.sheet-tab.active {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--text);
+}
+
+.sheet-scroll {
+  max-height: min(70dvh, 720px);
+  overflow: auto;
+}
+
+.sheet-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.sheet-table th,
+.sheet-table td {
+  padding: 6px;
+  text-align: center;
+}
+
+.sheet-table .sheet-group {
+  text-align: center;
+  background: var(--surface-2);
+}
+
+.sheet-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+  text-align: left;
+  min-width: 132px;
+  max-width: 44vw;
+  box-shadow: 1px 0 0 var(--border-subtle);
+}
+
+.sheet-table thead .sheet-sticky {
+  z-index: 3;
+  background: var(--surface-2);
+}
+
+.sheet-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sheet-hps td,
+.sheet-hps th {
+  background: var(--primary-soft);
+}
+
+.score-input {
+  width: 56px;
+  min-width: 56px;
+  min-height: 44px;
+  padding: 8px 6px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.sheet-computed {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pass {
+  color: var(--green);
+  font-weight: 700;
+}
+
+@media (min-width: 600px) {
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+  }
+
+  .form-grid .primary,
+  .form-preview {
+    grid-column: 1 / -1;
+  }
+
+  .sheet-toolbar {
+    flex-direction: row;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .sheet-toolbar label {
+    min-width: min(100%, 280px);
+  }
+}
+
+@media (min-width: 900px) {
+  .form-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .sheet-scroll {
+    max-height: calc(100dvh - 280px);
+  }
+}
