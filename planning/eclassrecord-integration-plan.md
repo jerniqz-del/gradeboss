@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-05 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 4 complete — Phase 5 next |
-| **Active phase** | 5 (Term summary, pass/fail & dashboard) |
+| **Overall status** | 🔄 Phase 5 complete — Phase 6 next |
+| **Active phase** | 6 (Export, print & backup) |
 
 ---
 
@@ -59,7 +59,7 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 | **Storage** | IndexedDB schema v1 (`teachingLoads`, profile, legacy gradebook); `localStorage` kept as SF1 history + migration source |
 | **SF1** | Import links to matching teaching-load rosters (grade + section + SY) |
 | **Gradebook** | DepEd teaching loads + score grid (WW/PT/ST/TE, terms, transmutation); G1–12 |
-| **Views** | Dashboard, Classes, Students, Courses, Gradebook, Plans, Profile |
+| **Views** | Dashboard (DepEd completion), Classes, Students, Loads, Sheet, Plans, Profile |
 | **PWA** | Vite + Workbox, offline banner, install prompt |
 | **UI** | Material-inspired flat + elevation, light/dark/system themes |
 | **Planning** | Sync bridge spec (`planning/sync-bridge-spec.md`), pricing page |
@@ -113,7 +113,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 2 | DepEd grading engine (domain) | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #5](https://github.com/jerniqz-del/gradeboss/pull/5) (stacked on #4) |
 | 3 | Teaching loads & score grid UI | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #6](https://github.com/jerniqz-del/gradeboss/pull/6) |
 | 4 | Roster operations & SF1 linking | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #7](https://github.com/jerniqz-del/gradeboss/pull/7) |
-| 5 | Term summary, pass/fail & dashboard | ⬜ Not started | — | — | |
+| 5 | Term summary, pass/fail & dashboard | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #8](https://github.com/jerniqz-del/gradeboss/pull/8) |
 | 6 | Export, print & backup (CSV/JSON) | ⬜ Not started | — | — | |
 | 7 | Advisory class & grade transfer | ⬜ Not started | — | — | |
 | 8 | Attendance tracker & SF2 | ⬜ Not started | — | — | |
@@ -293,7 +293,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 5 — Term summary, pass/fail & dashboard
+### Phase 5 — Term summary, pass/fail & dashboard ✅
 
 **Goal:** Summary grades and dashboard reflect DepEd completion state.
 
@@ -301,22 +301,22 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 **Work items:**
 
-1. Summary tab: term final grades, annual average, pass/fail badges (≥75).
-2. Descriptive grade display for G1–3 policy.
-3. Dashboard cards per teaching load: completion %, missing scores, class average.
-4. Student standings table using transmuted grades (not flat percentage).
-5. Course/subject performance bars by term.
-6. Workplace-style pending tasks (missing HPS, incomplete terms) — lightweight v1.
+1. [x] Summary tab: term final grades, annual average, pass/fail badges (≥75).
+2. [x] Descriptive grade display for G1–3 policy.
+3. [x] Dashboard cards per teaching load: completion %, missing scores, class average.
+4. [x] Student standings table using transmuted grades (not flat percentage).
+5. [x] Course/subject performance bars by term.
+6. [x] Workplace-style pending tasks (missing HPS, incomplete terms) — lightweight v1.
 
 **E-Class Record reference:** `dashboard.js`, `dashboard-grade-insights.js`, Summary tab in grading sheet
 
 **Deliverables:**
-- Updated Dashboard view
-- Summary computation hooks in domain layer
+- [x] Updated Dashboard view (`features/dashboard/DashboardView.tsx`)
+- [x] Summary computation hooks in domain layer (`domain/grading/summary.ts`, `insights.ts`)
 
 **Acceptance tests:**
-- Summary matches manual calculation for sample class
-- Dashboard completion % accurate when scores missing
+- [x] Summary matches manual calculation for sample class
+- [x] Dashboard completion % accurate when scores missing
 
 **Exit criteria:** Dashboard reflects real DepEd grading state.
 
@@ -676,6 +676,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | 3 | Phase 3 complete — Loads + grading sheet UI, live PS/IG/TG, MAPEH tabs, summary | Agent |
 | 2026-09-05 | 4 | Started Phase 4 — roster operations & SF1 linking | Agent |
 | 2026-09-05 | 4 | Phase 4 complete — SF1→load merge, learner CRUD, DepEd sort, CSV/clone/transfer, procedural avatars, G1–12 | Agent |
+| 2026-09-05 | 5 | Started Phase 5 — term summary, pass/fail & dashboard | Agent |
+| 2026-09-05 | 5 | Phase 5 complete — year-result/insights domain, summary pass/fail, DepEd dashboard | Agent |
 
 ### How to update when a phase finishes
 
@@ -712,4 +714,4 @@ Append a row when a phase status changes. **Do not delete entries.**
 
 ---
 
-*Next action: Begin **Phase 5 — Term summary, pass/fail & dashboard**.*
+*Next action: Begin **Phase 6 — Export, print & backup (CSV/JSON)**.*

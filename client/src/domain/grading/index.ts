@@ -6,6 +6,10 @@
  * - `computeMapehTermResult(load, learnerId, term)` — Music & Arts + PE & Health
  * - `computeClassTermResults(load, term)` — whole section
  *
+ * Phase 5 summary / dashboard:
+ * - `computeLearnerYearResult` / `computeClassYearResults` — term finals + annual + pass/fail
+ * - `computeLoadInsights` / `computeDashboardInsights` — completion, standings, pending tasks
+ *
  * Building blocks (`componentScore`, `initialGrade`, `transmute`) are exported
  * for unit tests and for UI cells that only need a single column.
  */
@@ -20,6 +24,16 @@ export type {
   TermResult,
   WeightTriplet,
 } from "./types";
+
+export type { LearnerTermSummary, LearnerYearResult } from "./summary";
+export type {
+  DashboardInsights,
+  LoadInsights,
+  PendingTask,
+  StandingRow,
+  TermAverage,
+  TermCompletion,
+} from "./insights";
 
 export {
   DO15_TRANSITION,
@@ -50,6 +64,10 @@ export { formatInitialGrade, initialGrade } from "./initial-grade";
 export { computeClassTermResults, computeTermResult } from "./term-result";
 
 export { computeMapehTermResult, consolidateMapehGrades } from "./mapeh";
+
+export { TERMS, computeClassYearResults, computeLearnerYearResult } from "./summary";
+
+export { computeDashboardInsights, computeLoadInsights, loadLabel } from "./insights";
 
 export {
   DEFAULT_WEIGHTS,
