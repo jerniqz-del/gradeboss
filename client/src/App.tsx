@@ -25,6 +25,8 @@ import {
 import { Icon } from "./Icon";
 import { Avatar, Profile } from "./Profile";
 import { SignIn } from "./SignIn";
+import { ThemeToggle } from "./ThemeToggle";
+import { useTheme } from "./useTheme";
 
 type View =
   | "dashboard"
@@ -118,6 +120,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const { canInstall, installed, install } = useInstallPrompt();
   const online = useOnline();
+  const { preference, setTheme } = useTheme();
 
   const refresh = useCallback(async () => {
     try {
@@ -154,7 +157,7 @@ export default function App() {
   }, []);
 
   if (!user) {
-    return <SignIn online={online} onSignedIn={onSignedIn} />;
+    return <SignIn online={online} onSignedIn={onSignedIn} themePreference={preference} onThemeChange={setTheme} />;
   }
 
   const showInstall = canInstall && !installed;
@@ -190,6 +193,7 @@ export default function App() {
         </nav>
         <div className="sidebar-footer">
           {showInstall && <InstallButton onInstall={install} />}
+          <ThemeToggle preference={preference} onChange={setTheme} compact />
           <button
             className={view === "plans" ? "nav-item active" : "nav-item"}
             onClick={() => setView("plans")}
@@ -206,6 +210,7 @@ export default function App() {
           <h1>GradeBoss</h1>
         </div>
         <div className="topbar-actions">
+          <ThemeToggle preference={preference} onChange={setTheme} compact />
           <button className="ghost small" onClick={() => setView("plans")}>
             Plans
           </button>
@@ -244,7 +249,14 @@ export default function App() {
           />
         )}
         {view === "plans" && <Plans />}
-        {view === "profile" && <Profile user={user} onSignOut={signOut} />}
+        {view === "profile" && (
+          <Profile
+            user={user}
+            onSignOut={signOut}
+            themePreference={preference}
+            onThemeChange={setTheme}
+          />
+        )}
       </main>
 
       <nav className="bottom-nav">
