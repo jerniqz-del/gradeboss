@@ -32,8 +32,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // The app is fully local (data lives in localStorage), so the service
-        // worker only needs to precache the app shell for offline use.
+        // Primary data lives in IndexedDB; localStorage retains SF1 class list
+        // and is read once on first launch for migration.
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         navigateFallback: "index.html",
       },

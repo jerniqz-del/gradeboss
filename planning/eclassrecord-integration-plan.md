@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-05 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Planning complete — implementation not started |
-| **Active phase** | — |
+| **Overall status** | 🔄 Phase 1 complete — Phase 2 next |
+| **Active phase** | 2 (DepEd grading engine) |
 
 ---
 
@@ -109,7 +109,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | Phase | Name | Status | Started | Completed | PR / notes |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Discovery & parity mapping | ✅ Complete | 2026-09-05 | 2026-09-05 | This document |
-| 1 | Data foundation & storage | ⬜ Not started | — | — | |
+| 1 | Data foundation & storage | ✅ Complete | 2026-09-05 | 2026-09-05 | PR #4 |
 | 2 | DepEd grading engine (domain) | ⬜ Not started | — | — | |
 | 3 | Teaching loads & score grid UI | ⬜ Not started | — | — | |
 | 4 | Roster operations & SF1 linking | ⬜ Not started | — | — | |
@@ -154,7 +154,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 1 — Data foundation & storage
+### Phase 1 — Data foundation & storage ✅
 
 **Goal:** Replace flat gradebook storage with a DepEd-ready schema and IndexedDB layer.
 
@@ -176,16 +176,16 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 **E-Class Record reference:** `database.js`, `classroom-records-core.js`
 
 **Deliverables:**
-- IndexedDB schema v1 + migration script
-- Type definitions in `client/src/models/`
-- Repository tests (Vitest)
-- Deprecate flat `Student`/`Course`/`Grade` or map via compatibility shim
+- [x] IndexedDB schema v1 + migration script (`client/src/storage/`)
+- [x] Type definitions in `client/src/models/`
+- [x] Repository tests (Vitest — `client/src/storage/migrate.test.ts`)
+- [x] Legacy `Student`/`Course`/`Grade` compat shim via `legacyGradebook` store + `api.ts`
 
 **Acceptance tests:**
-- Fresh install seeds sample teaching load in IndexedDB
-- Existing `localStorage` data migrates without loss
-- App loads offline after migration
-- `npm run typecheck`, `lint`, `test` pass
+- [x] Fresh install seeds sample teaching load in IndexedDB
+- [x] Existing `localStorage` data migrates without loss
+- [x] App loads offline after migration (PWA build unchanged)
+- [x] `npm run typecheck`, `lint`, `test` pass
 
 **Exit criteria:** All deliverables merged; Phase status → ✅; Progress log updated.
 
@@ -668,7 +668,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | Date | Phase | Event | Updated by |
 | --- | --- | --- | --- |
 | 2026-09-05 | 0 | Discovery complete; initial plan published | Agent |
-| | | | |
+| 2026-09-05 | 1 | Started Phase 1 — data foundation & storage | Agent |
+| 2026-09-05 | 1 | Phase 1 complete — IndexedDB schema v1, models, migration, repositories, Vitest | Agent |
 
 ### How to update when a phase finishes
 
@@ -704,4 +705,4 @@ Append a row when a phase status changes. **Do not delete entries.**
 
 ---
 
-*Next action: Begin **Phase 1 — Data foundation & storage** when approved.*
+*Next action: Begin **Phase 2 — DepEd grading engine (domain)**.*
