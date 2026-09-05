@@ -2,7 +2,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import { ensureStorageReady } from "./storage";
+import { initTheme } from "./theme.ts";
 import "./styles.css";
+
+initTheme();
 
 async function bootstrap() {
   try {
