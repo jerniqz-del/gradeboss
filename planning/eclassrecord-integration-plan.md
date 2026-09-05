@@ -110,7 +110,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | --- | --- | --- | --- | --- | --- |
 | 0 | Discovery & parity mapping | ✅ Complete | 2026-09-05 | 2026-09-05 | This document |
 | 1 | Data foundation & storage | ✅ Complete | 2026-09-05 | 2026-09-05 | PR #4 |
-| 2 | DepEd grading engine (domain) | ✅ Complete | 2026-09-05 | 2026-09-05 | PR stacked on #4 |
+| 2 | DepEd grading engine (domain) | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #5](https://github.com/jerniqz-del/gradeboss/pull/5) (stacked on #4) |
 | 3 | Teaching loads & score grid UI | ⬜ Not started | — | — | |
 | 4 | Roster operations & SF1 linking | ⬜ Not started | — | — | |
 | 5 | Term summary, pass/fail & dashboard | ⬜ Not started | — | — | |
