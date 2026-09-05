@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { roleLabel, type User } from "./auth";
+import { ThemeToggle } from "./ThemeToggle";
+import type { ThemePreference } from "./theme";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -36,9 +38,13 @@ export function Avatar({ user, size = 40 }: { user: User; size?: number }) {
 export function Profile({
   user,
   onSignOut,
+  themePreference,
+  onThemeChange,
 }: {
   user: User;
   onSignOut: () => void;
+  themePreference: ThemePreference;
+  onThemeChange: (next: ThemePreference) => void;
 }) {
   const signedIn = new Date(user.signedInAt).toLocaleDateString(undefined, {
     year: "numeric",
@@ -54,6 +60,12 @@ export function Profile({
       </div>
 
       <div className="card profile-card">
+        <div className="appearance-section">
+          <h4>Appearance</h4>
+          <p className="muted">Choose light, dark, or match your device setting.</p>
+          <ThemeToggle preference={themePreference} onChange={onThemeChange} />
+        </div>
+
         <div className="profile-identity">
           <Avatar user={user} size={72} />
           <div>

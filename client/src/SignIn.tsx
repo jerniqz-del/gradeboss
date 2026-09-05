@@ -6,13 +6,19 @@ import {
   type User,
 } from "./auth";
 import { Icon } from "./Icon";
+import { ThemeToggle } from "./ThemeToggle";
+import type { ThemePreference } from "./theme";
 
 export function SignIn({
   online,
   onSignedIn,
+  themePreference,
+  onThemeChange,
 }: {
   online: boolean;
   onSignedIn: (user: User) => void;
+  themePreference: ThemePreference;
+  onThemeChange: (next: ThemePreference) => void;
 }) {
   const slotRef = useRef<HTMLDivElement>(null);
   const onSignedInRef = useRef(onSignedIn);
@@ -80,6 +86,9 @@ export function SignIn({
 
   return (
     <div className="auth-screen">
+      <div className="auth-theme-toggle">
+        <ThemeToggle preference={themePreference} onChange={onThemeChange} compact />
+      </div>
       <div className="auth-card">
         <div className="brand">
           <div className="brand-mark">GB</div>
