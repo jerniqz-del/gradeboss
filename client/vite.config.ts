@@ -32,22 +32,10 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // The app is fully local (data lives in localStorage), so the service
+        // worker only needs to precache the app shell for offline use.
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         navigateFallback: "index.html",
-        runtimeCaching: [
-          {
-            // Keep the last successful API responses so the app still renders
-            // meaningful data when the device is offline.
-            urlPattern: ({ url }) => url.pathname.startsWith("/api/"),
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "gradeboss-api",
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-        ],
       },
       devOptions: {
         // Enables the service worker in `vite dev` so offline behavior can be
@@ -60,21 +48,9 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    proxy: {
-      "/api": {
-        target: "http://localhost:3001",
-        changeOrigin: true,
-      },
-    },
   },
   preview: {
     host: true,
     port: 4173,
-    proxy: {
-      "/api": {
-        target: "http://localhost:3001",
-        changeOrigin: true,
-      },
-    },
   },
 });

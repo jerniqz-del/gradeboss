@@ -3,16 +3,11 @@
   "install": "npm install",
   "terminals": [
     {
-      "name": "server",
-      "command": "npm run dev:server"
-    },
-    {
       "name": "client",
-      "command": "npm run dev:client"
+      "command": "npm run dev"
     }
   ],
   "ports": [
-    { "name": "GradeBoss API", "port": 3001 },
     { "name": "GradeBoss web", "port": 5173 }
   ]
 }
