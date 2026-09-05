@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-05 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 1 complete — Phase 2 next |
-| **Active phase** | 2 (DepEd grading engine) |
+| **Overall status** | 🔄 Phase 2 complete — Phase 3 next |
+| **Active phase** | 3 (Teaching loads & score grid UI) |
 
 ---
 
@@ -110,7 +110,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | --- | --- | --- | --- | --- | --- |
 | 0 | Discovery & parity mapping | ✅ Complete | 2026-09-05 | 2026-09-05 | This document |
 | 1 | Data foundation & storage | ✅ Complete | 2026-09-05 | 2026-09-05 | PR #4 |
-| 2 | DepEd grading engine (domain) | ⬜ Not started | — | — | |
+| 2 | DepEd grading engine (domain) | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #5](https://github.com/jerniqz-del/gradeboss/pull/5) (stacked on #4) |
 | 3 | Teaching loads & score grid UI | ⬜ Not started | — | — | |
 | 4 | Roster operations & SF1 linking | ⬜ Not started | — | — | |
 | 5 | Term summary, pass/fail & dashboard | ⬜ Not started | — | — | |
@@ -191,7 +191,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 2 — DepEd grading engine (domain)
+### Phase 2 — DepEd grading engine (domain) ✅
 
 **Goal:** Port computation logic from `grading.js` to pure TypeScript with full test coverage.
 
@@ -214,10 +214,10 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 **E-Class Record reference:** `grading.js`, `scripts/test-grading*.js`, `scripts/test-transmutation*.js`
 
 **Deliverables:**
-- `client/src/domain/grading/` module
-- 40+ unit tests covering edge cases from desktop test scripts
-- Policy detection helper
-- Exported API documented in code
+- [x] `client/src/domain/grading/` module
+- [x] 40+ unit tests covering edge cases from desktop test scripts
+- [x] Policy detection helper
+- [x] Exported API documented in code
 
 **Acceptance tests:**
 - Golden-file tests match E-Class Record outputs for sample inputs
@@ -670,6 +670,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | 0 | Discovery complete; initial plan published | Agent |
 | 2026-09-05 | 1 | Started Phase 1 — data foundation & storage | Agent |
 | 2026-09-05 | 1 | Phase 1 complete — IndexedDB schema v1, models, migration, repositories, Vitest | Agent |
+| 2026-09-05 | 2 | Started Phase 2 — DepEd grading engine (domain) | Agent |
+| 2026-09-05 | 2 | Phase 2 complete — TS grading engine, transmutation tables, golden-file tests vs eclassrecord `grading.js` | Agent |
 
 ### How to update when a phase finishes
 
@@ -705,4 +707,4 @@ Append a row when a phase status changes. **Do not delete entries.**
 
 ---
 
-*Next action: Begin **Phase 2 — DepEd grading engine (domain)**.*
+*Next action: Begin **Phase 3 — Teaching loads & score grid UI**.*
