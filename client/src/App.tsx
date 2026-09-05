@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, type Stats, type Student } from "./api";
+import { api, type Student } from "./api";
 import {
   clearUser,
   disableGoogleAutoSelect,
@@ -21,6 +21,7 @@ import { Avatar, Profile } from "./Profile";
 import { SignIn } from "./SignIn";
 import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "./useTheme";
+import { DashboardView } from "./features/dashboard/DashboardView";
 import { TeachingLoadsView } from "./features/teaching-loads/TeachingLoadsView";
 import { GradingSheetView } from "./features/grading-sheet/GradingSheetView";
 
@@ -44,14 +45,6 @@ const NAV: Array<{ id: View; label: string; icon: string }> = [
 
 const SYNC_PRICE_ANNUAL = 50; // PHP per extra device per year
 const SYNC_PRICE_MONTHLY = 5; // PHP per extra device per month
-
-function gradeColor(pct: number): string {
-  if (pct >= 90) return "var(--green)";
-  if (pct >= 80) return "var(--blue)";
-  if (pct >= 70) return "var(--amber)";
-  if (pct >= 60) return "var(--orange)";
-  return "var(--red)";
-}
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -110,7 +103,6 @@ export default function App() {
   const [user, setUser] = useState<User | null>(() => loadUser());
   const [view, setView] = useState<View>("dashboard");
   const [students, setStudents] = useState<Student[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
   const [selectedLoadId, setSelectedLoadId] = useState<string | null>(null);
   const [rosterLoadId, setRosterLoadId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -120,9 +112,7 @@ export default function App() {
 
   const refresh = useCallback(async () => {
     try {
-      const [s, st] = await Promise.all([api.getStudents(), api.getStats()]);
-      setStudents(s);
-      setStats(st);
+      setStudents(await api.getStudents());
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
@@ -223,7 +213,14 @@ export default function App() {
       <main className="content">
         {error && <div className="banner error">{error}</div>}
 
-        {view === "dashboard" && stats && <Dashboard stats={stats} />}
+        {view === "dashboard" && (
+          <DashboardView
+            onOpenSheet={(id) => {
+              setSelectedLoadId(id);
+              setView("sheet");
+            }}
+          />
+        )}
         {view === "classes" && <Classes />}
         {view === "students" && (
           <Students students={students} onChange={refresh} />
@@ -277,93 +274,6 @@ export default function App() {
         ))}
       </nav>
     </div>
-  );
-}
-
-function Dashboard({ stats }: { stats: Stats }) {
-  const { totals, studentAverages, courseAverages } = stats;
-  const cards = [
-    { label: "Students", value: totals.students, hint: "enrolled" },
-    { label: "Courses", value: totals.courses, hint: "active" },
-    { label: "Grades recorded", value: totals.grades, hint: "entries" },
-    {
-      label: "Overall average",
-      value: `${totals.overallAverage}%`,
-      hint: "across all grades",
-      accent: gradeColor(totals.overallAverage),
-    },
-  ];
-
-  return (
-    <section>
-      <Header title="Dashboard" subtitle="A live snapshot of school performance." />
-      <div className="cards">
-        {cards.map((card) => (
-          <div className="card stat" key={card.label}>
-            <span className="stat-label">{card.label}</span>
-            <span className="stat-value" style={{ color: card.accent }}>
-              {card.value}
-            </span>
-            <span className="stat-hint">{card.hint}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid-2">
-        <div className="card">
-          <h3>Student standings</h3>
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Grade</th>
-                  <th>Average</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {studentAverages.map((s) => (
-                  <tr key={s.id}>
-                    <td>{s.name}</td>
-                    <td>G{s.gradeLevel}</td>
-                    <td>{s.gradeCount ? `${s.average}%` : "—"}</td>
-                    <td>
-                      <span
-                        className="badge"
-                        style={{ background: gradeColor(s.average) }}
-                      >
-                        {s.letter}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="card">
-          <h3>Course performance</h3>
-          {courseAverages.map((c) => (
-            <div className="bar-row" key={c.id}>
-              <div className="bar-meta">
-                <span>{c.name}</span>
-                <span className="muted">
-                  {c.gradeCount ? `${c.average}%` : "no grades"}
-                </span>
-              </div>
-              <div className="bar-track">
-                <div
-                  className="bar-fill"
-                  style={{ width: `${c.average}%`, background: gradeColor(c.average) }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }
 

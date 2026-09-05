@@ -11,7 +11,7 @@
 | **Last updated** | 2026-09-05 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 4 complete — Phase 5 next |
+| **Overall status** | 🔄 Phase 5 in progress — term summary, pass/fail & dashboard |
 | **Active phase** | 5 (Term summary, pass/fail & dashboard) |
 
 ---
@@ -59,7 +59,7 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 | **Storage** | IndexedDB schema v1 (`teachingLoads`, profile, legacy gradebook); `localStorage` kept as SF1 history + migration source |
 | **SF1** | Import links to matching teaching-load rosters (grade + section + SY) |
 | **Gradebook** | DepEd teaching loads + score grid (WW/PT/ST/TE, terms, transmutation); G1–12 |
-| **Views** | Dashboard, Classes, Students, Courses, Gradebook, Plans, Profile |
+| **Views** | Dashboard (DepEd completion), Classes, Students, Loads, Sheet, Plans, Profile |
 | **PWA** | Vite + Workbox, offline banner, install prompt |
 | **UI** | Material-inspired flat + elevation, light/dark/system themes |
 | **Planning** | Sync bridge spec (`planning/sync-bridge-spec.md`), pricing page |
@@ -113,7 +113,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 2 | DepEd grading engine (domain) | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #5](https://github.com/jerniqz-del/gradeboss/pull/5) (stacked on #4) |
 | 3 | Teaching loads & score grid UI | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #6](https://github.com/jerniqz-del/gradeboss/pull/6) |
 | 4 | Roster operations & SF1 linking | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #7](https://github.com/jerniqz-del/gradeboss/pull/7) |
-| 5 | Term summary, pass/fail & dashboard | ⬜ Not started | — | — | |
+| 5 | Term summary, pass/fail & dashboard | 🔄 In progress | 2026-09-05 | — | |
 | 6 | Export, print & backup (CSV/JSON) | ⬜ Not started | — | — | |
 | 7 | Advisory class & grade transfer | ⬜ Not started | — | — | |
 | 8 | Attendance tracker & SF2 | ⬜ Not started | — | — | |
@@ -676,6 +676,7 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | 3 | Phase 3 complete — Loads + grading sheet UI, live PS/IG/TG, MAPEH tabs, summary | Agent |
 | 2026-09-05 | 4 | Started Phase 4 — roster operations & SF1 linking | Agent |
 | 2026-09-05 | 4 | Phase 4 complete — SF1→load merge, learner CRUD, DepEd sort, CSV/clone/transfer, procedural avatars, G1–12 | Agent |
+| 2026-09-05 | 5 | Started Phase 5 — term summary, pass/fail & dashboard | Agent |
 
 ### How to update when a phase finishes
 
@@ -712,4 +713,4 @@ Append a row when a phase status changes. **Do not delete entries.**
 
 ---
 
-*Next action: Begin **Phase 5 — Term summary, pass/fail & dashboard**.*
+*Next action: Finish **Phase 5 — Term summary, pass/fail & dashboard** (verify + merge).*

@@ -1,32 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api";
-import {
-  computeMapehTermResult,
-  computeTermResult,
-  isMapehSubject,
-  isPassing,
-  transmuteForLoad,
-} from "../../domain/grading";
+import { isMapehSubject } from "../../domain/grading";
 import { scoreKey } from "../../models/assessment";
-import { learnerDisplayName } from "../../models/learner";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { MapePart, Term } from "../../models/types";
-import { sortDepEdRoster } from "../roster/sort";
 import { formatWeights, policyLabel } from "../teaching-loads/create-load";
 import { ScoreGrid } from "./ScoreGrid";
+import { SummaryTable } from "./SummaryTable";
 
 type SheetTab = Term | "summary";
-
-function gradeTone(grade: number | string | null): string {
-  if (grade === null || grade === "T/O") return "var(--muted)";
-  if (typeof grade === "string") {
-    return ["A", "B", "C"].includes(grade) ? "var(--green)" : "var(--red)";
-  }
-  if (grade >= 90) return "var(--green)";
-  if (grade >= 80) return "var(--blue)";
-  if (grade >= 75) return "var(--amber)";
-  return "var(--red)";
-}
 
 export function GradingSheetView({
   selectedLoadId,
@@ -91,28 +73,6 @@ export function GradingSheetView({
   const mapeh = load ? isMapehSubject(load.subject) : false;
   const activePart = mapeh ? mapePart : undefined;
 
-  const summaryRows = useMemo(() => {
-    if (!load || tab !== "summary") return [];
-    return sortDepEdRoster(load.learners).map((learner) => {
-      const terms: Term[] = ["1", "2", "3"];
-      const igs: number[] = [];
-      const termGrades = terms.map((term) => {
-        if (mapeh) {
-          const result = computeMapehTermResult(load, learner.id, term);
-          if (result.musicArts.hasData) igs.push(result.musicArts.initialGrade);
-          if (result.peHealth.hasData) igs.push(result.peHealth.initialGrade);
-          return result.consolidatedGrade || null;
-        }
-        const result = computeTermResult(load, learner.id, term);
-        if (result.hasData) igs.push(result.initialGrade);
-        return result.termGrade;
-      });
-      const annual =
-        igs.length > 0 ? transmuteForLoad(load, igs.reduce((sum, value) => sum + value, 0) / igs.length) : null;
-      return { learner, termGrades, annual };
-    });
-  }, [load, mapeh, tab]);
-
   if (loads.length === 0) {
     return (
       <section>
@@ -128,7 +88,7 @@ export function GradingSheetView({
     <section className="sheet-page">
       <div className="page-header">
         <h2>Grading sheet</h2>
-        <p>Enter scores by term. PS, IG, and TG update from the DepEd engine as you type.</p>
+          <p>Enter scores by term. The Summary tab shows finals, annual average, and pass/fail.</p>
       </div>
 
       {error && <div className="banner error">{error}</div>}
@@ -193,45 +153,7 @@ export function GradingSheetView({
           )}
 
           {tab === "summary" ? (
-            <div className="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Learner</th>
-                    <th>Term 1</th>
-                    <th>Term 2</th>
-                    <th>Term 3</th>
-                    <th>Final</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {summaryRows.map((row) => (
-                    <tr key={row.learner.id}>
-                      <td>
-                    {learnerDisplayName(row.learner)}
-                    {row.learner.transferredOutTerm ? <span className="pill">T/O</span> : null}
-                  </td>
-                      {row.termGrades.map((grade, index) => (
-                        <td key={index}>{grade === null ? "—" : String(grade)}</td>
-                      ))}
-                      <td>
-                        {row.annual === null ? (
-                          "—"
-                        ) : (
-                          <span className="badge" style={{ background: gradeTone(row.annual) }}>
-                            {String(row.annual)}
-                          </span>
-                        )}
-                      </td>
-                      <td className={row.annual !== null && isPassing(row.annual) ? "pass" : "muted"}>
-                        {row.annual === null ? "—" : isPassing(row.annual) ? "Passed" : "Failed"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <SummaryTable load={load} />
           ) : (
             <ScoreGrid
               load={load}

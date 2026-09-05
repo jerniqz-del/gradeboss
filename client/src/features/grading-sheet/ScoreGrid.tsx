@@ -7,18 +7,7 @@ import type { TeachingLoad } from "../../models/teaching-load";
 import type { MapePart, Term } from "../../models/types";
 import { LearnerAvatar } from "../roster/LearnerAvatar";
 import { sortDepEdRoster } from "../roster/sort";
-
-function gradeTone(grade: number | string | null): string {
-  if (grade === null || grade === "T/O") return "var(--muted)";
-  if (typeof grade === "string") {
-    if (["A", "B", "C"].includes(grade)) return "var(--green)";
-    return "var(--red)";
-  }
-  if (grade >= 90) return "var(--green)";
-  if (grade >= 80) return "var(--blue)";
-  if (grade >= 75) return "var(--amber)";
-  return "var(--red)";
-}
+import { gradeTone } from "./grade-tone";
 
 export function ScoreGrid({
   load,
