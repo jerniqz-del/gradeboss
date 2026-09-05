@@ -1,3 +1,4 @@
+import { assignRoster, sortDepEdRoster } from "../features/roster";
 import type { Assessment } from "../models/assessment";
 import type { Learner } from "../models/learner";
 import type { LegacyGradebook } from "../models/legacy";
@@ -13,16 +14,20 @@ function sampleLearners(): Learner[] {
     ["Mendoza", "Carlo", "Ramos", "M"],
     ["Aquino", "Ella", "Torres", "F"],
   ];
-  return rows.map(([lastName, firstName, middleName, sex], i) => ({
-    id: `seed-learner-${i + 1}`,
-    lrn: `990012026${String(i + 1).padStart(4, "0")}`,
-    lastName,
-    firstName,
-    middleName,
-    sex,
-    birthdate: `201${i}-0${(i % 9) + 1}-15`,
-    avatarAssignment: "auto" as const,
-  }));
+  return assignRoster(
+    sortDepEdRoster(
+      rows.map(([lastName, firstName, middleName, sex], i) => ({
+        id: `seed-learner-${i + 1}`,
+        lrn: `1234567890${String(i + 1).padStart(2, "0")}`,
+        lastName,
+        firstName,
+        middleName,
+        sex,
+        birthdate: `201${i}-0${(i % 9) + 1}-15`,
+        avatarAssignment: "auto" as const,
+      })),
+    ),
+  );
 }
 
 function termAssessments(term: "1" | "2" | "3", prefix: string): Assessment[] {

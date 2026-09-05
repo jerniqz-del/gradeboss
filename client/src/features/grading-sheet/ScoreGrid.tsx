@@ -5,6 +5,8 @@ import { scoreKey } from "../../models/assessment";
 import { learnerDisplayName } from "../../models/learner";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { MapePart, Term } from "../../models/types";
+import { LearnerAvatar } from "../roster/LearnerAvatar";
+import { sortDepEdRoster } from "../roster/sort";
 
 function gradeTone(grade: number | string | null): string {
   if (grade === null || grade === "T/O") return "var(--muted)";
@@ -48,7 +50,7 @@ export function ScoreGrid({
     return { ww, pt, exam };
   }, [columns]);
 
-  const learners = load.learners;
+  const learners = useMemo(() => sortDepEdRoster(load.learners), [load.learners]);
   const focusCell = (row: number, col: number) => {
     const el = document.querySelector<HTMLInputElement>(`[data-score-cell="${row}-${col}"]`);
     el?.focus();
@@ -143,7 +145,13 @@ export function ScoreGrid({
             return (
               <tr key={learner.id}>
                 <th className="sheet-sticky sheet-name">
-                  {learnerDisplayName(learner)}
+                  <span className="sheet-learner">
+                    <LearnerAvatar presetId={learner.avatarPresetId} size="xs" />
+                    <span>
+                      {learnerDisplayName(learner)}
+                      {learner.transferredOutTerm ? <span className="pill">T/O</span> : null}
+                    </span>
+                  </span>
                 </th>
                 {columns.map((col, colIndex) => {
                   const key = scoreKey(learner.id, col.id);
@@ -183,7 +191,7 @@ export function ScoreGrid({
           {learners.length === 0 && (
             <tr>
               <td colSpan={columns.length + 6} className="muted center">
-                Add learners below to start entering scores.
+                Add learners from the roster panel to start entering scores.
               </td>
             </tr>
           )}

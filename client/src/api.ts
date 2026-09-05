@@ -37,7 +37,7 @@ export const api = {
     const student: Student = {
       id: crypto.randomUUID(),
       name: str(body.name) || "Unnamed",
-      gradeLevel: Number(body.gradeLevel) || 9,
+      gradeLevel: Number(body.gradeLevel) || 1,
       email: str(body.email),
     };
     return repoAddStudent(student);

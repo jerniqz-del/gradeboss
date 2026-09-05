@@ -129,6 +129,8 @@ select:focus:not(:focus-visible) {
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .sidebar {
@@ -231,6 +233,7 @@ select:focus:not(:focus-visible) {
 .content {
   flex: 1;
   width: 100%;
+  min-width: 0;
   max-width: 1200px;
   margin: 0 auto;
   padding: clamp(var(--space-4), 4vw, var(--space-6));
@@ -283,6 +286,8 @@ select:focus:not(:focus-visible) {
 }
 
 .card {
+  min-width: 0;
+  max-width: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -476,7 +481,8 @@ tr:last-child td {
 }
 
 input,
-select {
+select,
+textarea {
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text);
@@ -490,7 +496,8 @@ select {
 }
 
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+textarea:focus-visible {
   border-color: var(--primary);
   box-shadow: var(--focus-ring);
 }
@@ -1636,5 +1643,168 @@ button.ghost.back {
 
   .sheet-scroll {
     max-height: calc(100dvh - 280px);
+  }
+}
+
+/* Roster + learner avatars (Phase 4) */
+.roster-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+
+.roster-actions .primary,
+.roster-actions .ghost {
+  width: auto;
+  flex: 1 1 140px;
+}
+
+.roster-table {
+  min-width: 520px;
+}
+
+.roster-table td,
+.roster-table th {
+  vertical-align: middle;
+}
+
+@media (max-width: 599px) {
+  .roster-table th:nth-child(6),
+  .roster-table td:nth-child(6) {
+    display: none;
+  }
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.row-actions .ghost {
+  width: auto;
+  min-width: 44px;
+}
+
+.learner-form-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.learner-form-head h3 {
+  margin: 0;
+}
+
+.avatar-open {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-2);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 72px;
+  min-height: 72px;
+  cursor: pointer;
+}
+
+.avatar-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: var(--space-2);
+  max-height: 240px;
+  overflow: auto;
+  margin-bottom: var(--space-3);
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.avatar-choice {
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  padding: 4px;
+  border: 2px solid transparent;
+  background: transparent;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.avatar-choice.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.learner-avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.learner-avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.learner-avatar--xs { width: 22px; height: 22px; }
+.learner-avatar--sm { width: 32px; height: 32px; }
+.learner-avatar--md { width: 44px; height: 44px; }
+.learner-avatar--lg { width: 56px; height: 56px; }
+.learner-avatar--xl { width: 82px; height: 82px; }
+
+.sheet-learner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.sheet-learner span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.csv-paste {
+  width: 100%;
+  min-height: 160px;
+  font-size: 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.form-grid .span-all {
+  grid-column: 1 / -1;
+}
+
+.transferred-out {
+  opacity: 0.72;
+}
+
+.roster-table .pill {
+  margin-left: var(--space-2);
+}
+
+@media (min-width: 600px) {
+  .roster-actions .primary,
+  .roster-actions .ghost {
+    flex: 0 1 auto;
   }
 }

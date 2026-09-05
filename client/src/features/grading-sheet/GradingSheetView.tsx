@@ -11,7 +11,8 @@ import { scoreKey } from "../../models/assessment";
 import { learnerDisplayName } from "../../models/learner";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { MapePart, Term } from "../../models/types";
-import { createLearner, formatWeights, policyLabel } from "../teaching-loads/create-load";
+import { sortDepEdRoster } from "../roster/sort";
+import { formatWeights, policyLabel } from "../teaching-loads/create-load";
 import { ScoreGrid } from "./ScoreGrid";
 
 type SheetTab = Term | "summary";
@@ -30,17 +31,16 @@ function gradeTone(grade: number | string | null): string {
 export function GradingSheetView({
   selectedLoadId,
   onSelectLoad,
+  onManageRoster,
 }: {
   selectedLoadId: string | null;
   onSelectLoad: (id: string) => void;
+  onManageRoster?: (id: string) => void;
 }) {
   const [loads, setLoads] = useState<TeachingLoad[]>([]);
   const [load, setLoad] = useState<TeachingLoad | null>(null);
   const [tab, setTab] = useState<SheetTab>("1");
   const [mapePart, setMapePart] = useState<MapePart>("music_arts");
-  const [lastName, setLastName] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [sex, setSex] = useState<"M" | "F" | "">("");
   const [error, setError] = useState<string | null>(null);
 
   const refreshList = useCallback(async () => {
@@ -88,22 +88,12 @@ export function GradingSheetView({
     });
   };
 
-  const addLearner = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!load || !lastName.trim() || !firstName.trim()) return;
-    const learner = createLearner({ lastName, firstName, sex });
-    await persist({ ...load, learners: [...load.learners, learner] });
-    setLastName("");
-    setFirstName("");
-    setSex("");
-  };
-
   const mapeh = load ? isMapehSubject(load.subject) : false;
   const activePart = mapeh ? mapePart : undefined;
 
   const summaryRows = useMemo(() => {
     if (!load || tab !== "summary") return [];
-    return load.learners.map((learner) => {
+    return sortDepEdRoster(load.learners).map((learner) => {
       const terms: Term[] = ["1", "2", "3"];
       const igs: number[] = [];
       const termGrades = terms.map((term) => {
@@ -218,7 +208,10 @@ export function GradingSheetView({
                 <tbody>
                   {summaryRows.map((row) => (
                     <tr key={row.learner.id}>
-                      <td>{learnerDisplayName(row.learner)}</td>
+                      <td>
+                    {learnerDisplayName(row.learner)}
+                    {row.learner.transferredOutTerm ? <span className="pill">T/O</span> : null}
+                  </td>
                       {row.termGrades.map((grade, index) => (
                         <td key={index}>{grade === null ? "—" : String(grade)}</td>
                       ))}
@@ -249,31 +242,14 @@ export function GradingSheetView({
             />
           )}
 
-          <div className="card">
-            <h3>Add learner</h3>
-            <form className="form-row wrap" onSubmit={(e) => void addLearner(e)}>
-              <input
-                placeholder="Last name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-              />
-              <input
-                placeholder="First name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-              />
-              <select value={sex} onChange={(e) => setSex(e.target.value as "M" | "F" | "")}>
-                <option value="">Sex</option>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
-              </select>
-              <button type="submit" className="primary">
-                Add learner
+          {onManageRoster && load && (
+            <div className="card">
+              <p className="muted">Add, import, transfer, or clone learners from the roster panel.</p>
+              <button type="button" className="primary" onClick={() => onManageRoster(load.id)}>
+                Manage roster
               </button>
-            </form>
-          </div>
+            </div>
+          )}
         </>
       )}
     </section>

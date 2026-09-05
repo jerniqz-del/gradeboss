@@ -112,6 +112,7 @@ export default function App() {
   const [students, setStudents] = useState<Student[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [selectedLoadId, setSelectedLoadId] = useState<string | null>(null);
+  const [rosterLoadId, setRosterLoadId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { canInstall, installed, install } = useInstallPrompt();
   const online = useOnline();
@@ -229,6 +230,7 @@ export default function App() {
         )}
         {view === "loads" && (
           <TeachingLoadsView
+            initialRosterLoadId={rosterLoadId}
             onOpenSheet={(id) => {
               setSelectedLoadId(id);
               setView("sheet");
@@ -236,7 +238,14 @@ export default function App() {
           />
         )}
         {view === "sheet" && (
-          <GradingSheetView selectedLoadId={selectedLoadId} onSelectLoad={setSelectedLoadId} />
+          <GradingSheetView
+            selectedLoadId={selectedLoadId}
+            onSelectLoad={setSelectedLoadId}
+            onManageRoster={(id) => {
+              setRosterLoadId(id);
+              setView("loads");
+            }}
+          />
         )}
         {view === "plans" && <Plans />}
         {view === "profile" && (
@@ -366,7 +375,7 @@ function Students({
   onChange: () => Promise<void>;
 }) {
   const [name, setName] = useState("");
-  const [gradeLevel, setGradeLevel] = useState(9);
+  const [gradeLevel, setGradeLevel] = useState(1);
   const [email, setEmail] = useState("");
 
   const submit = async (e: React.FormEvent) => {
@@ -375,7 +384,7 @@ function Students({
     await api.addStudent({ name, gradeLevel, email });
     setName("");
     setEmail("");
-    setGradeLevel(9);
+    setGradeLevel(1);
     await onChange();
   };
 
@@ -398,7 +407,7 @@ function Students({
             value={gradeLevel}
             onChange={(e) => setGradeLevel(Number(e.target.value))}
           >
-            {[9, 10, 11, 12].map((g) => (
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((g) => (
               <option key={g} value={g}>
                 Grade {g}
               </option>
@@ -457,6 +466,7 @@ function Classes() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState("");
+  const [syncNote, setSyncNote] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const selected = classes.find((c) => c.id === selectedId) ?? null;
@@ -482,18 +492,29 @@ function Classes() {
     }
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!preview) return;
-    saveClass({
-      id: crypto.randomUUID(),
-      createdAt: Date.now(),
-      source: preview.source,
-      learners: preview.parsed.learners,
-      ...preview.parsed.meta,
-    });
-    setClasses(listClasses());
-    setPreview(null);
-    setMode("list");
+    setBusy(true);
+    try {
+      const result = await saveClass({
+        id: crypto.randomUUID(),
+        createdAt: Date.now(),
+        source: preview.source,
+        learners: preview.parsed.learners,
+        ...preview.parsed.meta,
+      });
+      setClasses(listClasses());
+      const applied = result?.updatedLoads.length ?? 0;
+      setSyncNote(
+        applied > 0
+          ? `Roster saved and applied to ${applied} teaching load${applied === 1 ? "" : "s"} in this section.`
+          : "Roster saved. Open Teaching loads → Roster to grade this class, or create a matching load first.",
+      );
+      setPreview(null);
+      setMode("list");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const removeClass = (id: string) => {
@@ -524,8 +545,8 @@ function Classes() {
           <RosterTable learners={learners} />
         </div>
         <div className="form-row">
-          <button className="primary" onClick={confirmSave}>
-            Save class
+          <button className="primary" disabled={busy} onClick={() => void confirmSave()}>
+            {busy ? "Saving…" : "Save to teaching loads"}
           </button>
           <button
             className="ghost"
@@ -565,6 +586,7 @@ function Classes() {
           title={`${selected.gradeLevel || "Class"} — ${selected.section}`}
           subtitle={selected.schoolName}
         />
+        {syncNote && <div className="banner warn">{syncNote}</div>}
         <ClassMetaCard
           meta={selected}
           male={male}
@@ -583,9 +605,33 @@ function Classes() {
           </div>
           <RosterTable learners={filtered} />
         </div>
-        <button className="ghost danger" onClick={() => removeClass(selected.id)}>
-          Delete class
-        </button>
+        <div className="form-row wrap">
+          <button
+            className="primary"
+            disabled={busy}
+            onClick={() => {
+              void (async () => {
+                setBusy(true);
+                try {
+                  const result = await saveClass(selected);
+                  const applied = result?.updatedLoads.length ?? 0;
+                  setSyncNote(
+                    applied > 0
+                      ? `Roster applied to ${applied} teaching load${applied === 1 ? "" : "s"}.`
+                      : "No matching teaching load yet. Create one with this grade, section, and school year.",
+                  );
+                } finally {
+                  setBusy(false);
+                }
+              })();
+            }}
+          >
+            Apply roster to teaching loads
+          </button>
+          <button className="ghost danger" onClick={() => removeClass(selected.id)}>
+            Delete class
+          </button>
+        </div>
       </section>
     );
   }
@@ -594,8 +640,9 @@ function Classes() {
     <section>
       <Header
         title="Classes"
-        subtitle="Upload a DepEd School Form 1 (SF1) to create a class."
+        subtitle="Upload a DepEd School Form 1 (SF1). The roster is linked to matching teaching loads."
       />
+      {syncNote && <div className="banner warn">{syncNote}</div>}
       <div className="card upload-card">
         <input
           ref={fileRef}

@@ -3,8 +3,8 @@ import {
   determineSubjectGroup,
   weightsFor,
 } from "../../domain/grading";
-import type { Learner } from "../../models/learner";
 import type { TeachingLoad } from "../../models/teaching-load";
+import { createLearner } from "../roster/learner";
 import { createTemplateAssessments } from "./catalog";
 
 export interface CreateLoadInput {
@@ -42,23 +42,7 @@ export function createTeachingLoad(input: CreateLoadInput): TeachingLoad {
   };
 }
 
-export function createLearner(partial: {
-  lastName: string;
-  firstName: string;
-  middleName?: string;
-  sex?: "M" | "F" | "";
-}): Learner {
-  return {
-    id: crypto.randomUUID(),
-    lrn: "",
-    lastName: partial.lastName.trim(),
-    firstName: partial.firstName.trim(),
-    middleName: (partial.middleName || "").trim(),
-    sex: partial.sex || "",
-    birthdate: "",
-    avatarAssignment: "auto",
-  };
-}
+export { createLearner };
 
 export function formatWeights(group: string): string {
   const [ww, pt, exam] = weightsFor(group);
