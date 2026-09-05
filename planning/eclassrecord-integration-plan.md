@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-05 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 3 in progress |
-| **Active phase** | 3 (Teaching loads & score grid UI) |
+| **Overall status** | 🔄 Phase 3 complete — Phase 4 next |
+| **Active phase** | 4 (Roster operations & SF1 linking) |
 
 ---
 
@@ -111,7 +111,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 0 | Discovery & parity mapping | ✅ Complete | 2026-09-05 | 2026-09-05 | This document |
 | 1 | Data foundation & storage | ✅ Complete | 2026-09-05 | 2026-09-05 | PR #4 |
 | 2 | DepEd grading engine (domain) | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #5](https://github.com/jerniqz-del/gradeboss/pull/5) (stacked on #4) |
-| 3 | Teaching loads & score grid UI | 🔄 In progress | 2026-09-05 | — | |
+| 3 | Teaching loads & score grid UI | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #6](https://github.com/jerniqz-del/gradeboss/pull/6) |
 | 4 | Roster operations & SF1 linking | ⬜ Not started | — | — | |
 | 5 | Term summary, pass/fail & dashboard | ⬜ Not started | — | — | |
 | 6 | Export, print & backup (CSV/JSON) | ⬜ Not started | — | — | |
@@ -228,7 +228,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 3 — Teaching loads & score grid UI
+### Phase 3 — Teaching loads & score grid UI ✅
 
 **Goal:** Replace generic Courses/Gradebook with DepEd grading sheet experience.
 
@@ -247,9 +247,9 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 **E-Class Record reference:** `record` view, `grading.js` renderers, score grid CSS modules
 
 **Deliverables:**
-- `features/teaching-loads/` and `features/grading-sheet/` React modules
-- Responsive score grid component
-- Navigation updates (replace Courses + Gradebook with Loads + Grading Sheet)
+- [x] `features/teaching-loads/` and `features/grading-sheet/` React modules
+- [x] Responsive score grid component
+- [x] Navigation updates (replace Courses + Gradebook with Loads + Grading Sheet)
 
 **Acceptance tests:**
 - Enter scores for 30 learners × 10 assessments; computed grades match Phase 2 tests
@@ -673,6 +673,7 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | 2 | Started Phase 2 — DepEd grading engine (domain) | Agent |
 | 2026-09-05 | 2 | Phase 2 complete — TS grading engine, transmutation tables, golden-file tests vs eclassrecord `grading.js` | Agent |
 | 2026-09-05 | 3 | Started Phase 3 — teaching loads & score grid UI | Agent |
+| 2026-09-05 | 3 | Phase 3 complete — Loads + grading sheet UI, live PS/IG/TG, MAPEH tabs, summary | Agent |
 
 ### How to update when a phase finishes
 
@@ -708,4 +709,4 @@ Append a row when a phase status changes. **Do not delete entries.**
 
 ---
 
-*Next action: Begin **Phase 3 — Teaching loads & score grid UI**.*
+*Next action: Begin **Phase 4 — Roster operations & SF1 linking**.*

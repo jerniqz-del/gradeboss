@@ -1483,6 +1483,10 @@ button.ghost.back {
   align-items: center;
 }
 
+.load-card p {
+  word-break: break-word;
+}
+
 .load-actions {
   display: flex;
   flex-wrap: wrap;
