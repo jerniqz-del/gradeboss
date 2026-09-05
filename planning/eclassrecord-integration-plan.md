@@ -112,7 +112,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 1 | Data foundation & storage | ✅ Complete | 2026-09-05 | 2026-09-05 | PR #4 |
 | 2 | DepEd grading engine (domain) | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #5](https://github.com/jerniqz-del/gradeboss/pull/5) (stacked on #4) |
 | 3 | Teaching loads & score grid UI | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #6](https://github.com/jerniqz-del/gradeboss/pull/6) |
-| 4 | Roster operations & SF1 linking | ✅ Complete | 2026-09-05 | 2026-09-05 | |
+| 4 | Roster operations & SF1 linking | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #7](https://github.com/jerniqz-del/gradeboss/pull/7) |
 | 5 | Term summary, pass/fail & dashboard | ⬜ Not started | — | — | |
 | 6 | Export, print & backup (CSV/JSON) | ⬜ Not started | — | — | |
 | 7 | Advisory class & grade transfer | ⬜ Not started | — | — | |
