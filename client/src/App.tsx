@@ -6,6 +6,14 @@ import {
   type Stats,
   type Student,
 } from "./api";
+import {
+  clearUser,
+  disableGoogleAutoSelect,
+  loadUser,
+  roleLabel,
+  saveUser,
+  type User,
+} from "./auth";
 import { fullName, parseSf1, type ParsedSf1, type Sf1Learner } from "./sf1";
 import {
   countBySex,
@@ -14,6 +22,9 @@ import {
   saveClass,
   type SchoolClass,
 } from "./classes";
+import { Icon } from "./Icon";
+import { Avatar, Profile } from "./Profile";
+import { SignIn } from "./SignIn";
 
 type View =
   | "dashboard"
@@ -21,7 +32,8 @@ type View =
   | "students"
   | "courses"
   | "gradebook"
-  | "plans";
+  | "plans"
+  | "profile";
 
 const NAV: Array<{ id: View; label: string; icon: string }> = [
   { id: "dashboard", label: "Dashboard", icon: "chart" },
@@ -96,6 +108,7 @@ function useOnline() {
 }
 
 export default function App() {
+  const [user, setUser] = useState<User | null>(() => loadUser());
   const [view, setView] = useState<View>("dashboard");
   const [students, setStudents] = useState<Student[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -127,13 +140,23 @@ export default function App() {
     void refresh();
   }, [refresh]);
 
-  const installButton =
-    canInstall && !installed ? (
-      <button className="install-btn" onClick={install}>
-        <Icon name="download" />
-        <span>Install app</span>
-      </button>
-    ) : null;
+  const onSignedIn = useCallback((next: User) => {
+    saveUser(next);
+    setUser(next);
+  }, []);
+
+  const signOut = useCallback(() => {
+    disableGoogleAutoSelect();
+    clearUser();
+    setUser(null);
+    setView("dashboard");
+  }, []);
+
+  if (!user) {
+    return <SignIn online={online} onSignedIn={onSignedIn} />;
+  }
+
+  const showInstall = canInstall && !installed;
 
   return (
     <div className="app">
@@ -165,7 +188,7 @@ export default function App() {
           ))}
         </nav>
         <div className="sidebar-footer">
-          {installButton}
+          {showInstall && <InstallButton onInstall={install} />}
           <button
             className={view === "plans" ? "nav-item active" : "nav-item"}
             onClick={() => setView("plans")}
@@ -173,8 +196,17 @@ export default function App() {
             <Icon name="spark" />
             Plans
           </button>
-          <div className="pill">Admin mode</div>
-          <p>All teacher &amp; admin tools in one place.</p>
+          <button
+            type="button"
+            className={view === "profile" ? "user-chip active" : "user-chip"}
+            onClick={() => setView("profile")}
+          >
+            <Avatar user={user} size={36} />
+            <span className="user-chip-text">
+              <span className="user-chip-name">{user.name}</span>
+              <span className="user-chip-role">{roleLabel(user.role)}</span>
+            </span>
+          </button>
         </div>
       </aside>
 
@@ -187,7 +219,15 @@ export default function App() {
           <button className="ghost small" onClick={() => setView("plans")}>
             Plans
           </button>
-          {installButton}
+          {showInstall && <InstallButton onInstall={install} />}
+          <button
+            type="button"
+            className="avatar-btn"
+            aria-label="Profile"
+            onClick={() => setView("profile")}
+          >
+            <Avatar user={user} size={36} />
+          </button>
         </div>
       </header>
 
@@ -209,6 +249,7 @@ export default function App() {
           />
         )}
         {view === "plans" && <Plans />}
+        {view === "profile" && <Profile user={user} onSignOut={signOut} />}
       </main>
 
       <nav className="bottom-nav">
@@ -1032,33 +1073,11 @@ function Header({ title, subtitle }: { title: string; subtitle: string }) {
   );
 }
 
-function Icon({ name }: { name: string }) {
-  const paths: Record<string, string> = {
-    chart: "M4 19V5m5 14V9m5 10V3m5 16v-7",
-    users: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0 .01M23 21v-2a4 4 0 0 0-3-3.87",
-    book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z",
-    pencil: "M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z",
-    download: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",
-    "cloud-off":
-      "M22.61 16.95A5 5 0 0 0 18 10h-1.26a8 8 0 0 0-7.05-6M5 5a8 8 0 0 0 4 15h9a5 5 0 0 0 1.7-.3M1 1l22 22",
-    spark: "M12 2l2.4 7.2H22l-6 4.4 2.3 7.2L12 16.6 5.7 20.8 8 13.6 2 9.2h7.6z",
-    check: "M20 6L9 17l-5-5",
-    board: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
-    upload: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12",
-    "arrow-left": "M19 12H5M12 19l-7-7 7-7",
-  };
+function InstallButton({ onInstall }: { onInstall: () => void }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d={paths[name]} />
-    </svg>
+    <button type="button" className="install-btn" onClick={onInstall}>
+      <Icon name="download" />
+      <span>Install app</span>
+    </button>
   );
 }
