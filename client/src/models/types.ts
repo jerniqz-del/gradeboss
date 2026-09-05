@@ -3,7 +3,8 @@ export type GradingPolicy =
   | "DO15_TRANSITION"
   | "DO15_ZERO"
   | "DO15_DESCRIPTIVE"
-  | "KEY_STAGE_2_TRIMESTER";
+  | "KEY_STAGE_2_TRIMESTER"
+  | "DO8_2015";
 
 export type AssessmentComponent = "WW" | "PT" | "ST1" | "ST2" | "TE";
 export type Term = "1" | "2" | "3";

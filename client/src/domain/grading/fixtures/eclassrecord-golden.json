@@ -1,0 +1,572 @@
+{
+  "source": "eclassrecord src/renderer/js/grading.js (v1.9.6)",
+  "transmutation": {
+    "do15Transition": {
+      "0": 60,
+      "70": 75,
+      "100": 100,
+      "99.5": 100,
+      "99.49": 99,
+      "98.32": 99,
+      "98.319": 99,
+      "90.06": 92,
+      "88.88": 91,
+      "87.7": 90,
+      "69.99": 74,
+      "65.34": 74,
+      "4.68": 61,
+      "4.67": 60,
+      "99.505": 100,
+      "87.695": 90,
+      "70.004": 75,
+      "74.995": 79
+    },
+    "keyStage2": {
+      "0": 60,
+      "70": 75,
+      "100": 100,
+      "99.5": 100,
+      "99.49": 99,
+      "98.32": 99,
+      "98.319": 99,
+      "90.06": 92,
+      "88.88": 91,
+      "87.7": 90,
+      "69.99": 74,
+      "65.34": 74,
+      "4.68": 61,
+      "4.67": 60,
+      "99.505": 100,
+      "87.695": 90,
+      "70.004": 75,
+      "74.995": 79
+    },
+    "do15Zero": {
+      "0": 0,
+      "70": 70,
+      "100": 100,
+      "99.5": 100,
+      "99.49": 99,
+      "98.32": 98,
+      "98.319": 98,
+      "90.06": 90,
+      "88.88": 89,
+      "87.7": 88,
+      "69.99": 70,
+      "65.34": 65,
+      "4.68": 5,
+      "4.67": 5,
+      "99.505": 100,
+      "87.695": 88,
+      "70.004": 70,
+      "74.995": 75
+    },
+    "descriptive": {
+      "0": "E",
+      "70": "D",
+      "100": "A",
+      "99.5": "A",
+      "99.49": "A",
+      "98.32": "A",
+      "98.319": "A",
+      "90.06": "A",
+      "88.88": "B",
+      "87.7": "B",
+      "69.99": "D",
+      "65.34": "D",
+      "4.68": "E",
+      "4.67": "E",
+      "99.505": "A",
+      "87.695": "B",
+      "70.004": "D",
+      "74.995": "D"
+    }
+  },
+  "policies": {
+    "g1_2026": "DO15_DESCRIPTIVE",
+    "g2_2026": "DO15_TRANSITION",
+    "g2_2027": "DO15_DESCRIPTIVE",
+    "g3_2026": "DO15_TRANSITION",
+    "g3_2027": "DO15_ZERO",
+    "g3_2028": "DO15_DESCRIPTIVE",
+    "g5_2026": "KEY_STAGE_2_TRIMESTER",
+    "g10_2026": "DO15_TRANSITION",
+    "g10_2027": "DO15_ZERO"
+  },
+  "subjectGroups": {
+    "g10_math": "CORE_20_50_30",
+    "g10_mapeh": "SKILLS_20_60_20",
+    "g10_tle": "SKILLS_20_60_20",
+    "g5_science": "KS2_TRIMESTER",
+    "g12_research": "SHS_RESEARCH",
+    "g12_work": "SHS_WORK",
+    "g12_field": "SHS_FIELD",
+    "g12_core": "SHS_CORE",
+    "g12_override": "SHS_ARTS"
+  },
+  "weights": {
+    "CORE_20_50_30": [
+      20,
+      50,
+      30
+    ],
+    "SKILLS_20_60_20": [
+      20,
+      60,
+      20
+    ],
+    "SHS_WORK": [
+      20,
+      80,
+      0
+    ],
+    "SHS_RESEARCH": [
+      40,
+      60,
+      0
+    ],
+    "SHS_FIELD": [
+      15,
+      70,
+      15
+    ],
+    "SHS_TECHPRO": [
+      15,
+      65,
+      20
+    ],
+    "SHS_ARTS": [
+      20,
+      60,
+      20
+    ],
+    "unknown": [
+      20,
+      50,
+      30
+    ]
+  },
+  "seedTerms": {
+    "seed-learner-1": {
+      "ww": {
+        "raw": 44,
+        "max": 50,
+        "ps": 88,
+        "hasData": true
+      },
+      "pt": {
+        "raw": 44,
+        "max": 50,
+        "ps": 88,
+        "hasData": true
+      },
+      "st1": {
+        "raw": 35,
+        "max": 40,
+        "ps": 87.5,
+        "hasData": true
+      },
+      "st2": {
+        "raw": 35,
+        "max": 40,
+        "ps": 87.5,
+        "hasData": true
+      },
+      "te": {
+        "raw": 44,
+        "max": 50,
+        "ps": 88,
+        "hasData": true
+      },
+      "examPS": 87.7,
+      "initialGrade": 87.91,
+      "termGrade": 90,
+      "hasData": true
+    },
+    "seed-learner-2": {
+      "ww": {
+        "raw": 36,
+        "max": 50,
+        "ps": 72,
+        "hasData": true
+      },
+      "pt": {
+        "raw": 36,
+        "max": 50,
+        "ps": 72,
+        "hasData": true
+      },
+      "st1": {
+        "raw": 29,
+        "max": 40,
+        "ps": 72.5,
+        "hasData": true
+      },
+      "st2": {
+        "raw": 29,
+        "max": 40,
+        "ps": 72.5,
+        "hasData": true
+      },
+      "te": {
+        "raw": 36,
+        "max": 50,
+        "ps": 72,
+        "hasData": true
+      },
+      "examPS": 72.3,
+      "initialGrade": 72.09,
+      "termGrade": 76,
+      "hasData": true
+    },
+    "seed-learner-3": {
+      "ww": {
+        "raw": 38,
+        "max": 50,
+        "ps": 76,
+        "hasData": true
+      },
+      "pt": {
+        "raw": 38,
+        "max": 50,
+        "ps": 76,
+        "hasData": true
+      },
+      "st1": {
+        "raw": 30,
+        "max": 40,
+        "ps": 75,
+        "hasData": true
+      },
+      "st2": {
+        "raw": 30,
+        "max": 40,
+        "ps": 75,
+        "hasData": true
+      },
+      "te": {
+        "raw": 38,
+        "max": 50,
+        "ps": 76,
+        "hasData": true
+      },
+      "examPS": 75.4,
+      "initialGrade": 75.82000000000001,
+      "termGrade": 79,
+      "hasData": true
+    },
+    "seed-learner-4": {
+      "ww": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "pt": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "st1": {
+        "raw": 32,
+        "max": 40,
+        "ps": 80,
+        "hasData": true
+      },
+      "st2": {
+        "raw": 32,
+        "max": 40,
+        "ps": 80,
+        "hasData": true
+      },
+      "te": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "examPS": 80,
+      "initialGrade": 80,
+      "termGrade": 83,
+      "hasData": true
+    },
+    "seed-learner-5": {
+      "ww": {
+        "raw": 42,
+        "max": 50,
+        "ps": 84,
+        "hasData": true
+      },
+      "pt": {
+        "raw": 42,
+        "max": 50,
+        "ps": 84,
+        "hasData": true
+      },
+      "st1": {
+        "raw": 34,
+        "max": 40,
+        "ps": 85,
+        "hasData": true
+      },
+      "st2": {
+        "raw": 34,
+        "max": 40,
+        "ps": 85,
+        "hasData": true
+      },
+      "te": {
+        "raw": 42,
+        "max": 50,
+        "ps": 84,
+        "hasData": true
+      },
+      "examPS": 84.6,
+      "initialGrade": 84.17999999999999,
+      "termGrade": 87,
+      "hasData": true
+    }
+  },
+  "mapeh": {
+    "music": {
+      "ww": {
+        "raw": 45,
+        "max": 50,
+        "ps": 90,
+        "hasData": true
+      },
+      "pt": {
+        "raw": 45,
+        "max": 50,
+        "ps": 90,
+        "hasData": true
+      },
+      "st1": {
+        "raw": 45,
+        "max": 50,
+        "ps": 90,
+        "hasData": true
+      },
+      "st2": {
+        "raw": 45,
+        "max": 50,
+        "ps": 90,
+        "hasData": true
+      },
+      "te": {
+        "raw": 45,
+        "max": 50,
+        "ps": 90,
+        "hasData": true
+      },
+      "examPS": 90,
+      "initialGrade": 90,
+      "termGrade": 91,
+      "hasData": true
+    },
+    "pe": {
+      "ww": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "pt": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "st1": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "st2": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "te": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "examPS": 80,
+      "initialGrade": 80,
+      "termGrade": 83,
+      "hasData": true
+    },
+    "consolidated": 87
+  },
+  "shs": {
+    "research": {
+      "ww": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "pt": {
+        "raw": 45,
+        "max": 50,
+        "ps": 90,
+        "hasData": true
+      },
+      "st1": {
+        "raw": 0,
+        "max": 0,
+        "ps": 0,
+        "hasData": false
+      },
+      "st2": {
+        "raw": 0,
+        "max": 0,
+        "ps": 0,
+        "hasData": false
+      },
+      "te": {
+        "raw": 50,
+        "max": 50,
+        "ps": 100,
+        "hasData": true
+      },
+      "examPS": 0,
+      "initialGrade": 86,
+      "termGrade": 88,
+      "hasData": true
+    },
+    "work": {
+      "ww": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "pt": {
+        "raw": 45,
+        "max": 50,
+        "ps": 90,
+        "hasData": true
+      },
+      "st1": {
+        "raw": 0,
+        "max": 0,
+        "ps": 0,
+        "hasData": false
+      },
+      "st2": {
+        "raw": 0,
+        "max": 0,
+        "ps": 0,
+        "hasData": false
+      },
+      "te": {
+        "raw": 50,
+        "max": 50,
+        "ps": 100,
+        "hasData": true
+      },
+      "examPS": 0,
+      "initialGrade": 88,
+      "termGrade": 90,
+      "hasData": true
+    },
+    "field": {
+      "ww": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "pt": {
+        "raw": 45,
+        "max": 50,
+        "ps": 90,
+        "hasData": true
+      },
+      "st1": {
+        "raw": 0,
+        "max": 0,
+        "ps": 0,
+        "hasData": false
+      },
+      "st2": {
+        "raw": 0,
+        "max": 0,
+        "ps": 0,
+        "hasData": false
+      },
+      "te": {
+        "raw": 40,
+        "max": 50,
+        "ps": 80,
+        "hasData": true
+      },
+      "examPS": 80,
+      "initialGrade": 87,
+      "termGrade": 89,
+      "hasData": true
+    },
+    "examComponents": {
+      "research": [],
+      "work": [],
+      "field": [
+        "TE"
+      ],
+      "jhs": [
+        "ST1",
+        "ST2",
+        "TE"
+      ]
+    }
+  },
+  "passing": {
+    "74": false,
+    "75": true,
+    "A": true,
+    "D": false,
+    "empty": false
+  },
+  "mapehPairs": [
+    {
+      "a": 90,
+      "b": 80,
+      "out": 85
+    },
+    {
+      "a": 91,
+      "b": 80,
+      "out": 86
+    },
+    {
+      "a": 75,
+      "b": 76,
+      "out": 76
+    },
+    {
+      "a": "T/O",
+      "b": 80,
+      "out": "T/O"
+    },
+    {
+      "a": null,
+      "b": 81.2,
+      "out": 81
+    },
+    {
+      "a": "",
+      "b": "",
+      "out": ""
+    },
+    {
+      "a": "A",
+      "b": "B",
+      "out": ""
+    }
+  ]
+}
