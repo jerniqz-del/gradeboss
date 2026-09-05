@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   api,
   type Course,
@@ -6,15 +6,33 @@ import {
   type Stats,
   type Student,
 } from "./api";
+import { fullName, parseSf1, type ParsedSf1, type Sf1Learner } from "./sf1";
+import {
+  countBySex,
+  deleteClass,
+  listClasses,
+  saveClass,
+  type SchoolClass,
+} from "./classes";
 
-type View = "dashboard" | "students" | "courses" | "gradebook";
+type View =
+  | "dashboard"
+  | "classes"
+  | "students"
+  | "courses"
+  | "gradebook"
+  | "plans";
 
 const NAV: Array<{ id: View; label: string; icon: string }> = [
   { id: "dashboard", label: "Dashboard", icon: "chart" },
+  { id: "classes", label: "Classes", icon: "board" },
   { id: "students", label: "Students", icon: "users" },
   { id: "courses", label: "Courses", icon: "book" },
   { id: "gradebook", label: "Gradebook", icon: "pencil" },
 ];
+
+const SYNC_PRICE_ANNUAL = 50; // PHP per extra device per year
+const SYNC_PRICE_MONTHLY = 5; // PHP per extra device per month
 
 function gradeColor(pct: number): string {
   if (pct >= 90) return "var(--green)";
@@ -148,6 +166,13 @@ export default function App() {
         </nav>
         <div className="sidebar-footer">
           {installButton}
+          <button
+            className={view === "plans" ? "nav-item active" : "nav-item"}
+            onClick={() => setView("plans")}
+          >
+            <Icon name="spark" />
+            Plans
+          </button>
           <div className="pill">Admin mode</div>
           <p>All teacher &amp; admin tools in one place.</p>
         </div>
@@ -158,13 +183,19 @@ export default function App() {
           <div className="brand-mark">GB</div>
           <h1>GradeBoss</h1>
         </div>
-        {installButton}
+        <div className="topbar-actions">
+          <button className="ghost small" onClick={() => setView("plans")}>
+            Plans
+          </button>
+          {installButton}
+        </div>
       </header>
 
       <main className="content">
         {error && <div className="banner error">{error}</div>}
 
         {view === "dashboard" && stats && <Dashboard stats={stats} />}
+        {view === "classes" && <Classes />}
         {view === "students" && (
           <Students students={students} onChange={refresh} />
         )}
@@ -177,6 +208,7 @@ export default function App() {
             onChange={refresh}
           />
         )}
+        {view === "plans" && <Plans />}
       </main>
 
       <nav className="bottom-nav">
@@ -569,6 +601,428 @@ function Gradebook({
   );
 }
 
+function Classes() {
+  const [classes, setClasses] = useState<SchoolClass[]>(() => listClasses());
+  const [mode, setMode] = useState<"list" | "preview" | "detail">("list");
+  const [preview, setPreview] = useState<{ parsed: ParsedSf1; source: string } | null>(
+    null,
+  );
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [query, setQuery] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const selected = classes.find((c) => c.id === selectedId) ?? null;
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const parsed = parseSf1(await file.arrayBuffer());
+      if (parsed.learners.length === 0) {
+        setError(parsed.warnings[0] ?? "No learners found in this file.");
+      } else {
+        setPreview({ parsed, source: file.name });
+        setMode("preview");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to read the file.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const confirmSave = () => {
+    if (!preview) return;
+    saveClass({
+      id: crypto.randomUUID(),
+      createdAt: Date.now(),
+      source: preview.source,
+      learners: preview.parsed.learners,
+      ...preview.parsed.meta,
+    });
+    setClasses(listClasses());
+    setPreview(null);
+    setMode("list");
+  };
+
+  const removeClass = (id: string) => {
+    deleteClass(id);
+    setClasses(listClasses());
+    if (selectedId === id) {
+      setSelectedId(null);
+      setMode("list");
+    }
+  };
+
+  if (mode === "preview" && preview) {
+    const { meta, learners, warnings } = preview.parsed;
+    const { male, female } = countBySex(learners);
+    return (
+      <section>
+        <Header title="Review class" subtitle={`Extracted from ${preview.source}`} />
+        {warnings.map((w, i) => (
+          <div className="banner warn" key={i}>
+            {w}
+          </div>
+        ))}
+        <ClassMetaCard meta={meta} male={male} female={female} total={learners.length} />
+        <div className="card">
+          <div className="roster-head">
+            <h3>Roster ({learners.length})</h3>
+          </div>
+          <RosterTable learners={learners} />
+        </div>
+        <div className="form-row">
+          <button className="primary" onClick={confirmSave}>
+            Save class
+          </button>
+          <button
+            className="ghost"
+            onClick={() => {
+              setPreview(null);
+              setMode("list");
+            }}
+          >
+            Discard
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  if (mode === "detail" && selected) {
+    const { male, female } = countBySex(selected.learners);
+    const q = query.trim().toLowerCase();
+    const filtered = q
+      ? selected.learners.filter((l) =>
+          (fullName(l) + " " + l.lrn).toLowerCase().includes(q),
+        )
+      : selected.learners;
+    return (
+      <section>
+        <button
+          className="ghost back"
+          onClick={() => {
+            setMode("list");
+            setSelectedId(null);
+            setQuery("");
+          }}
+        >
+          <Icon name="arrow-left" /> All classes
+        </button>
+        <Header
+          title={`${selected.gradeLevel || "Class"} — ${selected.section}`}
+          subtitle={selected.schoolName}
+        />
+        <ClassMetaCard
+          meta={selected}
+          male={male}
+          female={female}
+          total={selected.learners.length}
+        />
+        <div className="card">
+          <div className="roster-head">
+            <h3>Roster ({selected.learners.length})</h3>
+            <input
+              className="roster-search"
+              placeholder="Search name or LRN"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
+          <RosterTable learners={filtered} />
+        </div>
+        <button className="ghost danger" onClick={() => removeClass(selected.id)}>
+          Delete class
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <section>
+      <Header
+        title="Classes"
+        subtitle="Upload a DepEd School Form 1 (SF1) to create a class."
+      />
+      <div className="card upload-card">
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".xls,.xlsx,.csv"
+          hidden
+          onChange={onFile}
+        />
+        <button
+          className="primary"
+          disabled={busy}
+          onClick={() => fileRef.current?.click()}
+        >
+          <Icon name="upload" /> {busy ? "Reading…" : "Upload SF1 file"}
+        </button>
+        <p className="muted">
+          Accepts .xls / .xlsx exported from LIS. Your data stays on this device.
+        </p>
+        {error && <div className="banner error">{error}</div>}
+      </div>
+
+      {classes.length === 0 ? (
+        <div className="card empty-state">
+          <Icon name="board" />
+          <p className="muted">No classes yet. Upload a School Form 1 to get started.</p>
+        </div>
+      ) : (
+        <div className="cards">
+          {classes.map((c) => {
+            const { male, female } = countBySex(c.learners);
+            return (
+              <button
+                className="card class-card"
+                key={c.id}
+                onClick={() => {
+                  setSelectedId(c.id);
+                  setMode("detail");
+                }}
+              >
+                <div className="class-card-top">
+                  <h3>
+                    {c.gradeLevel || "Class"} — {c.section}
+                  </h3>
+                  <span className="class-count">{c.learners.length}</span>
+                </div>
+                <p className="muted">{c.schoolName}</p>
+                <p className="muted small">{c.schoolYear}</p>
+                <div className="sex-chips">
+                  <span className="chip male">{male} M</span>
+                  <span className="chip female">{female} F</span>
+                </div>
+                {c.adviser && <p className="muted small">Adviser: {c.adviser}</p>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ClassMetaCard({
+  meta,
+  male,
+  female,
+  total,
+}: {
+  meta: ParsedSf1["meta"];
+  male: number;
+  female: number;
+  total: number;
+}) {
+  const items: Array<[string, string]> = [
+    ["School", meta.schoolName],
+    ["School ID", meta.schoolId],
+    ["Region", meta.region],
+    ["Division", meta.division],
+    ["District", meta.district],
+    ["School Year", meta.schoolYear],
+    ["Grade Level", meta.gradeLevel],
+    ["Section", meta.section],
+    ["Adviser", meta.adviser],
+    ["School Head", meta.schoolHead],
+  ];
+  return (
+    <div className="card">
+      <div className="meta-grid">
+        {items.map(([k, v]) => (
+          <div className="meta-item" key={k}>
+            <span className="meta-k">{k}</span>
+            <span className="meta-v">{v || "—"}</span>
+          </div>
+        ))}
+      </div>
+      <div className="sex-chips">
+        <span className="chip">{total} learners</span>
+        <span className="chip male">{male} male</span>
+        <span className="chip female">{female} female</span>
+      </div>
+    </div>
+  );
+}
+
+function RosterTable({ learners }: { learners: Sf1Learner[] }) {
+  return (
+    <div className="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>LRN</th>
+            <th>Name</th>
+            <th>Sex</th>
+            <th>Birth Date</th>
+            <th>Age</th>
+            <th>Modality</th>
+            <th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          {learners.map((l, i) => (
+            <tr key={l.lrn + i}>
+              <td>{i + 1}</td>
+              <td className="muted">{l.lrn}</td>
+              <td>{fullName(l)}</td>
+              <td>{l.sex}</td>
+              <td className="muted">{l.birthdate}</td>
+              <td>{l.age}</td>
+              <td className="muted">{l.modality}</td>
+              <td className="muted">{l.remarks}</td>
+            </tr>
+          ))}
+          {learners.length === 0 && (
+            <tr>
+              <td colSpan={8} className="muted center">
+                No learners.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function Plans() {
+  const [devices, setDevices] = useState(2);
+  const [billing, setBilling] = useState<"annual" | "monthly">("annual");
+  const [notice, setNotice] = useState(false);
+
+  const extra = Math.max(0, devices - 1);
+  const perDevice = billing === "annual" ? SYNC_PRICE_ANNUAL : SYNC_PRICE_MONTHLY;
+  const price = extra * perDevice;
+  const suffix = billing === "annual" ? "/year" : "/month";
+
+  return (
+    <section>
+      <Header title="Plans" subtitle="Simple pricing — your data always stays yours." />
+
+      <div className="plans">
+        <div className="card tier">
+          <div className="tier-head">
+            <h3>Free</h3>
+            <span className="tier-price">
+              ₱0<span>/forever</span>
+            </span>
+          </div>
+          <p className="muted tier-tagline">
+            Everything you need on a single device, fully offline.
+          </p>
+          <ul className="tier-feats">
+            <Feat>Full gradebook — students, courses &amp; grades</Feat>
+            <Feat>Works 100% offline</Feat>
+            <Feat>Installable app (add to home screen)</Feat>
+            <Feat>1 device</Feat>
+            <Feat>Free nearby sync over Wi-Fi / hotspot</Feat>
+            <Feat>Export &amp; import backup</Feat>
+          </ul>
+          <button className="ghost tier-cta" disabled>
+            Current plan
+          </button>
+        </div>
+
+        <div className="card tier featured">
+          <div className="tier-badge">Most useful</div>
+          <div className="tier-head">
+            <h3>Sync</h3>
+            <span className="tier-price">
+              ₱50<span>/device/year</span>
+            </span>
+          </div>
+          <p className="muted tier-tagline">
+            Link 2–3 devices anywhere with end-to-end encrypted sync.
+          </p>
+          <ul className="tier-feats">
+            <Feat>Everything in Free</Feat>
+            <Feat>Encrypted online sync bridge (phone, tablet, laptop)</Feat>
+            <Feat>Syncs across different networks, not just same Wi-Fi</Feat>
+            <Feat>End-to-end encrypted — we can’t read your data</Feat>
+            <Feat>Automatic periodic sync</Feat>
+            <Feat>₱5/device/month or ₱50/device/year</Feat>
+          </ul>
+          <button className="primary tier-cta" onClick={() => setNotice(true)}>
+            Subscribe via PayMongo
+          </button>
+          {notice && (
+            <p className="tier-note info">
+              Online sync is still in development — we’ll enable checkout soon.
+            </p>
+          )}
+          <p className="tier-note">
+            The online bridge is a paid feature; nearby Wi-Fi/hotspot sync stays free.
+            Billed via PayMongo (GCash / Maya).
+          </p>
+        </div>
+      </div>
+
+      <div className="card estimator">
+        <h3>Estimate your price</h3>
+        <div className="estimator-row">
+          <label className="estimator-field">
+            <span>Devices you use</span>
+            <select value={devices} onChange={(e) => setDevices(Number(e.target.value))}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n} device{n > 1 ? "s" : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="billing-toggle" role="group" aria-label="Billing period">
+            <button
+              className={billing === "annual" ? "active" : ""}
+              onClick={() => setBilling("annual")}
+            >
+              Annual
+            </button>
+            <button
+              className={billing === "monthly" ? "active" : ""}
+              onClick={() => setBilling("monthly")}
+            >
+              Monthly
+            </button>
+          </div>
+        </div>
+        <div className="estimator-out">
+          {extra === 0 ? (
+            <>Free — your first device is always free.</>
+          ) : (
+            <>
+              {extra} extra device{extra > 1 ? "s" : ""} ={" "}
+              <strong>
+                ₱{price}
+                {suffix}
+              </strong>{" "}
+              <span className="muted">(1 device stays free)</span>
+            </>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Feat({ children }: { children: React.ReactNode }) {
+  return (
+    <li>
+      <Icon name="check" />
+      <span>{children}</span>
+    </li>
+  );
+}
+
 function Header({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="page-header">
@@ -587,6 +1041,11 @@ function Icon({ name }: { name: string }) {
     download: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3",
     "cloud-off":
       "M22.61 16.95A5 5 0 0 0 18 10h-1.26a8 8 0 0 0-7.05-6M5 5a8 8 0 0 0 4 15h9a5 5 0 0 0 1.7-.3M1 1l22 22",
+    spark: "M12 2l2.4 7.2H22l-6 4.4 2.3 7.2L12 16.6 5.7 20.8 8 13.6 2 9.2h7.6z",
+    check: "M20 6L9 17l-5-5",
+    board: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
+    upload: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12",
+    "arrow-left": "M19 12H5M12 19l-7-7 7-7",
   };
   return (
     <svg
