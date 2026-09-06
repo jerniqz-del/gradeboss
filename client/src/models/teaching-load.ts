@@ -1,7 +1,9 @@
 import type { Sf1Meta } from "../sf1";
 import type { Assessment } from "./assessment";
 import type { AttendanceState } from "./attendance";
+import type { PerformanceChecklist } from "./checklist";
 import type { Learner } from "./learner";
+import type { ScoreHistoryEntry } from "./score-history";
 import type {
   ComponentWeights,
   GradingPolicy,
@@ -27,6 +29,10 @@ export interface TeachingLoad {
   assessments: Assessment[];
   scores: ScoreMap;
   attendance?: AttendanceState;
+  /** Performance checklists for this load (Phase 10). */
+  checklists?: PerformanceChecklist[];
+  /** Per-cell score audit (Phase 10). */
+  scoreHistory?: ScoreHistoryEntry[];
   createdAt: string;
   updatedAt: string;
 }

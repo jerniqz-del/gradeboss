@@ -23,6 +23,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "./useTheme";
 import { AdvisoryView } from "./features/advisory/AdvisoryView";
 import { AttendanceView } from "./features/attendance/AttendanceView";
+import { ChecklistView } from "./features/checklist/ChecklistView";
 import { DashboardView } from "./features/dashboard/DashboardView";
 import { BackupPanel } from "./features/exports/BackupPanel";
 import { TeachingLoadsView } from "./features/teaching-loads/TeachingLoadsView";
@@ -35,6 +36,7 @@ type View =
   | "students"
   | "loads"
   | "sheet"
+  | "checklist"
   | "attendance"
   | "plans"
   | "profile";
@@ -46,6 +48,7 @@ const NAV: Array<{ id: View; label: string; short?: string; icon: string }> = [
   { id: "students", label: "Students", icon: "users" },
   { id: "loads", label: "Loads", icon: "book" },
   { id: "sheet", label: "Sheet", icon: "pencil" },
+  { id: "checklist", label: "Checklist", short: "Check", icon: "list-checks" },
   { id: "attendance", label: "Attendance", short: "Attend", icon: "calendar" },
   { id: "profile", label: "Profile", icon: "user" },
 ];
@@ -255,6 +258,16 @@ export default function App() {
         )}
         {view === "attendance" && (
           <AttendanceView selectedLoadId={selectedLoadId} onSelectLoad={setSelectedLoadId} />
+        )}
+        {view === "checklist" && (
+          <ChecklistView
+            selectedLoadId={selectedLoadId}
+            onSelectLoad={setSelectedLoadId}
+            onOpenSheet={(id) => {
+              setSelectedLoadId(id);
+              setView("sheet");
+            }}
+          />
         )}
         {view === "plans" && <Plans />}
         {view === "profile" && (

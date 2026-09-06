@@ -15,3 +15,9 @@ export interface Assessment {
 export function scoreKey(learnerId: string, assessmentId: string): string {
   return `${learnerId}|${assessmentId}`;
 }
+
+export function parseScoreKey(key: string): { learnerId: string; assessmentId: string } | null {
+  const separator = String(key || "").lastIndexOf("|");
+  if (separator < 1 || separator === key.length - 1) return null;
+  return { learnerId: key.slice(0, separator), assessmentId: key.slice(separator + 1) };
+}
