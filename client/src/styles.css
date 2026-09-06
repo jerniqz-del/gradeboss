@@ -1279,9 +1279,16 @@ button.ghost.back {
 
 .auth-card .banner {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: var(--space-2);
   margin: 14px 0;
+  overflow-wrap: anywhere;
+}
+
+.auth-card .banner code {
+  display: inline;
+  word-break: break-all;
 }
 
 .gsi-slot {

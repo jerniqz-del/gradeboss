@@ -119,11 +119,9 @@ export function SignIn({
         )}
 
         {online && !clientId && (
-          <div className="banner warn">
-            Google Sign-In is not configured. Set{" "}
-            <code>VITE_GOOGLE_CLIENT_ID</code> in <code>client/.env.local</code>{" "}
-            and restart the dev server.
-          </div>
+          <p className="muted small">
+            DepEd Google is optional here. Local profile does not need it.
+          </p>
         )}
 
         {error && <div className="banner error">{error}</div>}
