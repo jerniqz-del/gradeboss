@@ -27,6 +27,7 @@ import { ensureStorageReady, getTeacherProfile } from "../../storage/init";
 import { SCHOOL_YEARS } from "../teaching-loads/catalog";
 import { LearnerForm } from "../roster/LearnerForm";
 import { GradeMatrix } from "./GradeMatrix";
+import { downloadAdvisoryGradePdf } from "../exports/pdf-advisory";
 
 type Tab = "grades" | "import" | "roster" | "sources" | "settings";
 
@@ -120,12 +121,30 @@ export function AdvisoryView() {
             ))}
           </div>
           {tab === "grades" && (
-            <GradeMatrix
-              advisoryClass={advisoryClass}
-              learners={store.learners.filter((item) => item.advisoryClassId === advisoryClass.id)}
-              subjects={store.subjects.filter((item) => item.advisoryClassId === advisoryClass.id)}
-              grades={store.grades.filter((item) => item.advisoryClassId === advisoryClass.id)}
-            />
+            <>
+              <div className="sheet-export no-print">
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={() => downloadAdvisoryGradePdf(store, advisoryClass, "finals")}
+                >
+                  PDF — final grades
+                </button>
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={() => downloadAdvisoryGradePdf(store, advisoryClass, "terms")}
+                >
+                  PDF — terms 1–3
+                </button>
+              </div>
+              <GradeMatrix
+                advisoryClass={advisoryClass}
+                learners={store.learners.filter((item) => item.advisoryClassId === advisoryClass.id)}
+                subjects={store.subjects.filter((item) => item.advisoryClassId === advisoryClass.id)}
+                grades={store.grades.filter((item) => item.advisoryClassId === advisoryClass.id)}
+              />
+            </>
           )}
           {tab === "import" && (
             <ImportTab

@@ -5,6 +5,7 @@ import {
   calculateGeneralAverage,
   calculateMapehFinal,
   calculateSubjectFinal,
+  subjectGroupsForGradeRecord,
 } from "./average";
 
 function subject(name: string, include = true): AdvisorySubject {
@@ -93,5 +94,24 @@ describe("advisory averages", () => {
     // Subject finals: FIL 80, ENG 90, MAPEH = round(mean of term avgs of 80) = 80
     expect(calculateMapehFinal(grades, "L1", [fil, eng, music, pe])).toBe(80);
     expect(calculateGeneralAverage(grades, "L1", [fil, eng, music, pe, journalism])).toBe(83.33);
+  });
+
+  it("inserts a derived MAPEH Average column before the MAPEH parts", () => {
+    const fil = subject("Filipino");
+    const music = subject("Music & Arts");
+    const pe = subject("PE & Health");
+    fil.displayOrder = 0;
+    music.displayOrder = 1;
+    pe.displayOrder = 2;
+    const groups = subjectGroupsForGradeRecord([fil, music, pe]);
+    expect(groups[0].subjectName).toBe("Filipino");
+    expect(groups[1].subjectName).toBe("MAPEH Average");
+    expect(groups[1].derived).toBe(true);
+    expect(groups.map((item) => item.subjectName)).toEqual([
+      "Filipino",
+      "MAPEH Average",
+      "Music & Arts",
+      "PE & Health",
+    ]);
   });
 });
