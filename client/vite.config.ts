@@ -44,6 +44,18 @@ export default defineConfig(({ command }) => ({
         // CacheFirst so Excel export still works offline after the first fetch.
         runtimeCaching: [
           {
+            urlPattern: ({ url }) =>
+              url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "gradeboss-fonts",
+              expiration: {
+                maxEntries: 12,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+            },
+          },
+          {
             urlPattern: ({ url }) => url.pathname.startsWith("/templates/"),
             handler: "CacheFirst",
             options: {

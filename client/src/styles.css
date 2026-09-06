@@ -1,5 +1,5 @@
 /* ==========================================================================
-   GradeBoss design tokens — Material-inspired flat + elevation
+   Design tokens — Figma-style type, 4px spacing, glass elevation
    ========================================================================== */
 
 :root,
@@ -25,9 +25,15 @@
   --orange: #f97316;
   --red: #ef4444;
 
-  --chrome-bg: #151b28;
-  --body-gradient: var(--bg);
+  --chrome-bg: rgba(21, 27, 40, 0.78);
+  --body-gradient:
+    radial-gradient(900px 420px at 100% -10%, rgba(15, 154, 164, 0.16), transparent 55%),
+    #121826;
   --sidebar-w: 248px;
+  --glass: rgba(21, 27, 40, 0.72);
+  --glass-strong: rgba(21, 27, 40, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --highlight: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
   --error-bg: rgba(239, 68, 68, 0.14);
   --error-text: #fecaca;
@@ -38,12 +44,27 @@
   --badge-text: #0b0d18;
   --focus-ring: 0 0 0 3px rgba(15, 154, 164, 0.35);
 
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fs-xs: 0.6875rem;
+  --fs-sm: 0.75rem;
+  --fs-md: 0.8125rem;
+  --fs-body: 0.875rem;
+  --fs-ui: 0.9375rem;
+  --fs-lg: 1rem;
+  --fs-xl: 1.125rem;
+  --fs-2xl: 1.375rem;
+  --fs-3xl: 1.75rem;
+  --lh-tight: 1.25;
+  --lh-body: 1.5;
+  --tracking-tight: -0.022em;
+  --tracking-caps: 0.08em;
+
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 16px;
 
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.24), 0 4px 12px rgba(0, 0, 0, 0.18);
-  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.32), 0 2px 6px rgba(0, 0, 0, 0.2);
+  --shadow-1: var(--highlight), 0 1px 2px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.18);
+  --shadow-2: var(--highlight), 0 8px 28px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.16);
   --shadow: var(--shadow-2);
 
   --space-1: 4px;
@@ -52,6 +73,8 @@
   --space-4: 16px;
   --space-5: 24px;
   --space-6: 32px;
+  --space-7: 40px;
+  --space-8: 48px;
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -74,8 +97,14 @@
   --muted: #5d6b78;
   --primary-soft: rgba(15, 154, 164, 0.12);
 
-  --chrome-bg: #ffffff;
-  --body-gradient: #f3f5f7;
+  --chrome-bg: rgba(255, 255, 255, 0.78);
+  --body-gradient:
+    radial-gradient(900px 420px at 100% -10%, rgba(15, 154, 164, 0.1), transparent 55%),
+    #f3f5f7;
+  --glass: rgba(255, 255, 255, 0.7);
+  --glass-strong: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --highlight: inset 0 1px 0 rgba(255, 255, 255, 0.86);
 
   --error-bg: rgba(239, 68, 68, 0.1);
   --error-text: #991b1b;
@@ -85,8 +114,8 @@
 
   --badge-text: #12152a;
 
-  --shadow-1: 0 1px 2px rgba(18, 21, 42, 0.06), 0 2px 8px rgba(18, 21, 42, 0.05);
-  --shadow-2: 0 8px 24px rgba(18, 21, 42, 0.08), 0 2px 6px rgba(18, 21, 42, 0.04);
+  --shadow-1: var(--highlight), 0 1px 2px rgba(21, 27, 40, 0.05), 0 8px 20px rgba(21, 27, 40, 0.06);
+  --shadow-2: var(--highlight), 0 10px 28px rgba(21, 27, 40, 0.1), 0 2px 8px rgba(21, 27, 40, 0.05);
 }
 
 /* ==========================================================================
@@ -103,12 +132,17 @@ html {
 
 body {
   margin: 0;
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  font-feature-settings: "ss01", "cv11", "tnum";
+  letter-spacing: var(--tracking-tight);
   background: var(--body-gradient);
   color: var(--text);
   min-height: 100vh;
   min-height: 100dvh;
-  line-height: 1.5;
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 :focus-visible {
@@ -188,10 +222,11 @@ select:focus:not(:focus-visible) {
   padding: calc(var(--space-3) + var(--safe-top)) clamp(14px, 4vw, 20px) var(--space-3);
   padding-left: calc(clamp(14px, 4vw, 20px) + var(--safe-left));
   padding-right: calc(clamp(14px, 4vw, 20px) + var(--safe-right));
-  background: var(--chrome-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
+  background: var(--glass);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: var(--highlight);
 }
 
 /* Brand */
@@ -236,13 +271,13 @@ select:focus:not(:focus-visible) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  background: linear-gradient(135deg, var(--primary), var(--primary-600));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 46%), var(--primary);
   color: #fff;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   padding: 10px var(--space-4);
   border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--fs-body);
   cursor: pointer;
   box-shadow: var(--shadow-1);
   min-height: 44px;
@@ -322,8 +357,8 @@ select:focus:not(:focus-visible) {
 .card {
   min-width: 0;
   max-width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   padding: clamp(var(--space-4), 4vw, 20px);
   box-shadow: var(--shadow-1);
@@ -333,8 +368,10 @@ select:focus:not(:focus-visible) {
 
 .card h3 {
   margin: 0 0 var(--space-4);
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--fs-lg);
+  font-weight: 650;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-tight);
 }
 
 .card.stat {
@@ -1236,9 +1273,12 @@ button.ghost.back {
     flex-direction: column;
     gap: 12px;
     grid-row: 1 / -1;
-    background: var(--navy);
+    background: rgba(21, 27, 40, 0.92);
     color: #e8eef3;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(1.15);
+    -webkit-backdrop-filter: blur(20px) saturate(1.15);
     padding: calc(var(--space-3) + var(--safe-top)) 12px var(--space-3);
     padding-left: calc(12px + var(--safe-left));
     position: sticky;
@@ -3817,9 +3857,13 @@ button.ghost.back {
   gap: 12px;
   padding: 8px 16px;
   padding-bottom: calc(8px + var(--safe-bottom));
-  background: var(--navy);
+  background: var(--glass-strong);
   color: #c5d0da;
-  font-size: 11px;
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .welcome-toast {

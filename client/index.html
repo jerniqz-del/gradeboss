@@ -9,7 +9,13 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#0f1220" />
+    <meta name="theme-color" content="#0f9aa4" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <script>
       (function () {
         var key = "gradeboss:theme";
@@ -28,7 +34,7 @@
         document.documentElement.style.colorScheme = theme;
         var meta = document.querySelector('meta[name="theme-color"]');
         if (meta) {
-          meta.setAttribute("content", theme === "light" ? "#6d5efc" : "#0f1220");
+          meta.setAttribute("content", theme === "light" ? "#0f9aa4" : "#151b28");
         }
         if ("serviceWorker" in navigator) {
           navigator.serviceWorker.getRegistrations().then(function (regs) {
