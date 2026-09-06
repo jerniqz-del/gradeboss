@@ -1,11 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  api,
-  type Course,
-  type Grade,
-  type Stats,
-  type Student,
-} from "./api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { api, type Student } from "./api";
 import {
   clearUser,
   disableGoogleAutoSelect,
@@ -25,13 +19,18 @@ import {
 import { Icon } from "./Icon";
 import { Avatar, Profile } from "./Profile";
 import { SignIn } from "./SignIn";
+import { ThemeToggle } from "./ThemeToggle";
+import { useTheme } from "./useTheme";
+import { DashboardView } from "./features/dashboard/DashboardView";
+import { TeachingLoadsView } from "./features/teaching-loads/TeachingLoadsView";
+import { GradingSheetView } from "./features/grading-sheet/GradingSheetView";
 
 type View =
   | "dashboard"
   | "classes"
   | "students"
-  | "courses"
-  | "gradebook"
+  | "loads"
+  | "sheet"
   | "plans"
   | "profile";
 
@@ -39,21 +38,13 @@ const NAV: Array<{ id: View; label: string; icon: string }> = [
   { id: "dashboard", label: "Dashboard", icon: "chart" },
   { id: "classes", label: "Classes", icon: "board" },
   { id: "students", label: "Students", icon: "users" },
-  { id: "courses", label: "Courses", icon: "book" },
-  { id: "gradebook", label: "Gradebook", icon: "pencil" },
+  { id: "loads", label: "Loads", icon: "book" },
+  { id: "sheet", label: "Sheet", icon: "pencil" },
   { id: "profile", label: "Profile", icon: "user" },
 ];
 
 const SYNC_PRICE_ANNUAL = 50; // PHP per extra device per year
 const SYNC_PRICE_MONTHLY = 5; // PHP per extra device per month
-
-function gradeColor(pct: number): string {
-  if (pct >= 90) return "var(--green)";
-  if (pct >= 80) return "var(--blue)";
-  if (pct >= 70) return "var(--amber)";
-  if (pct >= 60) return "var(--orange)";
-  return "var(--red)";
-}
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -112,25 +103,16 @@ export default function App() {
   const [user, setUser] = useState<User | null>(() => loadUser());
   const [view, setView] = useState<View>("dashboard");
   const [students, setStudents] = useState<Student[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [grades, setGrades] = useState<Grade[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [selectedLoadId, setSelectedLoadId] = useState<string | null>(null);
+  const [rosterLoadId, setRosterLoadId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { canInstall, installed, install } = useInstallPrompt();
   const online = useOnline();
+  const { preference, setTheme } = useTheme();
 
   const refresh = useCallback(async () => {
     try {
-      const [s, c, g, st] = await Promise.all([
-        api.getStudents(),
-        api.getCourses(),
-        api.getGrades(),
-        api.getStats(),
-      ]);
-      setStudents(s);
-      setCourses(c);
-      setGrades(g);
-      setStats(st);
+      setStudents(await api.getStudents());
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
@@ -154,7 +136,7 @@ export default function App() {
   }, []);
 
   if (!user) {
-    return <SignIn online={online} onSignedIn={onSignedIn} />;
+    return <SignIn online={online} onSignedIn={onSignedIn} themePreference={preference} onThemeChange={setTheme} />;
   }
 
   const showInstall = canInstall && !installed;
@@ -190,6 +172,7 @@ export default function App() {
         </nav>
         <div className="sidebar-footer">
           {showInstall && <InstallButton onInstall={install} />}
+          <ThemeToggle preference={preference} onChange={setTheme} compact />
           <button
             className={view === "plans" ? "nav-item active" : "nav-item"}
             onClick={() => setView("plans")}
@@ -206,6 +189,7 @@ export default function App() {
           <h1>GradeBoss</h1>
         </div>
         <div className="topbar-actions">
+          <ThemeToggle preference={preference} onChange={setTheme} compact />
           <button className="ghost small" onClick={() => setView("plans")}>
             Plans
           </button>
@@ -229,22 +213,46 @@ export default function App() {
       <main className="content">
         {error && <div className="banner error">{error}</div>}
 
-        {view === "dashboard" && stats && <Dashboard stats={stats} />}
+        {view === "dashboard" && (
+          <DashboardView
+            onOpenSheet={(id) => {
+              setSelectedLoadId(id);
+              setView("sheet");
+            }}
+          />
+        )}
         {view === "classes" && <Classes />}
         {view === "students" && (
           <Students students={students} onChange={refresh} />
         )}
-        {view === "courses" && <Courses courses={courses} onChange={refresh} />}
-        {view === "gradebook" && (
-          <Gradebook
-            students={students}
-            courses={courses}
-            grades={grades}
-            onChange={refresh}
+        {view === "loads" && (
+          <TeachingLoadsView
+            initialRosterLoadId={rosterLoadId}
+            onOpenSheet={(id) => {
+              setSelectedLoadId(id);
+              setView("sheet");
+            }}
+          />
+        )}
+        {view === "sheet" && (
+          <GradingSheetView
+            selectedLoadId={selectedLoadId}
+            onSelectLoad={setSelectedLoadId}
+            onManageRoster={(id) => {
+              setRosterLoadId(id);
+              setView("loads");
+            }}
           />
         )}
         {view === "plans" && <Plans />}
-        {view === "profile" && <Profile user={user} onSignOut={signOut} />}
+        {view === "profile" && (
+          <Profile
+            user={user}
+            onSignOut={signOut}
+            themePreference={preference}
+            onThemeChange={setTheme}
+          />
+        )}
       </main>
 
       <nav className="bottom-nav">
@@ -269,93 +277,6 @@ export default function App() {
   );
 }
 
-function Dashboard({ stats }: { stats: Stats }) {
-  const { totals, studentAverages, courseAverages } = stats;
-  const cards = [
-    { label: "Students", value: totals.students, hint: "enrolled" },
-    { label: "Courses", value: totals.courses, hint: "active" },
-    { label: "Grades recorded", value: totals.grades, hint: "entries" },
-    {
-      label: "Overall average",
-      value: `${totals.overallAverage}%`,
-      hint: "across all grades",
-      accent: gradeColor(totals.overallAverage),
-    },
-  ];
-
-  return (
-    <section>
-      <Header title="Dashboard" subtitle="A live snapshot of school performance." />
-      <div className="cards">
-        {cards.map((card) => (
-          <div className="card stat" key={card.label}>
-            <span className="stat-label">{card.label}</span>
-            <span className="stat-value" style={{ color: card.accent }}>
-              {card.value}
-            </span>
-            <span className="stat-hint">{card.hint}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid-2">
-        <div className="card">
-          <h3>Student standings</h3>
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Grade</th>
-                  <th>Average</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {studentAverages.map((s) => (
-                  <tr key={s.id}>
-                    <td>{s.name}</td>
-                    <td>G{s.gradeLevel}</td>
-                    <td>{s.gradeCount ? `${s.average}%` : "—"}</td>
-                    <td>
-                      <span
-                        className="badge"
-                        style={{ background: gradeColor(s.average) }}
-                      >
-                        {s.letter}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="card">
-          <h3>Course performance</h3>
-          {courseAverages.map((c) => (
-            <div className="bar-row" key={c.id}>
-              <div className="bar-meta">
-                <span>{c.name}</span>
-                <span className="muted">
-                  {c.gradeCount ? `${c.average}%` : "no grades"}
-                </span>
-              </div>
-              <div className="bar-track">
-                <div
-                  className="bar-fill"
-                  style={{ width: `${c.average}%`, background: gradeColor(c.average) }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Students({
   students,
   onChange,
@@ -364,7 +285,7 @@ function Students({
   onChange: () => Promise<void>;
 }) {
   const [name, setName] = useState("");
-  const [gradeLevel, setGradeLevel] = useState(9);
+  const [gradeLevel, setGradeLevel] = useState(1);
   const [email, setEmail] = useState("");
 
   const submit = async (e: React.FormEvent) => {
@@ -373,7 +294,7 @@ function Students({
     await api.addStudent({ name, gradeLevel, email });
     setName("");
     setEmail("");
-    setGradeLevel(9);
+    setGradeLevel(1);
     await onChange();
   };
 
@@ -396,7 +317,7 @@ function Students({
             value={gradeLevel}
             onChange={(e) => setGradeLevel(Number(e.target.value))}
           >
-            {[9, 10, 11, 12].map((g) => (
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((g) => (
               <option key={g} value={g}>
                 Grade {g}
               </option>
@@ -445,203 +366,6 @@ function Students({
   );
 }
 
-function Courses({
-  courses,
-  onChange,
-}: {
-  courses: Course[];
-  onChange: () => Promise<void>;
-}) {
-  const [name, setName] = useState("");
-  const [teacher, setTeacher] = useState("");
-  const [period, setPeriod] = useState(1);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    await api.addCourse({ name, teacher, period });
-    setName("");
-    setTeacher("");
-    setPeriod(1);
-    await onChange();
-  };
-
-  return (
-    <section>
-      <Header title="Courses" subtitle="Track every class and the teacher who runs it." />
-      <div className="card">
-        <form className="form-row" onSubmit={submit}>
-          <input
-            placeholder="Course name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            placeholder="Teacher"
-            value={teacher}
-            onChange={(e) => setTeacher(e.target.value)}
-          />
-          <select value={period} onChange={(e) => setPeriod(Number(e.target.value))}>
-            {[1, 2, 3, 4, 5, 6].map((p) => (
-              <option key={p} value={p}>
-                Period {p}
-              </option>
-            ))}
-          </select>
-          <button type="submit" className="primary">
-            Add course
-          </button>
-        </form>
-      </div>
-
-      <div className="cards">
-        {courses.map((c) => (
-          <div className="card course" key={c.id}>
-            <div className="course-period">P{c.period}</div>
-            <h3>{c.name}</h3>
-            <p className="muted">{c.teacher}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function Gradebook({
-  students,
-  courses,
-  grades,
-  onChange,
-}: {
-  students: Student[];
-  courses: Course[];
-  grades: Grade[];
-  onChange: () => Promise<void>;
-}) {
-  const [courseId, setCourseId] = useState("");
-  const [studentId, setStudentId] = useState("");
-  const [assignment, setAssignment] = useState("");
-  const [score, setScore] = useState(90);
-  const [maxScore, setMaxScore] = useState(100);
-
-  useEffect(() => {
-    if (!courseId && courses.length) setCourseId(courses[0].id);
-  }, [courses, courseId]);
-  useEffect(() => {
-    if (!studentId && students.length) setStudentId(students[0].id);
-  }, [students, studentId]);
-
-  const visibleGrades = useMemo(
-    () => grades.filter((g) => g.courseId === courseId),
-    [grades, courseId],
-  );
-  const studentName = (id: string) =>
-    students.find((s) => s.id === id)?.name ?? "Unknown";
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!studentId || !courseId) return;
-    await api.addGrade({ studentId, courseId, assignment, score, maxScore });
-    setAssignment("");
-    setScore(90);
-    setMaxScore(100);
-    await onChange();
-  };
-
-  return (
-    <section>
-      <Header title="Gradebook" subtitle="Enter and review grades course by course." />
-      <div className="card">
-        <form className="form-row wrap" onSubmit={submit}>
-          <select value={courseId} onChange={(e) => setCourseId(e.target.value)}>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-          <select value={studentId} onChange={(e) => setStudentId(e.target.value)}>
-            {students.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-          <input
-            placeholder="Assignment"
-            value={assignment}
-            onChange={(e) => setAssignment(e.target.value)}
-          />
-          <div className="score-group">
-            <input
-              type="number"
-              className="narrow"
-              value={score}
-              min={0}
-              onChange={(e) => setScore(Number(e.target.value))}
-            />
-            <span className="slash">/</span>
-            <input
-              type="number"
-              className="narrow"
-              value={maxScore}
-              min={1}
-              onChange={(e) => setMaxScore(Number(e.target.value))}
-            />
-          </div>
-          <button type="submit" className="primary">
-            Record grade
-          </button>
-        </form>
-      </div>
-
-      <div className="card">
-        <h3>{courses.find((c) => c.id === courseId)?.name ?? "Grades"}</h3>
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Assignment</th>
-                <th>Score</th>
-                <th>%</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleGrades.map((g) => {
-                const pct = Math.round((g.score / g.maxScore) * 100);
-                return (
-                  <tr key={g.id}>
-                    <td>{studentName(g.studentId)}</td>
-                    <td>{g.assignment}</td>
-                    <td>
-                      {g.score}/{g.maxScore}
-                    </td>
-                    <td>
-                      <span className="badge" style={{ background: gradeColor(pct) }}>
-                        {pct}%
-                      </span>
-                    </td>
-                    <td className="muted">{g.date}</td>
-                  </tr>
-                );
-              })}
-              {visibleGrades.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="muted center">
-                    No grades yet for this course.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function Classes() {
   const [classes, setClasses] = useState<SchoolClass[]>(() => listClasses());
   const [mode, setMode] = useState<"list" | "preview" | "detail">("list");
@@ -652,6 +376,7 @@ function Classes() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState("");
+  const [syncNote, setSyncNote] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const selected = classes.find((c) => c.id === selectedId) ?? null;
@@ -677,18 +402,29 @@ function Classes() {
     }
   };
 
-  const confirmSave = () => {
+  const confirmSave = async () => {
     if (!preview) return;
-    saveClass({
-      id: crypto.randomUUID(),
-      createdAt: Date.now(),
-      source: preview.source,
-      learners: preview.parsed.learners,
-      ...preview.parsed.meta,
-    });
-    setClasses(listClasses());
-    setPreview(null);
-    setMode("list");
+    setBusy(true);
+    try {
+      const result = await saveClass({
+        id: crypto.randomUUID(),
+        createdAt: Date.now(),
+        source: preview.source,
+        learners: preview.parsed.learners,
+        ...preview.parsed.meta,
+      });
+      setClasses(listClasses());
+      const applied = result?.updatedLoads.length ?? 0;
+      setSyncNote(
+        applied > 0
+          ? `Roster saved and applied to ${applied} teaching load${applied === 1 ? "" : "s"} in this section.`
+          : "Roster saved. Open Teaching loads → Roster to grade this class, or create a matching load first.",
+      );
+      setPreview(null);
+      setMode("list");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const removeClass = (id: string) => {
@@ -719,8 +455,8 @@ function Classes() {
           <RosterTable learners={learners} />
         </div>
         <div className="form-row">
-          <button className="primary" onClick={confirmSave}>
-            Save class
+          <button className="primary" disabled={busy} onClick={() => void confirmSave()}>
+            {busy ? "Saving…" : "Save to teaching loads"}
           </button>
           <button
             className="ghost"
@@ -760,6 +496,7 @@ function Classes() {
           title={`${selected.gradeLevel || "Class"} — ${selected.section}`}
           subtitle={selected.schoolName}
         />
+        {syncNote && <div className="banner warn">{syncNote}</div>}
         <ClassMetaCard
           meta={selected}
           male={male}
@@ -778,9 +515,33 @@ function Classes() {
           </div>
           <RosterTable learners={filtered} />
         </div>
-        <button className="ghost danger" onClick={() => removeClass(selected.id)}>
-          Delete class
-        </button>
+        <div className="form-row wrap">
+          <button
+            className="primary"
+            disabled={busy}
+            onClick={() => {
+              void (async () => {
+                setBusy(true);
+                try {
+                  const result = await saveClass(selected);
+                  const applied = result?.updatedLoads.length ?? 0;
+                  setSyncNote(
+                    applied > 0
+                      ? `Roster applied to ${applied} teaching load${applied === 1 ? "" : "s"}.`
+                      : "No matching teaching load yet. Create one with this grade, section, and school year.",
+                  );
+                } finally {
+                  setBusy(false);
+                }
+              })();
+            }}
+          >
+            Apply roster to teaching loads
+          </button>
+          <button className="ghost danger" onClick={() => removeClass(selected.id)}>
+            Delete class
+          </button>
+        </div>
       </section>
     );
   }
@@ -789,8 +550,9 @@ function Classes() {
     <section>
       <Header
         title="Classes"
-        subtitle="Upload a DepEd School Form 1 (SF1) to create a class."
+        subtitle="Upload a DepEd School Form 1 (SF1). The roster is linked to matching teaching loads."
       />
+      {syncNote && <div className="banner warn">{syncNote}</div>}
       <div className="card upload-card">
         <input
           ref={fileRef}

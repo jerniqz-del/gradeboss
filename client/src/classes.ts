@@ -1,4 +1,9 @@
 import type { Sf1Learner, Sf1Meta } from "./sf1";
+import {
+  removeTeachingLoadForSchoolClass,
+  syncSchoolClassToTeachingLoads,
+  type Sf1SyncResult,
+} from "./storage/sync-sf1";
 
 export interface SchoolClass extends Sf1Meta {
   id: string;
@@ -27,14 +32,22 @@ function persist(list: SchoolClass[]): void {
   }
 }
 
-export function saveClass(cls: SchoolClass): void {
+export async function saveClass(cls: SchoolClass): Promise<Sf1SyncResult | null> {
   const list = listClasses().filter((c) => c.id !== cls.id);
   list.push(cls);
   persist(list);
+  try {
+    return await syncSchoolClassToTeachingLoads(cls);
+  } catch {
+    return null;
+  }
 }
 
 export function deleteClass(id: string): void {
   persist(listClasses().filter((c) => c.id !== id));
+  void removeTeachingLoadForSchoolClass(id).catch(() => {
+    // Best effort — class list already updated.
+  });
 }
 
 export function countBySex(learners: Sf1Learner[]): { male: number; female: number } {

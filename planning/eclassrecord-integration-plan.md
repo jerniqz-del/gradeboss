@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-05 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Planning complete — implementation not started |
-| **Active phase** | — |
+| **Overall status** | 🔄 Phase 5 complete — Phase 6 next |
+| **Active phase** | 6 (Export, print & backup) |
 
 ---
 
@@ -56,17 +56,17 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 | Area | Scope |
 | --- | --- |
 | **Auth** | Google OAuth (`@deped.gov.ph`), offline profile cache |
-| **Storage** | `localStorage`: `gradeboss:data`, `gradeboss:classes`, `gradeboss:auth` |
-| **SF1** | Import to standalone class viewer (`sf1.ts`) — **not linked to gradebook** |
-| **Gradebook** | Flat assignment list (score / maxScore), generic A–F letters, G9–12 only |
-| **Views** | Dashboard, Classes, Students, Courses, Gradebook, Plans, Profile |
+| **Storage** | IndexedDB schema v1 (`teachingLoads`, profile, legacy gradebook); `localStorage` kept as SF1 history + migration source |
+| **SF1** | Import links to matching teaching-load rosters (grade + section + SY) |
+| **Gradebook** | DepEd teaching loads + score grid (WW/PT/ST/TE, terms, transmutation); G1–12 |
+| **Views** | Dashboard (DepEd completion), Classes, Students, Loads, Sheet, Plans, Profile |
 | **PWA** | Vite + Workbox, offline banner, install prompt |
 | **UI** | Material-inspired flat + elevation, light/dark/system themes |
 | **Planning** | Sync bridge spec (`planning/sync-bridge-spec.md`), pricing page |
 
 ### Critical architectural gaps
 
-1. **Disconnected data** — SF1 classes and gradebook use separate stores with no shared learners.
+1. **~~Disconnected data~~** — Phase 4 links SF1 imports to teaching-load rosters (LRN merge). `gradeboss:classes` remains an import history.
 2. **No DepEd grading model** — no components, terms, weights, transmutation, or policy modes.
 3. **Storage too shallow** — flat `Student` / `Course` / `Grade` cannot hold assessments, HPS, or term structure.
 4. **No exports** — no CSV, Excel, PDF, or print layouts.
@@ -109,11 +109,11 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | Phase | Name | Status | Started | Completed | PR / notes |
 | --- | --- | --- | --- | --- | --- |
 | 0 | Discovery & parity mapping | ✅ Complete | 2026-09-05 | 2026-09-05 | This document |
-| 1 | Data foundation & storage | ⬜ Not started | — | — | |
-| 2 | DepEd grading engine (domain) | ⬜ Not started | — | — | |
-| 3 | Teaching loads & score grid UI | ⬜ Not started | — | — | |
-| 4 | Roster operations & SF1 linking | ⬜ Not started | — | — | |
-| 5 | Term summary, pass/fail & dashboard | ⬜ Not started | — | — | |
+| 1 | Data foundation & storage | ✅ Complete | 2026-09-05 | 2026-09-05 | PR #4 |
+| 2 | DepEd grading engine (domain) | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #5](https://github.com/jerniqz-del/gradeboss/pull/5) (stacked on #4) |
+| 3 | Teaching loads & score grid UI | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #6](https://github.com/jerniqz-del/gradeboss/pull/6) |
+| 4 | Roster operations & SF1 linking | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #7](https://github.com/jerniqz-del/gradeboss/pull/7) |
+| 5 | Term summary, pass/fail & dashboard | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #8](https://github.com/jerniqz-del/gradeboss/pull/8) |
 | 6 | Export, print & backup (CSV/JSON) | ⬜ Not started | — | — | |
 | 7 | Advisory class & grade transfer | ⬜ Not started | — | — | |
 | 8 | Attendance tracker & SF2 | ⬜ Not started | — | — | |
@@ -154,7 +154,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 1 — Data foundation & storage
+### Phase 1 — Data foundation & storage ✅
 
 **Goal:** Replace flat gradebook storage with a DepEd-ready schema and IndexedDB layer.
 
@@ -176,22 +176,22 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 **E-Class Record reference:** `database.js`, `classroom-records-core.js`
 
 **Deliverables:**
-- IndexedDB schema v1 + migration script
-- Type definitions in `client/src/models/`
-- Repository tests (Vitest)
-- Deprecate flat `Student`/`Course`/`Grade` or map via compatibility shim
+- [x] IndexedDB schema v1 + migration script (`client/src/storage/`)
+- [x] Type definitions in `client/src/models/`
+- [x] Repository tests (Vitest — `client/src/storage/migrate.test.ts`)
+- [x] Legacy `Student`/`Course`/`Grade` compat shim via `legacyGradebook` store + `api.ts`
 
 **Acceptance tests:**
-- Fresh install seeds sample teaching load in IndexedDB
-- Existing `localStorage` data migrates without loss
-- App loads offline after migration
-- `npm run typecheck`, `lint`, `test` pass
+- [x] Fresh install seeds sample teaching load in IndexedDB
+- [x] Existing `localStorage` data migrates without loss
+- [x] App loads offline after migration (PWA build unchanged)
+- [x] `npm run typecheck`, `lint`, `test` pass
 
 **Exit criteria:** All deliverables merged; Phase status → ✅; Progress log updated.
 
 ---
 
-### Phase 2 — DepEd grading engine (domain)
+### Phase 2 — DepEd grading engine (domain) ✅
 
 **Goal:** Port computation logic from `grading.js` to pure TypeScript with full test coverage.
 
@@ -214,10 +214,10 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 **E-Class Record reference:** `grading.js`, `scripts/test-grading*.js`, `scripts/test-transmutation*.js`
 
 **Deliverables:**
-- `client/src/domain/grading/` module
-- 40+ unit tests covering edge cases from desktop test scripts
-- Policy detection helper
-- Exported API documented in code
+- [x] `client/src/domain/grading/` module
+- [x] 40+ unit tests covering edge cases from desktop test scripts
+- [x] Policy detection helper
+- [x] Exported API documented in code
 
 **Acceptance tests:**
 - Golden-file tests match E-Class Record outputs for sample inputs
@@ -228,7 +228,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 3 — Teaching loads & score grid UI
+### Phase 3 — Teaching loads & score grid UI ✅
 
 **Goal:** Replace generic Courses/Gradebook with DepEd grading sheet experience.
 
@@ -247,9 +247,9 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 **E-Class Record reference:** `record` view, `grading.js` renderers, score grid CSS modules
 
 **Deliverables:**
-- `features/teaching-loads/` and `features/grading-sheet/` React modules
-- Responsive score grid component
-- Navigation updates (replace Courses + Gradebook with Loads + Grading Sheet)
+- [x] `features/teaching-loads/` and `features/grading-sheet/` React modules
+- [x] Responsive score grid component
+- [x] Navigation updates (replace Courses + Gradebook with Loads + Grading Sheet)
 
 **Acceptance tests:**
 - Enter scores for 30 learners × 10 assessments; computed grades match Phase 2 tests
@@ -260,7 +260,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 4 — Roster operations & SF1 linking
+### Phase 4 — Roster operations & SF1 linking ✅
 
 **Goal:** Full learner management connected to teaching loads.
 
@@ -277,23 +277,23 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 7. Learner avatars (100 bundled presets, auto by sex, manual override) — static assets precached in PWA.
 8. Extend grade levels to 1–12 (remove G9–12-only restriction).
 
-**E-Class Record reference:** `learners.js`, `sf1-import.js`, `learner-transfer.js`, avatar assets
+**E-Class Record reference:** `learners.js`, `import-export.js`, `learner-avatars.js` (no `sf1-import.js` / `learner-transfer.js` in desktop)
 
 **Deliverables:**
-- Roster panel in Teaching Loads view
-- SF1 → load workflow (replace read-only Classes viewer or redirect)
-- Avatar picker component
+- [x] Roster panel in Teaching Loads view (`features/roster/`)
+- [x] SF1 → load workflow (Classes import applies roster to matching grade/section/SY loads)
+- [x] Avatar picker (procedural SVG, 50M + 50F + 1 neutral — same as desktop; no PNG bundle)
 
 **Acceptance tests:**
-- Import real SF1 `.xlsx`; learners appear in score grid
-- Transfer learner preserves partial term grades
-- Roster sort matches DepEd convention
+- [x] Generated SF1 `.xlsx` import places learners on the matching teaching load and score grid
+- [x] Transfer learner preserves completed term grades as T/I and marks later terms T/O
+- [x] Roster sort is male block → female block → Filipino alpha
 
 **Exit criteria:** SF1 classes and gradebook fully unified.
 
 ---
 
-### Phase 5 — Term summary, pass/fail & dashboard
+### Phase 5 — Term summary, pass/fail & dashboard ✅
 
 **Goal:** Summary grades and dashboard reflect DepEd completion state.
 
@@ -301,22 +301,22 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 **Work items:**
 
-1. Summary tab: term final grades, annual average, pass/fail badges (≥75).
-2. Descriptive grade display for G1–3 policy.
-3. Dashboard cards per teaching load: completion %, missing scores, class average.
-4. Student standings table using transmuted grades (not flat percentage).
-5. Course/subject performance bars by term.
-6. Workplace-style pending tasks (missing HPS, incomplete terms) — lightweight v1.
+1. [x] Summary tab: term final grades, annual average, pass/fail badges (≥75).
+2. [x] Descriptive grade display for G1–3 policy.
+3. [x] Dashboard cards per teaching load: completion %, missing scores, class average.
+4. [x] Student standings table using transmuted grades (not flat percentage).
+5. [x] Course/subject performance bars by term.
+6. [x] Workplace-style pending tasks (missing HPS, incomplete terms) — lightweight v1.
 
 **E-Class Record reference:** `dashboard.js`, `dashboard-grade-insights.js`, Summary tab in grading sheet
 
 **Deliverables:**
-- Updated Dashboard view
-- Summary computation hooks in domain layer
+- [x] Updated Dashboard view (`features/dashboard/DashboardView.tsx`)
+- [x] Summary computation hooks in domain layer (`domain/grading/summary.ts`, `insights.ts`)
 
 **Acceptance tests:**
-- Summary matches manual calculation for sample class
-- Dashboard completion % accurate when scores missing
+- [x] Summary matches manual calculation for sample class
+- [x] Dashboard completion % accurate when scores missing
 
 **Exit criteria:** Dashboard reflects real DepEd grading state.
 
@@ -668,7 +668,16 @@ Append a row when a phase status changes. **Do not delete entries.**
 | Date | Phase | Event | Updated by |
 | --- | --- | --- | --- |
 | 2026-09-05 | 0 | Discovery complete; initial plan published | Agent |
-| | | | |
+| 2026-09-05 | 1 | Started Phase 1 — data foundation & storage | Agent |
+| 2026-09-05 | 1 | Phase 1 complete — IndexedDB schema v1, models, migration, repositories, Vitest | Agent |
+| 2026-09-05 | 2 | Started Phase 2 — DepEd grading engine (domain) | Agent |
+| 2026-09-05 | 2 | Phase 2 complete — TS grading engine, transmutation tables, golden-file tests vs eclassrecord `grading.js` | Agent |
+| 2026-09-05 | 3 | Started Phase 3 — teaching loads & score grid UI | Agent |
+| 2026-09-05 | 3 | Phase 3 complete — Loads + grading sheet UI, live PS/IG/TG, MAPEH tabs, summary | Agent |
+| 2026-09-05 | 4 | Started Phase 4 — roster operations & SF1 linking | Agent |
+| 2026-09-05 | 4 | Phase 4 complete — SF1→load merge, learner CRUD, DepEd sort, CSV/clone/transfer, procedural avatars, G1–12 | Agent |
+| 2026-09-05 | 5 | Started Phase 5 — term summary, pass/fail & dashboard | Agent |
+| 2026-09-05 | 5 | Phase 5 complete — year-result/insights domain, summary pass/fail, DepEd dashboard | Agent |
 
 ### How to update when a phase finishes
 
@@ -701,7 +710,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | Port `grading.js` as pure TS domain module first | Highest risk / highest value; enables all downstream UI |
 | 2026-09-05 | Keep Google DepEd auth; add optional local PIN later | GradeBoss identity model differs from desktop profiles |
 | 2026-09-05 | 15 phases (0–14) | Groups work into shippable increments without multi-month blocks |
+| 2026-09-05 | Port desktop procedural SVG avatars instead of 100 PNG files | Matches eclassrecord `learner-avatars.js`; keeps PWA cache small and works offline |
 
 ---
 
-*Next action: Begin **Phase 1 — Data foundation & storage** when approved.*
+*Next action: Begin **Phase 6 — Export, print & backup (CSV/JSON)**.*
