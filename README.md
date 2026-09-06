@@ -34,23 +34,22 @@ npm install     # install dependencies
 npm run dev     # start the web client at http://localhost:5173
 ```
 
-That's it — open http://localhost:5173. Create the school admin account with the
-official `@deped.gov.ph` email, or use a local profile. After that the app works
-offline and can be installed (Add to Home Screen).
+That's it — open http://localhost:5173 and create a **local profile**. After that
+the app works offline and can be installed (Add to Home Screen).
 
-## School accounts (no Google)
+## Local profile first, then school Cloudflare
 
-The school admin creates a Cloudflare account using the school’s official DepEd
-email, then issues DepEd emails to personnel. GradeBoss sign-in uses those
-addresses plus an optional PIN — not Google OAuth.
+1. Every person creates a **local profile**. Data stays on the device under
+   `Documents/ecrecord_users_local`.
+2. The **school admin** creates the school Cloudflare account with the official
+   DepEd email, then in Profile marks Cloudflare ready and issues **teaching**
+   or **non-teaching** accounts.
+3. When that person’s school-issued email exists and Cloudflare is ready, they
+   open Profile → **Sync local profile** and enter the email (and PIN) the admin
+   gave them.
 
-1. First `@deped.gov.ph` account on a device becomes **School admin**.
-2. Later emails on the same device sign in as teachers.
-3. Optional: put the deployed PWA behind **Cloudflare Access** so only those
-   school-issued emails can reach the site.
-
-A **local profile** still writes `Documents/ecrecord_users_local` for fully
-offline teachers.
+There is no Google Sign-In. Cloudflare Access can later sit in front of the
+deployed PWA using those same school-issued emails.
 
 ## Useful scripts
 

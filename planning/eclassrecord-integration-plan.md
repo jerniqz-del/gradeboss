@@ -25,7 +25,7 @@ features in GradeBoss while preserving GradeBoss golden rules:
 
 - Responsive & adaptive (mobile-first, 600px / 900px breakpoints, safe areas)
 - Installable & offline-capable (PWA, service worker, runtime caching)
-- Google DepEd sign-in (GradeBoss-specific; E-Class Record uses local PIN profiles)
+- School DepEd email + Cloudflare (no Google); local profiles for offline devices
 
 Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 **status** that must be updated when the phase finishes.

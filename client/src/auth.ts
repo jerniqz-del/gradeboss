@@ -1,5 +1,7 @@
-export type Role = "superAdmin" | "schoolAdmin" | "teacher";
+export type Role = "superAdmin" | "schoolAdmin" | "teacher" | "nonTeaching";
 export type AuthKind = "school" | "local" | "google";
+export type SchoolAccountKind = "admin" | "teaching" | "nonTeaching";
+export type SyncStatus = "local-only" | "waiting" | "linked";
 
 export interface User {
   id: string;
@@ -9,6 +11,9 @@ export interface User {
   role: Role;
   signedInAt: string;
   authKind?: AuthKind;
+  schoolEmail?: string;
+  schoolAccountKind?: SchoolAccountKind;
+  syncStatus?: SyncStatus;
 }
 
 export const LOCAL_EMAIL_SUFFIX = "@ecrecord.local";
@@ -17,7 +22,7 @@ export const SUPER_ADMIN_EMAIL = "jerniqz@gmail.com";
 export const ALLOWED_DOMAIN = "deped.gov.ph";
 
 const KEY = "gradeboss:auth";
-const DOMAIN_ERROR = "Use the school’s official DepEd email (@deped.gov.ph).";
+const DOMAIN_ERROR = "Use a school-issued DepEd email (@deped.gov.ph).";
 
 interface StoredAuth {
   user: User;
@@ -29,10 +34,11 @@ export function isAllowedEmail(email: string): boolean {
 }
 
 export function roleLabel(role: Role, kind?: AuthKind): string {
-  if (kind === "local") return "Local profile";
+  if (kind === "local" && role === "teacher") return "Local profile";
   if (role === "schoolAdmin") return "School admin";
   if (role === "superAdmin") return "Super admin";
-  return "Teacher";
+  if (role === "nonTeaching") return "Non-teaching";
+  return "Teaching";
 }
 
 export function isLocalUser(user: User): boolean {
@@ -40,7 +46,7 @@ export function isLocalUser(user: User): boolean {
 }
 
 export function isSchoolUser(user: User): boolean {
-  return user.authKind === "school" || (!isLocalUser(user) && isAllowedEmail(user.email));
+  return Boolean(user.schoolEmail) || user.authKind === "school";
 }
 
 export function createLocalUser(name: string, profileId: string): User {
@@ -52,6 +58,7 @@ export function createLocalUser(name: string, profileId: string): User {
     role: "teacher",
     signedInAt: new Date().toISOString(),
     authKind: "local",
+    syncStatus: "local-only",
   };
 }
 
@@ -73,7 +80,7 @@ export function createSchoolUser(input: {
 }
 
 function isRole(value: unknown): value is Role {
-  return value === "superAdmin" || value === "schoolAdmin" || value === "teacher";
+  return value === "superAdmin" || value === "schoolAdmin" || value === "teacher" || value === "nonTeaching";
 }
 
 function isUser(value: unknown): value is User {
@@ -85,11 +92,7 @@ function isUser(value: unknown): value is User {
     typeof user.name === "string" &&
     typeof user.picture === "string" &&
     isRole(user.role) &&
-    typeof user.signedInAt === "string" &&
-    (user.authKind === undefined ||
-      user.authKind === "school" ||
-      user.authKind === "local" ||
-      user.authKind === "google")
+    typeof user.signedInAt === "string"
   );
 }
 
@@ -102,7 +105,7 @@ export function loadUser(): User | null {
       localStorage.removeItem(KEY);
       return null;
     }
-    if (!isLocalUser(stored.user) && !isAllowedEmail(stored.user.email)) {
+    if (!isLocalUser(stored.user) && !isAllowedEmail(stored.user.email) && !stored.user.schoolEmail) {
       localStorage.removeItem(KEY);
       return null;
     }

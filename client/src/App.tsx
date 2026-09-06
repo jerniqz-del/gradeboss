@@ -329,6 +329,10 @@ export default function App() {
           <Profile
             user={user}
             onSignOut={signOut}
+            onUserChange={(next) => {
+              saveUser(next);
+              setUser(next);
+            }}
             themePreference={preference}
             onThemeChange={setTheme}
           />

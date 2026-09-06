@@ -1,4 +1,3 @@
-import { SchoolAccountSignIn } from "./features/school-account/SchoolAccountSignIn";
 import { LocalProfileSignIn } from "./features/local-profile/LocalProfileSignIn";
 import { ThemeToggle } from "./ThemeToggle";
 import type { User } from "./auth";
@@ -27,24 +26,16 @@ export function SignIn({
             <span>School command center</span>
           </div>
         </div>
-        <h2>Sign in</h2>
+        <h2>Create a local profile</h2>
         <p className="muted">
-          No Google. The school issues DepEd emails through its Cloudflare account.
-          Teachers who need a device-only copy can use a local profile.
+          Start on this device. When the school admin has your Cloudflare / DepEd
+          email ready, you can sync this local profile from Profile.
         </p>
-
-        <SchoolAccountSignIn onSignedIn={onSignedIn} />
-
-        <div className="auth-divider" role="separator">
-          <span>or local profile</span>
-        </div>
-
         <LocalProfileSignIn onSignedIn={onSignedIn} />
-
         <ul className="auth-notes">
-          <li>School admin: official @deped.gov.ph (Cloudflare / school-issued)</li>
-          <li>Personnel: the DepEd email the school created for them</li>
-          <li>Local profile: offline files in Documents/ecrecord_users_local</li>
+          <li>Everyone starts with a local profile under Documents/ecrecord_users_local</li>
+          <li>The school admin issues teaching and non-teaching Cloudflare accounts</li>
+          <li>Sync later — only when the school marks Cloudflare ready</li>
         </ul>
       </div>
     </div>

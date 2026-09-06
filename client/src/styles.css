@@ -1358,10 +1358,42 @@ button.ghost.back {
 }
 
 .local-profile-form input,
+.local-profile-form select,
 .local-user-list input {
   font-size: 16px;
   min-height: 44px;
   width: 100%;
+}
+
+.school-directory-card,
+.school-sync-card {
+  margin-top: var(--space-4);
+}
+
+.school-ready-row {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+}
+
+.school-ready-row .ghost {
+  min-height: 44px;
+}
+
+.school-account-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.school-account-list li {
+  display: grid;
+  gap: 4px;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
 }
 
 .local-user-list ul {

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { isLocalUser, roleLabel, type User } from "./auth";
 import { BackupPanel } from "./features/exports/BackupPanel";
+import { SchoolDirectoryPanel } from "./features/school-account/SchoolDirectoryPanel";
+import { SchoolSyncPanel } from "./features/school-account/SchoolSyncPanel";
+import { canManageSchool, schoolIsSetUp } from "./storage/school-accounts";
 import {
   connectLocalUsersFolder,
   documentsPathHint,
@@ -46,11 +49,13 @@ export function Avatar({ user, size = 40 }: { user: User; size?: number }) {
 export function Profile({
   user,
   onSignOut,
+  onUserChange,
   themePreference,
   onThemeChange,
 }: {
   user: User;
   onSignOut: () => void;
+  onUserChange: (user: User) => void;
   themePreference: ThemePreference;
   onThemeChange: (next: ThemePreference) => void;
 }) {
@@ -75,9 +80,9 @@ export function Profile({
       <div className="page-header">
         <h2>Profile</h2>
         <p>
-          {local
-            ? "Local profile on this device."
-            : "School-issued DepEd account on this device."}
+          {user.syncStatus === "linked"
+            ? "Local profile synced to a school-issued Cloudflare account."
+            : "Local profile on this device. Sync when the school Cloudflare account is ready."}
         </p>
       </div>
 
@@ -118,10 +123,14 @@ export function Profile({
           </div>
         </dl>
 
-        {user.role === "schoolAdmin" && !local ? (
+        {user.schoolEmail ? (
           <p className="muted small">
-            School admin registered with the official DepEd email. Personnel sign in
-            with the emails the school issued (Cloudflare).
+            School email: {user.schoolEmail}
+            {user.schoolAccountKind === "nonTeaching"
+              ? " · Non-teaching"
+              : user.role === "schoolAdmin"
+                ? " · School admin"
+                : " · Teaching"}
           </p>
         ) : null}
 
@@ -188,6 +197,11 @@ export function Profile({
           Sign out
         </button>
       </div>
+
+      {local ? <SchoolSyncPanel user={user} onUserChange={onUserChange} /> : null}
+      {canManageSchool(user) || !schoolIsSetUp() ? (
+        <SchoolDirectoryPanel user={user} onUserChange={onUserChange} />
+      ) : null}
 
       <BackupPanel />
     </section>
