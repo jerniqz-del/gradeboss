@@ -1,7 +1,15 @@
 export { BackupPanel } from "./BackupPanel";
 export { SheetExportBar } from "./SheetExportBar";
-export { buildSummaryCsv, buildTermGridCsv, csvFilename } from "./csv";
+export { buildSummaryCsv, buildTermGridCsv, csvFilename, termAssessments } from "./csv";
 export { buildBackupBundle, parseBackupBundle } from "./backup";
 export type { BackupBundle, BackupMode } from "./types";
 export { printGradingSheet } from "./print";
-export { downloadJson, downloadText } from "./download";
+export { downloadBlob, downloadJson, downloadText } from "./download";
+export { buildExcelExportPayload } from "./excel-payload";
+export { createEcrSkeleton, fillExcelWorkbook, workbookToBlob } from "./excel";
+export { computeClassAnalysis } from "./analysis";
+export { buildClassRecordPdfBlob } from "./pdf-class-record";
+export { buildLearnerCardsPdfBlob } from "./pdf-learner";
+export { buildTermCompletionPdfBlob } from "./pdf-completion";
+export { buildClassAnalysisPdfBlob } from "./pdf-analysis";
+export { buildAdvisoryGradePdfBlob } from "./pdf-advisory";

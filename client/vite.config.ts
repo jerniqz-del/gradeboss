@@ -35,8 +35,23 @@ export default defineConfig({
         // Primary data lives in IndexedDB; localStorage retains SF1 class list
         // and is read once on first launch for migration.
         // Learner avatars are procedural SVG (no extra image assets to precache).
-        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,xlsx}"],
         navigateFallback: "index.html",
+        // Official ECR template is optional (`public/templates/ecr.xlsx`).
+        // CacheFirst so Excel export still works offline after the first fetch.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith("/templates/"),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "gradeboss-ecr-templates",
+              expiration: {
+                maxEntries: 4,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+            },
+          },
+        ],
       },
       devOptions: {
         // Enables the service worker in `vite dev` so offline behavior can be
