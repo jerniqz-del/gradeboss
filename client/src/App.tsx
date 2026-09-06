@@ -39,14 +39,14 @@ type View =
   | "plans"
   | "profile";
 
-const NAV: Array<{ id: View; label: string; icon: string }> = [
-  { id: "dashboard", label: "Dashboard", icon: "chart" },
+const NAV: Array<{ id: View; label: string; short?: string; icon: string }> = [
+  { id: "dashboard", label: "Dashboard", short: "Home", icon: "chart" },
   { id: "advisory", label: "Advisory", icon: "clipboard" },
   { id: "classes", label: "Classes", icon: "board" },
   { id: "students", label: "Students", icon: "users" },
   { id: "loads", label: "Loads", icon: "book" },
   { id: "sheet", label: "Sheet", icon: "pencil" },
-  { id: "attendance", label: "Attendance", icon: "calendar" },
+  { id: "attendance", label: "Attendance", short: "Attend", icon: "calendar" },
   { id: "profile", label: "Profile", icon: "user" },
 ];
 
@@ -281,7 +281,7 @@ export default function App() {
             ) : (
               <Icon name={item.icon} />
             )}
-            <span>{item.label}</span>
+            <span>{item.short || item.label}</span>
           </button>
         ))}
       </nav>

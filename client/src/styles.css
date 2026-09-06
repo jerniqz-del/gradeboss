@@ -2286,6 +2286,10 @@ button.ghost.back {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.att-stats .att-stat:last-child {
+  grid-column: 1 / -1;
+}
+
 .att-stat {
   margin-bottom: 0;
 }

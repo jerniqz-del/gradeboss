@@ -21,7 +21,6 @@ import { policyLabel } from "../teaching-loads/create-load";
 import { AttendanceGrid } from "./AttendanceGrid";
 import { RollCallModal } from "./RollCallModal";
 import { Sf2Document } from "./Sf2Document";
-import { downloadSf2Pdf } from "./sf2-pdf";
 
 export function AttendanceView({
   selectedLoadId,
@@ -215,12 +214,15 @@ export function AttendanceView({
               className="ghost"
               onClick={() => {
                 if (!payload || !load) return;
-                try {
-                  downloadSf2Pdf(load, payload);
-                  setPdfNote(null);
-                } catch (err) {
-                  setPdfNote(err instanceof Error ? err.message : "Could not build the SF2 PDF.");
-                }
+                void (async () => {
+                  try {
+                    const { downloadSf2Pdf } = await import("./sf2-pdf");
+                    downloadSf2Pdf(load, payload);
+                    setPdfNote(null);
+                  } catch (err) {
+                    setPdfNote(err instanceof Error ? err.message : "Could not build the SF2 PDF.");
+                  }
+                })();
               }}
             >
               Download SF2 PDF

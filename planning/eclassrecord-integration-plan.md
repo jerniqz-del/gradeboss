@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-06 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 8 in progress |
-| **Active phase** | 8 (Attendance tracker & SF2) |
+| **Overall status** | 🔄 Phase 8 complete — Phase 9 next |
+| **Active phase** | 9 (Excel & PDF reports) |
 
 ---
 
@@ -117,7 +117,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 5 | Term summary, pass/fail & dashboard | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #8](https://github.com/jerniqz-del/gradeboss/pull/8) |
 | 6 | Export, print & backup (CSV/JSON) | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #9](https://github.com/jerniqz-del/gradeboss/pull/9) (stacked on #8) |
 | 7 | Advisory class & grade transfer | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #10](https://github.com/jerniqz-del/gradeboss/pull/10) (stacked on #9) |
-| 8 | Attendance tracker & SF2 | 🔄 In progress | 2026-09-06 | — | |
+| 8 | Attendance tracker & SF2 | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #11](https://github.com/jerniqz-del/gradeboss/pull/11) |
 | 9 | Excel & PDF reports | ⬜ Not started | — | — | |
 | 10 | Performance checklist & quick grade | ⬜ Not started | — | — | |
 | 11 | Teacher tools & classroom suite | ⬜ Not started | — | — | |
@@ -384,7 +384,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 8 — Attendance tracker & SF2
+### Phase 8 — Attendance tracker & SF2 ✅
 
 **Goal:** Monthly attendance with SF2 output.
 
@@ -392,22 +392,22 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 **Work items:**
 
-1. Monthly attendance grid per teaching load.
-2. Statuses: present, absent, tardy, excused, no classes.
-3. Roll-call modal, filters, statistics.
-4. SF2 PDF generation (client-side: jsPDF or pdfmake).
-5. Print layout for SF2 (`@page` landscape).
+1. [x] Monthly attendance grid per teaching load.
+2. [x] Statuses: present, absent, tardy, excused, no classes.
+3. [x] Roll-call modal, filters, statistics.
+4. [x] SF2 PDF generation (client-side: jsPDF or pdfmake).
+5. [x] Print layout for SF2 (`@page` landscape).
 
 **E-Class Record reference:** `attendance-*.js`, SF2 PDF templates in main process (reimplement in browser)
 
 **Deliverables:**
-- Attendance view
-- SF2 PDF download
+- [x] Attendance view (`features/attendance/`)
+- [x] SF2 PDF download (`sf2-pdf.ts`, lazy-loaded)
 
 **Acceptance tests:**
-- Month grid persists offline
-- SF2 present counts match grid totals
-- PDF renders on mobile and desktop
+- [x] Month grid persists offline
+- [x] SF2 present counts match grid totals
+- [x] PDF renders on mobile and desktop
 
 **Exit criteria:** SF2 generation works without Electron.
 
@@ -684,6 +684,7 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-06 | 7 | Started Phase 7 — advisory class & grade transfer | Agent |
 | 2026-09-06 | 7 | Phase 7 complete — Advisory view, GTF v1.0 export/import, GA + conflict tests | Agent |
 | 2026-09-06 | 8 | Started Phase 8 — attendance tracker & SF2 | Agent |
+| 2026-09-06 | 8 | Phase 8 complete — monthly grid, roll call, SF2 preview/print/PDF | Agent |
 
 ### How to update when a phase finishes
 
@@ -720,4 +721,4 @@ Append a row when a phase status changes. **Do not delete entries.**
 
 ---
 
-*Next action: Finish **Phase 8 — Attendance tracker & SF2**.*
+*Next action: Begin **Phase 9 — Excel & PDF reports**.*
