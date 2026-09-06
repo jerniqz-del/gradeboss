@@ -1,0 +1,13 @@
+---
+description: Owner workflow — edit main, no PRs, owner tests locally
+alwaysApply: true
+---
+
+# Workspace workflow (always apply)
+
+The owner tests features themselves. Agents edit code only.
+
+- Edit files on `main` only. Do not create feature branches or pull requests.
+- Do not run automated tests, typecheck/lint as a gate, or browser/manual verification unless the owner asks.
+- When the change is in place, say you are done so the owner can test.
+- Local-only profiles must persist the database under the device Documents folder `ecrecord_users_local`.

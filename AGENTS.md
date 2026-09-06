@@ -1,5 +1,14 @@
 # GradeBoss — Contributor & Agent Guide
 
+## Owner workflow (entire workspace)
+
+The repository owner tests features locally. Agents edit files and stop.
+
+- **Always edit on `main`.** Do not create feature branches or pull requests.
+- **Do not open a PR** when work is finished. Commit on `main` if a commit is needed; then say you are done.
+- **Do not run automated tests, typecheck/lint gates, or browser verification** unless the owner explicitly asks. The owner tests the feature themselves.
+- **Local profiles** (fully offline, no Google) must save the local database in the device Documents folder under `ecrecord_users_local`.
+
 ## Golden rules (apply to EVERYTHING built in this app)
 
 These are non-negotiable requirements for every feature, page, component, and
@@ -68,5 +77,5 @@ Full-stack TypeScript app managed with npm workspaces:
 | `npm run lint` | Lint both workspaces |
 | `npm run test` | Run the API test suite |
 
-Always run `npm run typecheck`, `npm run lint`, and `npm run test` before
-committing.
+Do not run `typecheck`, `lint`, `test`, or browser verification unless the
+owner asks. The owner tests on their device.
