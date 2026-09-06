@@ -2,11 +2,14 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     VitePWA({
       registerType: "autoUpdate",
+      // Dev SW was pinning an old sign-in shell in Cursor preview. The
+      // self-destroying worker unregisters that cache; production PWA is unchanged.
+      selfDestroying: command === "serve",
       includeAssets: ["favicon.ico", "apple-touch-icon-180x180.png", "logo.svg", "data/deped-calendar.json"],
       manifest: {
         name: "GradeBoss",
@@ -65,8 +68,6 @@ export default defineConfig({
         ],
       },
       devOptions: {
-        // Enables the service worker in `vite dev` so offline behavior can be
-        // exercised without a separate production build.
         enabled: true,
         type: "module",
       },
@@ -75,9 +76,12 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    headers: {
+      "Cache-Control": "no-store",
+    },
   },
   preview: {
     host: true,
     port: 4173,
   },
-});
+}));

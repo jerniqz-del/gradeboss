@@ -30,6 +30,13 @@
         if (meta) {
           meta.setAttribute("content", theme === "light" ? "#6d5efc" : "#0f1220");
         }
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            regs.forEach(function (reg) {
+              reg.unregister();
+            });
+          });
+        }
       })();
     </script>
     <meta name="mobile-web-app-capable" content="yes" />

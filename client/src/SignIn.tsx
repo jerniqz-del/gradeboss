@@ -98,11 +98,17 @@ export function SignIn({
             <span>School command center</span>
           </div>
         </div>
-        <h2>Sign in</h2>
+        <h2>Local profile or DepEd sign-in</h2>
         <p className="muted">
-          Use a DepEd Google account, or a local profile that stays on this device
-          under Documents/ecrecord_users_local.
+          Use a local profile to stay fully offline. GradeBoss saves the database in{" "}
+          <code>Documents/ecrecord_users_local</code>.
         </p>
+
+        <LocalProfileSignIn onSignedIn={onSignedIn} />
+
+        <div className="auth-divider" role="separator">
+          <span>or DepEd Google</span>
+        </div>
 
         {!online && (
           <div className="banner warn">
@@ -132,16 +138,9 @@ export function SignIn({
           <p className="muted">Loading Google Sign-In…</p>
         )}
 
-        <div className="auth-divider" role="separator">
-          <span>or stay fully local</span>
-        </div>
-
-        <LocalProfileSignIn onSignedIn={onSignedIn} />
-
         <ul className="auth-notes">
+          <li>Local profile: no Google, files in Documents/ecrecord_users_local</li>
           <li>DepEd Google: @deped.gov.ph</li>
-          <li>Local profile: no Google, database in Documents/ecrecord_users_local</li>
-          <li>Works offline after the first Google sign-in, or immediately with a local profile</li>
         </ul>
       </div>
     </div>
