@@ -1,12 +1,14 @@
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 import type { AdvisoryStore } from "../models/advisory";
+import type { CalendarStore } from "../models/calendar";
 import type { LegacyGradebook } from "../models/legacy";
 import type { TeacherProfile } from "../models/teacher-profile";
 import type { TeachingLoad } from "../models/teaching-load";
+import type { WorkplaceStore } from "../models/workplace";
 import { SCHEMA_VERSION } from "../models/types";
 
 export const DB_NAME = "gradeboss";
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 export interface SchemaMeta {
   version: number;
@@ -36,6 +38,14 @@ interface GradeBossDbSchema extends DBSchema {
     key: "default";
     value: AdvisoryStore;
   };
+  calendar: {
+    key: "default";
+    value: CalendarStore;
+  };
+  workplace: {
+    key: "default";
+    value: WorkplaceStore;
+  };
 }
 
 export type GradeBossDb = IDBPDatabase<GradeBossDbSchema>;
@@ -63,6 +73,12 @@ export function openGradeBossDb(): Promise<GradeBossDb> {
         }
         if (!db.objectStoreNames.contains("advisory")) {
           db.createObjectStore("advisory");
+        }
+        if (!db.objectStoreNames.contains("calendar")) {
+          db.createObjectStore("calendar");
+        }
+        if (!db.objectStoreNames.contains("workplace")) {
+          db.createObjectStore("workplace");
         }
         void transaction;
       },

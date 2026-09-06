@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api";
+import { listClasses } from "../../classes";
 import {
   computeDashboardInsights,
   type DashboardInsights,
@@ -7,30 +8,78 @@ import {
   type PendingTask,
   type StandingRow,
 } from "../../domain/grading";
+import { workplaceSnapshot, type WorkplaceSnapshot } from "../../domain/workplace";
+import { getAdvisoryStore } from "../../storage/repositories/advisory";
+import { getCalendarStore } from "../../storage/repositories/calendar";
+import {
+  addWorkplaceTask,
+  getWorkplaceStore,
+  removeWorkplaceTask,
+  toggleWorkplaceTask,
+} from "../../storage/repositories/workplace";
+import { getTeacherProfile } from "../../storage/init";
+import { openGradeBossDb } from "../../storage/db";
 import { completionTone, gradeTone } from "../grading-sheet/grade-tone";
 import { LearnerAvatar } from "../roster/LearnerAvatar";
+import { AnalyticsPanel } from "./AnalyticsPanel";
+import { WorkplacePanel, type WorkplaceNavigate } from "./WorkplacePanel";
 
 export function DashboardView({
   onOpenSheet,
   onOpenAdvisory,
+  onOpenCalendar,
+  onOpenClasses,
+  onOpenLoads,
 }: {
   onOpenSheet: (loadId: string) => void;
   onOpenAdvisory?: () => void;
+  onOpenCalendar?: (date?: string) => void;
+  onOpenClasses?: () => void;
+  onOpenLoads?: (loadId?: string) => void;
 }) {
   const [insights, setInsights] = useState<DashboardInsights | null>(null);
+  const [workplace, setWorkplace] = useState<WorkplaceSnapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const loads = await api.getTeachingLoads();
-        setInsights(computeDashboardInsights(loads));
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load dashboard");
-      }
-    })();
+  const loadDashboard = useCallback(async () => {
+    const [loads, advisory, calendar, workStore, db] = await Promise.all([
+      api.getTeachingLoads(),
+      getAdvisoryStore(),
+      getCalendarStore(),
+      getWorkplaceStore(),
+      openGradeBossDb(),
+    ]);
+    const profile = await getTeacherProfile(db);
+    setInsights(computeDashboardInsights(loads));
+    setWorkplace(
+      workplaceSnapshot({
+        loads,
+        schoolYear: profile?.schoolYear || loads[0]?.schoolYear || "2026-2027",
+        currentTerm: profile?.currentTerm || "1",
+        currentLoadId: profile?.currentTeachingLoadId,
+        workplace: workStore,
+        advisory,
+        schoolClasses: listClasses(),
+        calendarEvents: calendar.events,
+        calendarFilters: calendar.filters,
+      }),
+    );
+    setError(null);
   }, []);
+
+  useEffect(() => {
+    void loadDashboard().catch((err: unknown) => {
+      setError(err instanceof Error ? err.message : "Failed to load dashboard");
+    });
+  }, [loadDashboard]);
+
+  const navigate: WorkplaceNavigate = {
+    onOpenSheet,
+    onOpenAdvisory,
+    onOpenCalendar,
+    onOpenClasses,
+    onOpenLoads,
+  };
 
   if (error) {
     return (
@@ -100,10 +149,42 @@ export function DashboardView({
 
   return (
     <section>
-      <div className="page-header">
-        <h2>Dashboard</h2>
-        <p>DepEd completion, transmuted standings, and unfinished term work.</p>
-      </div>
+        <div className="page-header">
+          <h2>Dashboard</h2>
+          <p>Workplace tasks, official calendar, and DepEd completion for your teaching loads.</p>
+        </div>
+
+      {workplace && (
+        <WorkplacePanel
+          attention={workplace.attention}
+          upcoming={workplace.upcoming}
+          tasks={workplace.tasks}
+          onNavigate={navigate}
+          onAddTask={async (title, dueDate) => {
+            await addWorkplaceTask(title, dueDate);
+            await loadDashboard();
+          }}
+          onToggleTask={async (id) => {
+            await toggleWorkplaceTask(id);
+            await loadDashboard();
+          }}
+          onRemoveTask={async (id) => {
+            await removeWorkplaceTask(id);
+            await loadDashboard();
+          }}
+        />
+      )}
+
+      {workplace && (
+        <>
+          <h3 className="dash-section-title">Optimization analytics</h3>
+          <AnalyticsPanel
+            analytics={workplace.analytics}
+            currentTerm={workplace.currentTerm}
+            onOpenSheet={onOpenSheet}
+          />
+        </>
+      )}
 
       {onOpenAdvisory && (
         <div className="card advisory-dash-card">

@@ -11,7 +11,7 @@
 | **Last updated** | 2026-09-06 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 9–10 complete — Phase 11 next |
+| **Overall status** | ✅ Phase 12 complete — Phase 11 next |
 | **Active phase** | 11 (Teacher tools & classroom suite) |
 
 ---
@@ -56,13 +56,13 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 | Area | Scope |
 | --- | --- |
 | **Auth** | Google OAuth (`@deped.gov.ph`), offline profile cache |
-| **Storage** | IndexedDB schema v2 (`teachingLoads`, profile, legacy gradebook, advisory); `localStorage` kept as SF1 history + migration source |
+| **Storage** | IndexedDB schema v3 (`teachingLoads`, profile, legacy gradebook, advisory, calendar, workplace); `localStorage` kept as SF1 history + migration source |
 | **SF1** | Import links to matching teaching-load rosters (grade + section + SY) |
 | **Gradebook** | DepEd teaching loads + score grid (WW/PT/ST/TE, terms, transmutation); G1–12 |
 | **Advisory** | One active class per SY, grade matrix, GA (MAPEH once), GTF v1.0 export/import |
-| **Views** | Dashboard, Advisory, Attendance, Classes, Students, Loads, Sheet, Plans (backup), Profile |
+| **Views** | Dashboard, Calendar, Advisory, Attendance, Classes, Students, Loads, Sheet, Checklist, Plans (backup), Profile |
 | **Exports** | CSV, JSON backup, DepEd ECR Excel, class-record / learner / completion / analysis / advisory / SF2 PDFs |
-| **PWA** | Vite + Workbox, offline banner, install prompt; `/templates/` CacheFirst for optional ECR overlay |
+| **PWA** | Vite + Workbox, offline banner, install prompt; `/templates/` and `/data/` CacheFirst for ECR overlay + official calendar JSON |
 | **UI** | Material-inspired flat + elevation, light/dark/system themes |
 | **Planning** | Sync bridge spec (`planning/sync-bridge-spec.md`), pricing page |
 
@@ -122,7 +122,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 9 | Excel & PDF reports | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #12](https://github.com/jerniqz-del/gradeboss/pull/12) |
 | 10 | Performance checklist & quick grade | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #13](https://github.com/jerniqz-del/gradeboss/pull/13) |
 | 11 | Teacher tools & classroom suite | ⬜ Not started | — | — | |
-| 12 | Calendar & workplace dashboard | ⬜ Not started | — | — | |
+| 12 | Calendar & workplace dashboard | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #15](https://github.com/jerniqz-del/gradeboss/pull/15) |
 | 13 | Encrypted backup, sync bridge & mobile | ⬜ Not started | — | — | |
 | 14 | Help center, polish & release parity | ⬜ Not started | — | — | |
 
@@ -505,7 +505,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 12 — Calendar & workplace dashboard
+### Phase 12 — Calendar & workplace dashboard ✅
 
 **Goal:** School calendar integration and task-oriented dashboard.
 
@@ -513,21 +513,21 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 **Work items:**
 
-1. Import `deped-calendar.json` from E-Class Record `data/` (official holidays/events).
-2. Local events + learner birthdays (Feb 29 handling).
-3. Calendar view with class-scoped filters.
-4. Dashboard workplace panel: pending imports, missing grades, advisory conflicts.
-5. Dashboard optimization analytics (component performance insights).
+1. [x] Import official DepEd calendar pack (SY 2026–2027 DO 9 dates; `deped-calendar.json` published for PWA cache).
+2. [x] Local events + learner birthdays (Feb 29 → Feb 28 in non-leap years).
+3. [x] Calendar view with official / local / birthday + class-scoped filters.
+4. [x] Dashboard workplace panel: pending imports, missing grades, advisory conflicts.
+5. [x] Dashboard optimization analytics (score coverage + WW/PT/exam mix).
 
-**E-Class Record reference:** `calendar.js`, `calendar-*.js`, `dashboard-workplace*.js`
+**E-Class Record reference:** `official-calendar-pack.js`, `dashboard-workplace.js` (desktop `calendar.js` is obfuscated)
 
 **Deliverables:**
-- Calendar view
-- Enhanced dashboard task list
+- [x] Calendar view (`features/calendar/`, `domain/calendar/`)
+- [x] Enhanced dashboard workplace + analytics (`features/dashboard/WorkplacePanel.tsx`, `AnalyticsPanel.tsx`)
 
 **Acceptance tests:**
-- Official DepEd dates display for current SY
-- Birthday indicators appear for roster birthdates
+- [x] Official DepEd dates display for current SY (Term 1 starts 2026-06-08; Independence Day 2026-06-12)
+- [x] Birthday indicators appear for roster birthdates (Feb 29 observed on Feb 28)
 
 **Exit criteria:** Calendar and workplace tasks visible on dashboard.
 
@@ -688,6 +688,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-06 | 9 | Phase 9 complete — DepEd ECR Excel, class/learner/completion/analysis/advisory PDFs | Agent |
 | 2026-09-06 | 10 | Started Phase 10 — performance checklist & quick grade | Agent |
 | 2026-09-06 | 10 | Phase 10 complete — checklist publish to WW/PT, quick grade, undo/redo, score transfer | Agent |
+| 2026-09-06 | 12 | Started Phase 12 — calendar & workplace dashboard | Agent |
+| 2026-09-06 | 12 | Phase 12 complete — official DepEd calendar, birthdays, workplace + analytics | Agent |
 
 ### How to update when a phase finishes
 
@@ -722,6 +724,7 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | 15 phases (0–14) | Groups work into shippable increments without multi-month blocks |
 | 2026-09-05 | Port desktop procedural SVG avatars instead of 100 PNG files | Matches eclassrecord `learner-avatars.js`; keeps PWA cache small and works offline |
 | 2026-09-06 | Generate DepEd ECR workbook from the official cell map instead of bundling `Templates.xlsx` (1.3MB) | Protects PWA cache size; optional `/templates/ecr.xlsx` overlay with CacheFirst |
+| 2026-09-06 | Port official calendar from `official-calendar-pack.js`, not conflicted `data/deped-calendar.json` | Source JSON is an unresolved quarter-based draft; DO 9 s. 2026 pack is authoritative |
 
 ---
 
