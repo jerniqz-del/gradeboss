@@ -12,8 +12,10 @@ import { LearnerAvatar } from "../roster/LearnerAvatar";
 
 export function DashboardView({
   onOpenSheet,
+  onOpenAdvisory,
 }: {
   onOpenSheet: (loadId: string) => void;
+  onOpenAdvisory?: () => void;
 }) {
   const [insights, setInsights] = useState<DashboardInsights | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +66,17 @@ export function DashboardView({
         <div className="card empty-state">
           <p className="muted">Create a teaching load to see completion, class averages, and pending tasks.</p>
         </div>
+        {onOpenAdvisory && (
+          <div className="card advisory-dash-card">
+            <div>
+              <h3>Advisory Class</h3>
+              <p className="muted">Set up your advisory section even before teaching loads exist.</p>
+            </div>
+            <button type="button" className="primary" onClick={onOpenAdvisory}>
+              Open Advisory
+            </button>
+          </div>
+        )}
       </section>
     );
   }
@@ -91,6 +104,18 @@ export function DashboardView({
         <h2>Dashboard</h2>
         <p>DepEd completion, transmuted standings, and unfinished term work.</p>
       </div>
+
+      {onOpenAdvisory && (
+        <div className="card advisory-dash-card">
+          <div>
+            <h3>Advisory Class</h3>
+            <p className="muted">Consolidate finals and import Grade Transfer Files for one section.</p>
+          </div>
+          <button type="button" className="primary" onClick={onOpenAdvisory}>
+            Open Advisory
+          </button>
+        </div>
+      )}
 
       <div className="cards">
         {cards.map((card) => (

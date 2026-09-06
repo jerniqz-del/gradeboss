@@ -4,3 +4,4 @@ export * from "./assessment";
 export * from "./teaching-load";
 export * from "./teacher-profile";
 export * from "./legacy";
+export * from "./advisory";

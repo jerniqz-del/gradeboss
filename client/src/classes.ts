@@ -14,6 +14,10 @@ export interface SchoolClass extends Sf1Meta {
 
 const KEY = "gradeboss:classes";
 
+export function replaceClasses(next: SchoolClass[]): void {
+  persist(next);
+}
+
 export function listClasses(): SchoolClass[] {
   try {
     const raw = localStorage.getItem(KEY);
