@@ -2003,6 +2003,12 @@ button.ghost.back {
   text-align: center;
 }
 
+@media (min-width: 900px) {
+  .sheet-table tbody tr:hover td {
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  }
+}
+
 .sheet-table .sheet-group {
   text-align: center;
   background: var(--surface-2);
