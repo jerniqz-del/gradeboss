@@ -99,6 +99,7 @@ export function SignIn({
           </div>
         </div>
         <h2>Local profile or DepEd sign-in</h2>
+        <p className="muted small">Build: main · local-profile</p>
         <p className="muted">
           Use a local profile to stay fully offline. GradeBoss saves the database in{" "}
           <code>Documents/ecrecord_users_local</code>.
