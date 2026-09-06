@@ -125,3 +125,27 @@ export function calculateGeneralAverage(
 export function formatGeneralAverage(value: number | null): string {
   return value === null ? "—" : value.toFixed(2);
 }
+
+export interface GradeRecordSubject extends AdvisorySubject {
+  derived?: boolean;
+}
+
+/** Insert a derived MAPEH Average column before Music & Arts / PE & Health. */
+export function subjectGroupsForGradeRecord(subjects: AdvisorySubject[]): GradeRecordSubject[] {
+  const ordered: GradeRecordSubject[] = subjects
+    .filter((subject) => !subject.isArchived)
+    .sort((a, b) => a.displayOrder - b.displayOrder)
+    .map((subject) => ({ ...subject, derived: false }));
+  const components = mapehComponents(ordered);
+  if (!components) return ordered;
+  const first = ordered.findIndex(
+    (subject) => subject.id === components.musicArts.id || subject.id === components.peHealth.id,
+  );
+  ordered.splice(Math.max(first, 0), 0, {
+    ...components.musicArts,
+    id: MAPEH_AVERAGE_ID,
+    subjectName: "MAPEH Average",
+    derived: true,
+  });
+  return ordered;
+}

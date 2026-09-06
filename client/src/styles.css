@@ -2002,6 +2002,51 @@ button.ghost.back {
   flex: 1 1 160px;
 }
 
+.sheet-export-wrap {
+  margin: var(--space-4) 0;
+}
+
+.sheet-export-wrap .sheet-export {
+  margin: 0;
+}
+
+.report-menu {
+  position: relative;
+  flex: 1 1 160px;
+}
+
+.report-menu > summary {
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.report-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.report-menu-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.report-menu-panel .ghost {
+  width: 100%;
+  flex: 0 0 auto;
+  justify-content: flex-start;
+}
+
 .backup-card h4 {
   margin: 0 0 var(--space-3);
 }
@@ -2059,6 +2104,21 @@ button.ghost.back {
 
   .sheet-export .ghost {
     flex: 0 1 auto;
+  }
+
+  .report-menu {
+    flex: 0 1 auto;
+  }
+}
+
+@media (min-width: 900px) {
+  .report-menu-panel {
+    position: absolute;
+    z-index: 8;
+    min-width: min(280px, 80vw);
+    right: 0;
+    margin-top: var(--space-2);
+    box-shadow: var(--shadow-1);
   }
 }
 

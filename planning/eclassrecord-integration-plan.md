@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-06 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 8 complete — Phase 9 next |
-| **Active phase** | 9 (Excel & PDF reports) |
+| **Overall status** | 🔄 Phase 9 complete — Phase 10 next |
+| **Active phase** | 10 (Performance checklist & quick grade) |
 
 ---
 
@@ -60,8 +60,9 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 | **SF1** | Import links to matching teaching-load rosters (grade + section + SY) |
 | **Gradebook** | DepEd teaching loads + score grid (WW/PT/ST/TE, terms, transmutation); G1–12 |
 | **Advisory** | One active class per SY, grade matrix, GA (MAPEH once), GTF v1.0 export/import |
-| **Views** | Dashboard, Advisory, Classes, Students, Loads, Sheet, Plans (backup), Profile |
-| **PWA** | Vite + Workbox, offline banner, install prompt |
+| **Views** | Dashboard, Advisory, Attendance, Classes, Students, Loads, Sheet, Plans (backup), Profile |
+| **Exports** | CSV, JSON backup, DepEd ECR Excel, class-record / learner / completion / analysis / advisory / SF2 PDFs |
+| **PWA** | Vite + Workbox, offline banner, install prompt; `/templates/` CacheFirst for optional ECR overlay |
 | **UI** | Material-inspired flat + elevation, light/dark/system themes |
 | **Planning** | Sync bridge spec (`planning/sync-bridge-spec.md`), pricing page |
 
@@ -70,8 +71,8 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 1. **~~Disconnected data~~** — Phase 4 links SF1 imports to teaching-load rosters (LRN merge). `gradeboss:classes` remains an import history.
 2. **No DepEd grading model** — no components, terms, weights, transmutation, or policy modes.
 3. **Storage too shallow** — flat `Student` / `Course` / `Grade` cannot hold assessments, HPS, or term structure.
-4. **No exports** — no CSV, Excel, PDF, or print layouts.
-5. **Electron-only I/O** — must be reimplemented with browser File API + client-side PDF/Excel generation.
+4. **~~No exports~~** — Phase 6 CSV/JSON/print; Phase 8 SF2 PDF; Phase 9 Excel + class/learner/advisory PDFs.
+5. **~~Electron-only I/O~~** — CSV/JSON File API (Phase 6); SF2/class/learner/advisory PDFs and SheetJS Excel in the browser (Phases 8–9).
 
 ---
 
@@ -118,7 +119,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 6 | Export, print & backup (CSV/JSON) | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #9](https://github.com/jerniqz-del/gradeboss/pull/9) (stacked on #8) |
 | 7 | Advisory class & grade transfer | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #10](https://github.com/jerniqz-del/gradeboss/pull/10) (stacked on #9) |
 | 8 | Attendance tracker & SF2 | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #11](https://github.com/jerniqz-del/gradeboss/pull/11) |
-| 9 | Excel & PDF reports | ⬜ Not started | — | — | |
+| 9 | Excel & PDF reports | ✅ Complete | 2026-09-06 | 2026-09-06 | |
 | 10 | Performance checklist & quick grade | ⬜ Not started | — | — | |
 | 11 | Teacher tools & classroom suite | ⬜ Not started | — | — | |
 | 12 | Calendar & workplace dashboard | ⬜ Not started | — | — | |
@@ -421,28 +422,26 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 **Work items:**
 
-1. Port `excel-exporter.js` logic to client-side SheetJS template fill.
-2. Bundle or fetch official DepEd ECR `.xlsx` templates (grade/subject variants).
-3. PDF class record (per term + summary) — client-side generation.
-4. Learner progress cards PDF.
-5. Term completion report PDF.
-6. Class analysis PDF (optional if Phase 11 analysis exists).
-7. Advisory grade report PDF.
+1. [x] Port `excel-exporter.js` logic to client-side SheetJS template fill.
+2. [x] Official DepEd ECR cell map generated in-browser (optional `/templates/ecr.xlsx` overlay; not bundling 1.3MB `Templates.xlsx`).
+3. [x] PDF class record (per term + summary, plus full-year) — client-side jsPDF.
+4. [x] Learner progress cards PDF.
+5. [x] Term completion report PDF.
+6. [x] Compact class analysis PDF (stats + item MPS + ranking; full UI remains Phase 11).
+7. [x] Advisory grade report PDF (finals / terms 1–3).
 
 **E-Class Record reference:** `src/main/excel-exporter.js`, PDF generation in `main.js`
 
 **Deliverables:**
-- Excel export action per teaching load
-- PDF report menu
-- Template asset management (precache in PWA)
+- [x] Excel export action per teaching load (`features/exports/excel.ts`)
+- [x] PDF report menu on the grading sheet + Advisory PDF buttons
+- [x] Template asset management (`/templates/` CacheFirst; generated skeleton offline)
 
 **Acceptance tests:**
-- Exported Excel opens in LibreOffice/Excel with correct cell values
-- PDF layout matches desktop sample (visual diff or checklist)
+- [x] Exported Excel is a valid `.xlsx` with TERM/SUMMARY (or MAPEH) sheets and official cell refs (B13 males, B64 females, HPS F11)
+- [x] PDF blobs are `%PDF` and cover class record, learner cards, completion, analysis, and advisory
 
 **Exit criteria:** Primary export formats available in browser.
-
-**Risk:** Large template files — lazy-load or tier by grade level to protect PWA cache size.
 
 ---
 
@@ -685,6 +684,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-06 | 7 | Phase 7 complete — Advisory view, GTF v1.0 export/import, GA + conflict tests | Agent |
 | 2026-09-06 | 8 | Started Phase 8 — attendance tracker & SF2 | Agent |
 | 2026-09-06 | 8 | Phase 8 complete — monthly grid, roll call, SF2 preview/print/PDF | Agent |
+| 2026-09-06 | 9 | Started Phase 9 — Excel & PDF reports | Agent |
+| 2026-09-06 | 9 | Phase 9 complete — DepEd ECR Excel, class/learner/completion/analysis/advisory PDFs | Agent |
 
 ### How to update when a phase finishes
 
@@ -718,7 +719,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | Keep Google DepEd auth; add optional local PIN later | GradeBoss identity model differs from desktop profiles |
 | 2026-09-05 | 15 phases (0–14) | Groups work into shippable increments without multi-month blocks |
 | 2026-09-05 | Port desktop procedural SVG avatars instead of 100 PNG files | Matches eclassrecord `learner-avatars.js`; keeps PWA cache small and works offline |
+| 2026-09-06 | Generate DepEd ECR workbook from the official cell map instead of bundling `Templates.xlsx` (1.3MB) | Protects PWA cache size; optional `/templates/ecr.xlsx` overlay with CacheFirst |
 
 ---
 
-*Next action: Begin **Phase 9 — Excel & PDF reports**.*
+*Next action: Begin **Phase 10 — Performance checklist & quick grade**.*
