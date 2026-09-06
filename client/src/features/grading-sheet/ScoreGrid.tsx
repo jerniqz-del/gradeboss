@@ -73,9 +73,9 @@ export function ScoreGrid({
     return Number.isFinite(n) && n >= 0 ? n : "";
   };
 
-  const renderGroup = (items: Assessment[], label: string) =>
+  const renderGroup = (items: Assessment[], label: string, kind: "ww" | "pt" | "qa") =>
     items.length === 0 ? null : (
-      <th colSpan={items.length} className="sheet-group">
+      <th colSpan={items.length} className={`sheet-group sheet-group--${kind}`}>
         {label}
       </th>
     );
@@ -92,10 +92,10 @@ export function ScoreGrid({
               Learner
             </th>
             <th rowSpan={2}>Sex</th>
-            {renderGroup(groups.ww, "Written Works")}
-            {renderGroup(groups.pt, "Performance Tasks")}
-            {renderGroup(groups.exam, "Quarterly Assessment")}
-            <th colSpan={3} className="sheet-group">
+            {renderGroup(groups.ww, "Written Works", "ww")}
+            {renderGroup(groups.pt, "Performance Tasks", "pt")}
+            {renderGroup(groups.exam, "Quarterly Assessment", "qa")}
+            <th colSpan={3} className="sheet-group sheet-group--ps">
               PS
             </th>
             <th className="sheet-group" rowSpan={2}>
@@ -110,11 +110,22 @@ export function ScoreGrid({
           </tr>
           <tr>
             {columns.map((col) => (
-              <th key={col.id}>{col.title}</th>
+              <th
+                key={col.id}
+                className={
+                  col.component === "WW"
+                    ? "sheet-col--ww"
+                    : col.component === "PT"
+                      ? "sheet-col--pt"
+                      : "sheet-col--qa"
+                }
+              >
+                {col.title}
+              </th>
             ))}
-            <th>WW</th>
-            <th>PT</th>
-            <th>Exam</th>
+            <th className="sheet-col--ww">WW</th>
+            <th className="sheet-col--pt">PT</th>
+            <th className="sheet-col--qa">Exam</th>
           </tr>
         </thead>
         <tbody>

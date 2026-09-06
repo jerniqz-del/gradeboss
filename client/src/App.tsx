@@ -317,7 +317,7 @@ export default function App() {
         onUploadBackup={(file) => void runUploadBackup(file)}
       />
 
-      <main className="content" style={{ zoom: zoom / 100 }}>
+      <main className="content content--view-transition" key={view} style={{ zoom: zoom / 100 }}>
         {error && <div className="banner error">{error}</div>}
 
         {view === "dashboard" && (
