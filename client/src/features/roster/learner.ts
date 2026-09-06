@@ -1,3 +1,5 @@
+import { pruneAttendanceForLearner } from "../../domain/attendance";
+import { emptyAttendance } from "../../models/attendance";
 import type { Learner } from "../../models/learner";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { Sex } from "../../models/types";
@@ -105,6 +107,7 @@ export function removeLearner(load: TeachingLoad, learnerId: string): TeachingLo
     ...load,
     learners: load.learners.filter((item) => item.id !== learnerId),
     scores: pruneScoresForLearner(load.scores, learnerId),
+    attendance: pruneAttendanceForLearner(load.attendance || emptyAttendance(), learnerId),
     updatedAt: new Date().toISOString(),
   };
 }

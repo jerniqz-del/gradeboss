@@ -79,6 +79,18 @@ export function createSampleTeachingLoad(): TeachingLoad {
     learners,
     assessments,
     scores,
+    attendance: {
+      sessions: ["2026-09-01", "2026-09-02", "2026-09-03", "2026-09-04"],
+      noClassDays: [{ date: "2026-09-07", reason: "School activity" }],
+      marks: {
+        "seed-learner-2|2026-09-02": "absent",
+        "seed-learner-1|2026-09-03": "tardy",
+        "seed-learner-3|2026-09-04": "excused",
+      },
+      excuseReasons: {
+        "seed-learner-3|2026-09-04": "Medical appointment",
+      },
+    },
     createdAt: now,
     updatedAt: now,
   };
