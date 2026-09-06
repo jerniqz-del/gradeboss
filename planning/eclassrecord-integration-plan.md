@@ -116,7 +116,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 4 | Roster operations & SF1 linking | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #7](https://github.com/jerniqz-del/gradeboss/pull/7) |
 | 5 | Term summary, pass/fail & dashboard | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #8](https://github.com/jerniqz-del/gradeboss/pull/8) |
 | 6 | Export, print & backup (CSV/JSON) | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #9](https://github.com/jerniqz-del/gradeboss/pull/9) (stacked on #8) |
-| 7 | Advisory class & grade transfer | ✅ Complete | 2026-09-06 | 2026-09-06 | Stacked on Phase 6 |
+| 7 | Advisory class & grade transfer | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #10](https://github.com/jerniqz-del/gradeboss/pull/10) (stacked on #9) |
 | 8 | Attendance tracker & SF2 | ⬜ Not started | — | — | |
 | 9 | Excel & PDF reports | ⬜ Not started | — | — | |
 | 10 | Performance checklist & quick grade | ⬜ Not started | — | — | |
