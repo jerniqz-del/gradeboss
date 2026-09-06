@@ -161,7 +161,10 @@ export function DashboardView({
   const performance = analytics?.componentPerformance;
   const current = loads.find((item) => item.id === workplace?.currentLoadId) || loads[0];
   const advisoryClass = advisory ? activeAdvisoryClass(advisory, workplace?.schoolYear || current?.schoolYear || "2026-2027") : undefined;
+  const classCount = workplace?.stats.classes ?? insights.loadCount;
   const learnerCount = workplace?.stats.learnerDisplay ?? insights.learnerCount;
+  const classWord = classCount === 1 ? "class" : "classes";
+  const learnerWord = learnerCount === 1 ? "learner" : "learners";
 
   return (
     <section className="dash-ecr">
@@ -172,7 +175,7 @@ export function DashboardView({
               {greetingFor()}, {firstName(teacherName)}.
             </h2>
             <p className="dash-welcome-kicker">
-              {workplace?.stats.classes ?? insights.loadCount} classes • {learnerCount} learners
+              {classCount} {classWord} • {learnerCount} {learnerWord}
             </p>
           </div>
           <div className="dash-welcome-controls">
@@ -232,7 +235,9 @@ export function DashboardView({
               <div>
                 <span className="stat-label">Assessments</span>
                 <span className="stat-value">{analytics.assessments}</span>
-                <span className="stat-hint">Across {workplace?.stats.classes ?? loads.length} active classes</span>
+                <span className="stat-hint">
+                  Across {classCount} active {classWord}
+                </span>
               </div>
             </div>
             <div className="card stat dash-stat dash-stat--blue">
@@ -344,7 +349,9 @@ export function DashboardView({
       <aside className="dash-rail">
         <div className="dash-rail-head">
           <h3>My Classes &amp; Advisory</h3>
-          <span className="muted">{loads.length} classes</span>
+          <span className="muted">
+            {loads.length} {loads.length === 1 ? "class" : "classes"}
+          </span>
         </div>
         <div className="card">
           <h3>Advisory Class</h3>
