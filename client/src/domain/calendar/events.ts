@@ -196,13 +196,13 @@ export function upcomingEvents(events: CalendarEvent[], today = todayIso(), limi
       const end = dateKey(event.endDate || event.date || event.startDate);
       return end >= today;
     })
-    .sort((a, b) => {
-      const aStart = dateKey(a.startDate || a.date);
-      const bStart = dateKey(b.startDate || b.date);
-      const aShow = aStart < today ? today : aStart;
-      const bShow = bStart < today ? today : bStart;
-      return aShow.localeCompare(bShow) || a.title.localeCompare(b.title);
+    .map((event) => {
+      const start = dateKey(event.startDate || event.date);
+      const end = dateKey(event.endDate || event.date || event.startDate) || start;
+      const ongoing = start < today && end >= today;
+      return { ...event, date: ongoing ? today : start };
     })
+    .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title))
     .slice(0, limit);
 }
 

@@ -203,7 +203,7 @@ export function CalendarView({
                 {upcoming.map((event) => (
                   <li key={event.id} className={`calendar-agenda-item calendar-agenda-item--${eventPillClass(event.type)}`}>
                     <button type="button" className="dash-link" onClick={() => setSelectedDate(event.startDate || event.date)}>
-                      <span className="calendar-agenda-date">{event.startDate || event.date}</span>
+                      <span className="calendar-agenda-date">{event.date || event.startDate}</span>
                       <span className="calendar-agenda-title">{event.title}</span>
                       <span className="muted small">{eventKindLabel(event.type)}</span>
                     </button>

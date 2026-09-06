@@ -3162,6 +3162,11 @@ button.ghost.back {
 .calendar-day-modal {
   max-height: min(90dvh, 40rem);
   overflow: auto;
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2);
+  padding: var(--space-4);
 }
 
 .calendar-day-events,

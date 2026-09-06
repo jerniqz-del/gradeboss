@@ -162,4 +162,12 @@ describe("calendar filters and month grid", () => {
     expect(upcoming[0].date <= upcoming[upcoming.length - 1].endDate).toBe(true);
     expect(upcoming.some((item) => item.title === "Chinese New Year")).toBe(true);
   });
+
+  it("shows ongoing multi-day events as today instead of their start date", () => {
+    const upcoming = upcomingEvents(officialEvents(), "2026-09-06", 8);
+    const term1 = upcoming.find((item) => item.title === "Term 1");
+    expect(term1?.date).toBe("2026-09-06");
+    expect(term1?.startDate).toBe("2026-06-08");
+    expect(term1?.endDate).toBe("2026-09-15");
+  });
 });

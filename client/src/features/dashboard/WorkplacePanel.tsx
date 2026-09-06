@@ -69,7 +69,7 @@ export function WorkplacePanel({
             {upcoming.map((event) => (
               <li key={event.id}>
                 <button type="button" className="dash-link" onClick={() => onNavigate.onOpenCalendar?.(event.startDate || event.date)}>
-                  <span className="calendar-agenda-date">{event.startDate || event.date}</span>
+                  <span className="calendar-agenda-date">{event.date || event.startDate}</span>
                   <span>{event.title}</span>
                 </button>
               </li>
