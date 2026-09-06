@@ -1,4 +1,5 @@
 import type { SchoolClass } from "../../classes";
+import type { AdvisoryStore } from "../../models/advisory";
 import type { LegacyGradebook } from "../../models/legacy";
 import type { TeacherProfile } from "../../models/teacher-profile";
 import type { TeachingLoad } from "../../models/teaching-load";
@@ -17,6 +18,7 @@ export interface BackupBundle {
   teachingLoads: TeachingLoad[];
   legacy: LegacyGradebook;
   schoolClasses: SchoolClass[];
+  advisory: AdvisoryStore;
 }
 
 export interface SealedBackup {

@@ -1052,10 +1052,13 @@ button.ghost.back {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .bottom-nav .tab {
-  flex: 1;
+  flex: 1 0 auto;
+  min-width: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1064,10 +1067,10 @@ button.ghost.back {
   background: none;
   border: none;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   cursor: pointer;
-  padding: var(--space-2) 2px;
+  padding: var(--space-2) 4px;
   min-height: 44px;
   transition: color 0.15s ease;
   border-radius: var(--radius-sm);
@@ -2056,6 +2059,135 @@ button.ghost.back {
 
   .sheet-export .ghost {
     flex: 0 1 auto;
+  }
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.advisory-dash-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.advisory-dash-card h3 {
+  margin: 0;
+}
+
+.advisory-dash-card .primary {
+  min-height: 44px;
+  width: 100%;
+}
+
+.advisory-matrix-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.advisory-matrix-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.advisory-matrix {
+  min-width: 640px;
+}
+
+.advisory-matrix th,
+.advisory-matrix td {
+  white-space: nowrap;
+}
+
+.advisory-matrix .advisory-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+  min-width: 148px;
+}
+
+.advisory-learner-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.advisory-learner-cell small {
+  display: block;
+  color: var(--muted);
+}
+
+.advisory-subject-compact {
+  display: inline;
+}
+
+.advisory-subject-full {
+  display: none;
+}
+
+.advisory-matrix .is-missing {
+  color: var(--muted);
+}
+
+.advisory-matrix .has-grade {
+  font-weight: 700;
+}
+
+.advisory-import-plan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.advisory-source-row {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.advisory-source-row:last-child {
+  border-bottom: none;
+}
+
+@media (min-width: 600px) {
+  .advisory-dash-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .advisory-dash-card .primary {
+    width: auto;
+  }
+
+  .advisory-matrix-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .advisory-subject-compact {
+    display: none;
+  }
+
+  .advisory-subject-full {
+    display: inline;
+  }
+}
+
+@media (min-width: 900px) {
+  .advisory-matrix {
+    min-width: 100%;
   }
 }
 

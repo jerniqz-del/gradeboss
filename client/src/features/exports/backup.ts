@@ -2,6 +2,8 @@ import { createDefaultProfile, type TeacherProfile } from "../../models/teacher-
 import type { LegacyGradebook } from "../../models/legacy";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { SchoolClass } from "../../classes";
+import { createEmptyAdvisoryStore, type AdvisoryStore } from "../../models/advisory";
+import { parseAdvisoryStore } from "../../domain/advisory/transfer";
 import { BACKUP_FORMAT, BACKUP_VERSION, type BackupBundle } from "./types";
 
 function asArray<T>(value: unknown): T[] {
@@ -36,6 +38,7 @@ export function buildBackupBundle(input: {
   teachingLoads: TeachingLoad[];
   legacy?: LegacyGradebook;
   schoolClasses?: SchoolClass[];
+  advisory?: AdvisoryStore;
   exportedAt?: string;
 }): BackupBundle {
   return {
@@ -46,6 +49,7 @@ export function buildBackupBundle(input: {
     teachingLoads: input.teachingLoads,
     legacy: input.legacy || { students: [], courses: [], grades: [] },
     schoolClasses: input.schoolClasses || [],
+    advisory: input.advisory || createEmptyAdvisoryStore(),
   };
 }
 
@@ -72,6 +76,7 @@ export function parseBackupBundle(value: unknown): BackupBundle {
     teachingLoads,
     legacy: asLegacy(item.legacy),
     schoolClasses: asArray<SchoolClass>(item.schoolClasses),
+    advisory: parseAdvisoryStore(item.advisory),
   };
 }
 
@@ -89,6 +94,12 @@ export function mergeBackupBundles(local: BackupBundle, incoming: BackupBundle):
   const classes = new Map(local.schoolClasses.map((row) => [row.id, row]));
   for (const row of incoming.schoolClasses) classes.set(row.id, row);
 
+  const mergeById = <T extends { id: string }>(localRows: T[], incomingRows: T[]): T[] => {
+    const map = new Map(localRows.map((row) => [row.id, row]));
+    for (const row of incomingRows) map.set(row.id, row);
+    return [...map.values()];
+  };
+
   return buildBackupBundle({
     profile: incoming.profile,
     teachingLoads: [...byId.values()],
@@ -98,6 +109,15 @@ export function mergeBackupBundles(local: BackupBundle, incoming: BackupBundle):
       grades: [...grades.values()],
     },
     schoolClasses: [...classes.values()],
+    advisory: {
+      schemaVersion: incoming.advisory.schemaVersion || local.advisory.schemaVersion,
+      classes: mergeById(local.advisory.classes, incoming.advisory.classes),
+      learners: mergeById(local.advisory.learners, incoming.advisory.learners),
+      subjects: mergeById(local.advisory.subjects, incoming.advisory.subjects),
+      grades: mergeById(local.advisory.grades, incoming.advisory.grades),
+      importBatches: mergeById(local.advisory.importBatches, incoming.advisory.importBatches),
+      sourceMappings: mergeById(local.advisory.sourceMappings, incoming.advisory.sourceMappings),
+    },
     exportedAt: incoming.exportedAt,
   });
 }

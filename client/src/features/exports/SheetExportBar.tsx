@@ -1,8 +1,12 @@
 import { Icon } from "../../Icon";
+import { buildGradeTransferFromLoad, gradeTransferFilename } from "../../domain/advisory";
+import { isMapehSubject } from "../../domain/grading";
+import { createDefaultProfile } from "../../models/teacher-profile";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { MapePart, Term } from "../../models/types";
+import { ensureStorageReady, getTeacherProfile } from "../../storage/init";
 import { buildSummaryCsv, buildTermGridCsv, csvFilename } from "./csv";
-import { downloadText } from "./download";
+import { downloadJson, downloadText } from "./download";
 import { printGradingSheet } from "./print";
 
 export function SheetExportBar({
@@ -23,6 +27,16 @@ export function SheetExportBar({
     downloadText(csvFilename(load, suffix), buildTermGridCsv(load, tab, mapePart), "text/csv");
   };
 
+  const exportTransfer = async () => {
+    if (tab === "summary") return;
+    const db = await ensureStorageReady();
+    const profile = (await getTeacherProfile(db)) || createDefaultProfile();
+    const payload = buildGradeTransferFromLoad(load, profile, tab, {
+      mapePart: isMapehSubject(load.subject) ? mapePart : undefined,
+    });
+    downloadJson(gradeTransferFilename(payload), payload);
+  };
+
   return (
     <div className="sheet-export no-print">
       <button type="button" className="ghost" onClick={downloadCurrent}>
@@ -35,6 +49,11 @@ export function SheetExportBar({
           onClick={() => downloadText(csvFilename(load, "summary"), buildSummaryCsv(load), "text/csv")}
         >
           <Icon name="download" /> Summary CSV
+        </button>
+      )}
+      {tab !== "summary" && (
+        <button type="button" className="ghost" onClick={() => void exportTransfer()}>
+          <Icon name="download" /> Grade Transfer JSON
         </button>
       )}
       <button type="button" className="ghost" onClick={printGradingSheet}>

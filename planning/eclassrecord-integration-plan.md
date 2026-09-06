@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-06 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 6 complete — Phase 7 next |
-| **Active phase** | 7 (Advisory class & grade transfer) |
+| **Overall status** | 🔄 Phase 7 complete — Phase 8 next |
+| **Active phase** | 8 (Attendance tracker & SF2) |
 
 ---
 
@@ -56,10 +56,11 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 | Area | Scope |
 | --- | --- |
 | **Auth** | Google OAuth (`@deped.gov.ph`), offline profile cache |
-| **Storage** | IndexedDB schema v1 (`teachingLoads`, profile, legacy gradebook); `localStorage` kept as SF1 history + migration source |
+| **Storage** | IndexedDB schema v2 (`teachingLoads`, profile, legacy gradebook, advisory); `localStorage` kept as SF1 history + migration source |
 | **SF1** | Import links to matching teaching-load rosters (grade + section + SY) |
 | **Gradebook** | DepEd teaching loads + score grid (WW/PT/ST/TE, terms, transmutation); G1–12 |
-| **Views** | Dashboard (DepEd completion), Classes, Students, Loads, Sheet, Plans (backup), Profile |
+| **Advisory** | One active class per SY, grade matrix, GA (MAPEH once), GTF v1.0 export/import |
+| **Views** | Dashboard, Advisory, Classes, Students, Loads, Sheet, Plans (backup), Profile |
 | **PWA** | Vite + Workbox, offline banner, install prompt |
 | **UI** | Material-inspired flat + elevation, light/dark/system themes |
 | **Planning** | Sync bridge spec (`planning/sync-bridge-spec.md`), pricing page |
@@ -115,7 +116,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 4 | Roster operations & SF1 linking | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #7](https://github.com/jerniqz-del/gradeboss/pull/7) |
 | 5 | Term summary, pass/fail & dashboard | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #8](https://github.com/jerniqz-del/gradeboss/pull/8) |
 | 6 | Export, print & backup (CSV/JSON) | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #9](https://github.com/jerniqz-del/gradeboss/pull/9) (stacked on #8) |
-| 7 | Advisory class & grade transfer | ⬜ Not started | — | — | |
+| 7 | Advisory class & grade transfer | ✅ Complete | 2026-09-06 | 2026-09-06 | Stacked on Phase 6 |
 | 8 | Attendance tracker & SF2 | ⬜ Not started | — | — | |
 | 9 | Excel & PDF reports | ⬜ Not started | — | — | |
 | 10 | Performance checklist & quick grade | ⬜ Not started | — | — | |
@@ -351,7 +352,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 7 — Advisory class & grade transfer
+### Phase 7 — Advisory class & grade transfer ✅
 
 **Goal:** Adviser dashboard with grade consolidation and offline exchange.
 
@@ -370,14 +371,14 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 **E-Class Record reference:** `advisory-*.js` (8 modules), `docs/grade-transfer-schema-v1.0.md`, `docs/advisory-class-guide.md`
 
 **Deliverables:**
-- Advisory view (new nav item)
-- Grade transfer import/export UI
-- GA computation tests
+- [x] Advisory view (new nav item)
+- [x] Grade transfer import/export UI
+- [x] GA computation tests
 
 **Acceptance tests:**
-- Subject teacher exports term finals → adviser imports → GA matches expected
-- Import conflict UI handles duplicate LRN grades
-- Round-trip JSON validates against schema v1.0
+- [x] Subject teacher exports term finals → adviser imports → GA matches expected
+- [x] Import conflict UI handles duplicate LRN grades
+- [x] Round-trip JSON validates against schema v1.0
 
 **Exit criteria:** Advisory workflow matches desktop core path.
 
@@ -680,6 +681,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | 5 | Phase 5 complete — year-result/insights domain, summary pass/fail, DepEd dashboard | Agent |
 | 2026-09-06 | 6 | Started Phase 6 — export, print & backup | Agent |
 | 2026-09-06 | 6 | Phase 6 complete — CSV term/summary, JSON backup replace/merge, optional PIN, print CSS | Agent |
+| 2026-09-06 | 7 | Started Phase 7 — advisory class & grade transfer | Agent |
+| 2026-09-06 | 7 | Phase 7 complete — Advisory view, GTF v1.0 export/import, GA + conflict tests | Agent |
 
 ### How to update when a phase finishes
 
@@ -716,4 +719,4 @@ Append a row when a phase status changes. **Do not delete entries.**
 
 ---
 
-*Next action: Begin **Phase 7 — Advisory class & grade transfer**.*
+*Next action: Begin **Phase 8 — Attendance tracker & SF2**.*

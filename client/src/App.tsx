@@ -21,6 +21,7 @@ import { Avatar, Profile } from "./Profile";
 import { SignIn } from "./SignIn";
 import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "./useTheme";
+import { AdvisoryView } from "./features/advisory/AdvisoryView";
 import { DashboardView } from "./features/dashboard/DashboardView";
 import { BackupPanel } from "./features/exports/BackupPanel";
 import { TeachingLoadsView } from "./features/teaching-loads/TeachingLoadsView";
@@ -28,6 +29,7 @@ import { GradingSheetView } from "./features/grading-sheet/GradingSheetView";
 
 type View =
   | "dashboard"
+  | "advisory"
   | "classes"
   | "students"
   | "loads"
@@ -37,6 +39,7 @@ type View =
 
 const NAV: Array<{ id: View; label: string; icon: string }> = [
   { id: "dashboard", label: "Dashboard", icon: "chart" },
+  { id: "advisory", label: "Advisory", icon: "clipboard" },
   { id: "classes", label: "Classes", icon: "board" },
   { id: "students", label: "Students", icon: "users" },
   { id: "loads", label: "Loads", icon: "book" },
@@ -220,8 +223,10 @@ export default function App() {
               setSelectedLoadId(id);
               setView("sheet");
             }}
+            onOpenAdvisory={() => setView("advisory")}
           />
         )}
+        {view === "advisory" && <AdvisoryView />}
         {view === "classes" && <Classes />}
         {view === "students" && (
           <Students students={students} onChange={refresh} />
