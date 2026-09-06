@@ -8,11 +8,12 @@ import { cloneRosterOntoLoad } from "./clone";
 import { addCsvLearnersToLoad } from "./csv";
 import { LearnerAvatar } from "./LearnerAvatar";
 import { LearnerForm } from "./LearnerForm";
-import { removeLearner, upsertLearner } from "./learner";
+import { upsertLearner } from "./learner";
 import { attachSf1RosterToLoad } from "./sf1-link";
 import { sortDepEdRoster } from "./sort";
 import { transferableLoads, transferLearnerBetweenLoads } from "./transfer";
 import { assignRoster } from "./avatars";
+import { learnerNameCaps } from "../shell/labels";
 
 type PanelMode = "list" | "add" | "edit" | "csv" | "clone" | "transfer";
 
@@ -21,7 +22,7 @@ export function RosterPanel({
   loads,
   onChange,
   onChangeMany,
-  onBack,
+  onBack: _onBack,
   onOpenSheet,
 }: {
   load: TeachingLoad;
@@ -123,51 +124,16 @@ export function RosterPanel({
 
   return (
     <section>
-      <button className="ghost back" onClick={onBack}>
-        <Icon name="arrow-left" /> All loads
-      </button>
-      <div className="page-header">
-        <h2>
-          G{load.gradeLevel} {load.section} roster
-        </h2>
-        <p>
-          {load.subject} · SY {load.schoolYear}. Male block, then female — DepEd order.
-        </p>
-      </div>
-
       {error && <div className="banner error">{error}</div>}
       {csvNotice && <div className="banner warn">{csvNotice}</div>}
 
-      <div className="sex-chips">
-        <span className="chip">{learners.length} learners</span>
-        <span className="chip male">{males} male</span>
-        <span className="chip female">{females} female</span>
-      </div>
-
-      <div className="roster-actions">
-        <button type="button" className="primary" onClick={() => { setEditing(null); setMode("add"); }}>
-          Add learner
-        </button>
-        <button type="button" className="ghost" disabled={busy} onClick={() => fileRef.current?.click()}>
-          <Icon name="upload" /> {busy ? "Reading…" : "Import SF1"}
-        </button>
-        <button type="button" className="ghost" onClick={() => setMode("csv")}>
-          Paste CSV
-        </button>
-        <button type="button" className="ghost" onClick={() => setMode("clone")} disabled={cloneSources.length === 0}>
-          Clone roster
-        </button>
-        <button type="button" className="ghost" onClick={onOpenSheet}>
-          Open sheet
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".xls,.xlsx,.csv"
-          hidden
-          onChange={(e) => void onSf1(e)}
-        />
-      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".xls,.xlsx,.csv"
+        hidden
+        onChange={(e) => void onSf1(e)}
+      />
 
       {mode === "add" || mode === "edit" ? (
         <div className="card">
@@ -277,15 +243,51 @@ export function RosterPanel({
       )}
 
       <div className="card">
-        <div className="roster-head">
-          <h3>Learners ({filtered.length})</h3>
-          <input
-            className="roster-search"
-            placeholder="Search name or LRN"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+        <div className="roster-card-head">
+          <div>
+            <h3>Class Roster</h3>
+            <p className="muted small">
+              {learners.length} learners · {males} male · {females} female · DepEd name order
+            </p>
+          </div>
+          <div className="roster-page-actions">
+            <button type="button" className="primary" onClick={() => { setEditing(null); setMode("add"); }}>
+              + Add Learner
+            </button>
+            <button
+              type="button"
+              className="ghost btn-olive"
+              onClick={() => void persist({ ...load, learners: assignRoster(sortDepEdRoster(load.learners)), updatedAt: new Date().toISOString() })}
+            >
+              Sort Roster
+            </button>
+            <button
+              type="button"
+              className="ghost btn-danger"
+              onClick={() => {
+                if (!window.confirm("Clear every learner from this class?")) return;
+                void persist({ ...load, learners: [], updatedAt: new Date().toISOString() });
+              }}
+            >
+              Clear All
+            </button>
+            <button type="button" className="ghost" disabled={busy} onClick={() => fileRef.current?.click()}>
+              <Icon name="upload" /> {busy ? "Reading…" : "Import SF1"}
+            </button>
+            <button type="button" className="ghost" onClick={() => setMode("csv")}>
+              Paste CSV
+            </button>
+            <button type="button" className="ghost" onClick={() => setMode("clone")} disabled={cloneSources.length === 0}>
+              Clone roster
+            </button>
+          </div>
         </div>
+        <input
+          className="roster-search"
+          placeholder="Search name or LRN"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
         <div className="table-scroll">
           <table className="roster-table">
             <thead>
@@ -308,7 +310,7 @@ export function RosterPanel({
                   </td>
                   <td className="muted">{learner.lrn || "—"}</td>
                   <td>
-                    {learnerDisplayName(learner)}
+                    {learnerNameCaps(learnerDisplayName(learner))}
                     {learner.transferredOutTerm ? (
                       <span className="pill">T/O T{learner.transferredOutTerm}</span>
                     ) : null}
@@ -318,19 +320,12 @@ export function RosterPanel({
                   <td className="muted">{learner.birthdate || "—"}</td>
                   <td>
                     <div className="row-actions">
-                      <button
-                        type="button"
-                        className="ghost small"
-                        onClick={() => {
-                          setEditing(learner);
-                          setMode("edit");
-                        }}
-                      >
-                        Edit
+                      <button type="button" className="ghost small row-btn" onClick={onOpenSheet}>
+                        Export
                       </button>
                       <button
                         type="button"
-                        className="ghost small"
+                        className="ghost small row-btn btn-olive"
                         disabled={transferTargets.length === 0}
                         onClick={() => {
                           setEditing(learner);
@@ -342,13 +337,13 @@ export function RosterPanel({
                       </button>
                       <button
                         type="button"
-                        className="ghost danger small"
+                        className="ghost small row-btn btn-danger"
                         onClick={() => {
-                          if (!window.confirm(`Remove ${learnerDisplayName(learner)} from this roster?`)) return;
-                          void persist(removeLearner(load, learner.id));
+                          setEditing(learner);
+                          setMode("edit");
                         }}
                       >
-                        Remove
+                        Manage
                       </button>
                     </div>
                   </td>

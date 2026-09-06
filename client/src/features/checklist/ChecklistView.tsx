@@ -25,7 +25,7 @@ import {
 import { isMapehSubject } from "../../domain/grading";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { MapePart, Term } from "../../models/types";
-import { policyLabel } from "../teaching-loads/create-load";
+import { ActiveClassBar } from "../shell/ActiveClassBar";
 import { AddActivityForm } from "./AddActivityForm";
 import { BulkMarkModal } from "./BulkMarkModal";
 import { ChecklistGrid } from "./ChecklistGrid";
@@ -174,41 +174,63 @@ export function ChecklistView({
   const sessions = checklist ? visibleSessions(checklist) : [];
   const publishable = sessions.find((session) => session.activity && session.activity.destinationComponent !== "TRACKING");
 
+  const types = checklist?.criteria?.length || 3;
+  const available = sessions.length;
+
   return (
     <section className="chk-page">
-      <div className="page-header">
-        <h2>Performance checklist</h2>
-        <p>Mark recitation, notebook, and custom activities, then publish totals into WW or PT columns. Works offline.</p>
-      </div>
-
       {error && <div className="banner error">{error}</div>}
       {notice && <div className="banner ok">{notice}</div>}
 
-      <div className="sheet-toolbar">
-        <label>
-          Teaching load
-          <select value={load?.id || ""} onChange={(event) => onSelectLoad(event.target.value)}>
-            {loads.map((item) => (
-              <option key={item.id} value={item.id}>
-                G{item.gradeLevel} {item.section} — {item.subject}
-              </option>
-            ))}
+      <ActiveClassBar loads={loads} selectedId={load?.id || ""} onSelect={onSelectLoad}>
+        <label className="ecr-active-label">
+          Term
+          <select value={term} onChange={(event) => setTerm(event.target.value as Term)}>
+            <option value="1">Term 1</option>
+            <option value="2">Term 2</option>
+            <option value="3">Term 3</option>
           </select>
         </label>
-        {load && (
-          <div className="form-preview">
-            <span className="pill">{policyLabel(load.policy)}</span>
-            <span className="pill">{load.learners.length} learners</span>
-          </div>
-        )}
-      </div>
+      </ActiveClassBar>
 
-      <div className="sheet-tabs" role="tablist" aria-label="Term">
-        {(["1", "2", "3"] as const).map((id) => (
-          <button key={id} type="button" role="tab" aria-selected={term === id} className={term === id ? "sheet-tab active" : "sheet-tab"} onClick={() => setTerm(id)}>
-            Term {id}
-          </button>
-        ))}
+      <div className="chk-info-grid">
+        <div className="card chk-info">
+          <h3>Performance Checklist</h3>
+          <p className="muted">{types} checklist types</p>
+          <p className="muted">{available} available checklists</p>
+          <p className="muted">{load?.learners.length || 0} active learners</p>
+        </div>
+        <div className="card chk-info">
+          <h3>Quick Actions</h3>
+          <div className="roster-page-actions">
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => {
+                try {
+                  if (!checklist) return;
+                  void applyChecklist(undoLastChecklistEntryChange(checklist));
+                  setNotice("Undid the last checklist change.");
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Nothing to undo.");
+                }
+              }}
+            >
+              Undo entry
+            </button>
+            <button type="button" className="ghost" disabled={!publishable} onClick={() => setPublishActivityId(publishable?.activity?.id || publishable?.id || null)}>
+              Review Grade Contributions
+            </button>
+          </div>
+        </div>
+        <div className="card chk-info chk-info--green">
+          <h3>Choose Checklist to Conduct</h3>
+          <p className="muted">Select one checklist before recording learner results.</p>
+        </div>
+        <div className="card chk-info chk-info--blue">
+          <h3>Saved Status</h3>
+          <p className="muted">Saved locally. Official grades remain unchanged until you publish.</p>
+        </div>
       </div>
 
       {mapeh && (

@@ -86,10 +86,6 @@ export function CalendarView({
 
   return (
     <section className="calendar-page">
-      <div className="page-header">
-        <h2>Calendar</h2>
-        <p>Official DepEd dates, local events, and learner birthdays for {schoolYear}.</p>
-      </div>
       {error && <div className="banner error">{error}</div>}
 
       <div className="calendar-toolbar">
@@ -101,9 +97,7 @@ export function CalendarView({
           <button type="button" className="ghost" aria-label="Next month" onClick={() => setMonth(shiftMonth(month, 1))}>
             ›
           </button>
-          <button type="button" className="ghost" onClick={() => setMonth(monthValue())}>
-            Today
-          </button>
+          <span className="calendar-status-pill">Local calendar active</span>
         </div>
         <div className="calendar-filters">
           <label className="checkbox-row">
@@ -130,6 +124,14 @@ export function CalendarView({
             />
             Birthdays
           </label>
+          <label className="checkbox-row">
+            <input
+              type="checkbox"
+              checked={filters.birthdays}
+              onChange={(event) => void updateFilters({ birthdays: event.target.checked })}
+            />
+            Birthday alerts
+          </label>
           <label className="calendar-load-filter">
             <span className="muted small">Class</span>
             <select
@@ -151,7 +153,9 @@ export function CalendarView({
         <div className="card calendar-card">
           <div className="calendar-weekdays" aria-hidden="true">
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-              <span key={day}>{day}</span>
+              <span key={day} className={day === "Sun" ? "cal-sun" : day === "Sat" ? "cal-sat" : undefined}>
+                {day}
+              </span>
             ))}
           </div>
           <div className="calendar-grid" role="grid" aria-label={formatMonthLabel(month)}>
@@ -195,7 +199,7 @@ export function CalendarView({
 
         <aside className="calendar-sidebar">
           <div className="card">
-            <h3>Upcoming</h3>
+            <h3>Upcoming Events</h3>
             {upcoming.length === 0 ? (
               <p className="muted">No upcoming events in the current filters.</p>
             ) : (
@@ -213,7 +217,7 @@ export function CalendarView({
             )}
           </div>
           <div className="card calendar-summary-card">
-            <h3>This month</h3>
+            <h3>Calendar Summary</h3>
             <ul className="calendar-summary">
               <li>
                 <span>Official holidays</span>
@@ -233,8 +237,18 @@ export function CalendarView({
               </li>
             </ul>
           </div>
+          <div className="card">
+            <h3>Keep your calendar updated</h3>
+            <p className="muted small">Official DepEd dates stay on this device. Sync after your school marks Cloudflare ready.</p>
+            <button type="button" className="primary" onClick={() => void refresh()}>
+              Sync Now
+            </button>
+          </div>
         </aside>
       </div>
+      <button type="button" className="calendar-fab" aria-label="Add event" onClick={() => setSelectedDate(today)}>
+        <Icon name="plus" />
+      </button>
 
       {selectedDate && (
         <DayModal

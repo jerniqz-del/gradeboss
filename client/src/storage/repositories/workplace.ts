@@ -1,6 +1,7 @@
 import {
   createWorkplaceTaskId,
   type WorkplaceContext,
+  type WorkplacePreferences,
   type WorkplaceStore,
   type WorkplaceTask,
 } from "../../models/workplace";
@@ -50,6 +51,14 @@ export async function removeWorkplaceTask(taskId: string): Promise<boolean> {
   if (next.length === store.tasks.length) return false;
   await saveWorkplaceStore({ ...store, tasks: next });
   return true;
+}
+
+export async function updateWorkplacePreferences(
+  patch: Partial<WorkplacePreferences>,
+): Promise<WorkplaceStore> {
+  const store = await getWorkplaceStore();
+  store.preferences = { ...store.preferences, ...patch };
+  return saveWorkplaceStore(store);
 }
 
 export async function rememberWorkplaceContext(context: Partial<WorkplaceContext>): Promise<WorkplaceStore> {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import { api } from "../../api";
 import { listClasses } from "../../classes";
 import {
@@ -17,12 +17,20 @@ import {
   removeWorkplaceTask,
   toggleWorkplaceTask,
 } from "../../storage/repositories/workplace";
-import { getTeacherProfile } from "../../storage/init";
+import { getTeacherProfile, saveTeacherProfile } from "../../storage/init";
 import { openGradeBossDb } from "../../storage/db";
-import { completionTone, gradeTone } from "../grading-sheet/grade-tone";
+import { createDefaultProfile } from "../../models/teacher-profile";
+import type { Term } from "../../models/types";
+import { rememberWorkplaceContext, updateWorkplacePreferences } from "../../storage/repositories/workplace";
+import { persistLocalDatabase } from "../../storage/local-profile";
+import { notifyWorkspaceChanged } from "../shell/chrome";
+import { classOptionLabel, classTitle, countSex, firstName, greetingFor } from "../shell/labels";
+import { gradeTone } from "../grading-sheet/grade-tone";
 import { LearnerAvatar } from "../roster/LearnerAvatar";
-import { AnalyticsPanel } from "./AnalyticsPanel";
 import { WorkplacePanel, type WorkplaceNavigate } from "./WorkplacePanel";
+import { activeAdvisoryClass } from "../../domain/advisory";
+import type { AdvisoryStore } from "../../models/advisory";
+import type { TeachingLoad } from "../../models/teaching-load";
 
 export function DashboardView({
   onOpenSheet,
@@ -39,10 +47,13 @@ export function DashboardView({
 }) {
   const [insights, setInsights] = useState<DashboardInsights | null>(null);
   const [workplace, setWorkplace] = useState<WorkplaceSnapshot | null>(null);
+  const [loads, setLoads] = useState<TeachingLoad[]>([]);
+  const [advisory, setAdvisory] = useState<AdvisoryStore | null>(null);
+  const [teacherName, setTeacherName] = useState("teacher");
   const [error, setError] = useState<string | null>(null);
 
   const loadDashboard = useCallback(async () => {
-    const [loads, advisory, calendar, workStore, db] = await Promise.all([
+    const [nextLoads, nextAdvisory, calendar, workStore, db] = await Promise.all([
       api.getTeachingLoads(),
       getAdvisoryStore(),
       getCalendarStore(),
@@ -50,15 +61,18 @@ export function DashboardView({
       openGradeBossDb(),
     ]);
     const profile = await getTeacherProfile(db);
-    setInsights(computeDashboardInsights(loads));
+    setLoads(nextLoads);
+    setAdvisory(nextAdvisory);
+    setTeacherName(profile?.teacherName || "teacher");
+    setInsights(computeDashboardInsights(nextLoads));
     setWorkplace(
       workplaceSnapshot({
-        loads,
-        schoolYear: profile?.schoolYear || loads[0]?.schoolYear || "2026-2027",
+        loads: nextLoads,
+        schoolYear: profile?.schoolYear || nextLoads[0]?.schoolYear || "2026-2027",
         currentTerm: profile?.currentTerm || "1",
         currentLoadId: profile?.currentTeachingLoadId,
         workplace: workStore,
-        advisory,
+        advisory: nextAdvisory,
         schoolClasses: listClasses(),
         calendarEvents: calendar.events,
         calendarFilters: calendar.filters,
@@ -66,6 +80,18 @@ export function DashboardView({
     );
     setError(null);
   }, []);
+
+  const persistContext = async (loadId: string, term: Term) => {
+    const db = await openGradeBossDb();
+    const profile = (await getTeacherProfile(db)) || createDefaultProfile();
+    profile.currentTeachingLoadId = loadId;
+    profile.currentTerm = term;
+    await saveTeacherProfile(db, profile);
+    await rememberWorkplaceContext({ assignmentId: loadId, term });
+    await persistLocalDatabase();
+    notifyWorkspaceChanged();
+    await loadDashboard();
+  };
 
   useEffect(() => {
     void loadDashboard().catch((err: unknown) => {
@@ -130,131 +156,250 @@ export function DashboardView({
     );
   }
 
-  const cards = [
-    { label: "Teaching loads", value: insights.loadCount, hint: insights.loadCount === 1 ? "active subject" : "active subjects" },
-    { label: "Learners", value: insights.learnerCount, hint: `${insights.enrollmentCount} enrollments` },
-    {
-      label: "Completion",
-      value: `${insights.overallCompletion}%`,
-      hint: `${insights.missingScores} missing scores`,
-      accent: completionTone(insights.overallCompletion),
-    },
-    {
-      label: "Class average",
-      value: insights.overallAverage === null ? "—" : String(insights.overallAverage),
-      hint: insights.failedCount ? `${insights.failedCount} failed` : `${insights.passedCount} passed`,
-      accent: insights.overallAverage === null ? undefined : gradeTone(insights.overallAverage),
-    },
-  ];
+  const analytics = workplace?.analytics;
+  const coverage = analytics?.scoreCoverage;
+  const performance = analytics?.componentPerformance;
+  const current = loads.find((item) => item.id === workplace?.currentLoadId) || loads[0];
+  const advisoryClass = advisory ? activeAdvisoryClass(advisory, workplace?.schoolYear || current?.schoolYear || "2026-2027") : undefined;
+  const learnerCount = workplace?.stats.learnerDisplay ?? insights.learnerCount;
 
   return (
-    <section>
-        <div className="page-header">
-          <h2>Dashboard</h2>
-          <p>Workplace tasks, official calendar, and DepEd completion for your teaching loads.</p>
-        </div>
-
-      {workplace && (
-        <WorkplacePanel
-          attention={workplace.attention}
-          upcoming={workplace.upcoming}
-          tasks={workplace.tasks}
-          onNavigate={navigate}
-          onAddTask={async (title, dueDate) => {
-            await addWorkplaceTask(title, dueDate);
-            await loadDashboard();
-          }}
-          onToggleTask={async (id) => {
-            await toggleWorkplaceTask(id);
-            await loadDashboard();
-          }}
-          onRemoveTask={async (id) => {
-            await removeWorkplaceTask(id);
-            await loadDashboard();
-          }}
-        />
-      )}
-
-      {workplace && (
-        <>
-          <h3 className="dash-section-title">Optimization analytics</h3>
-          <AnalyticsPanel
-            analytics={workplace.analytics}
-            currentTerm={workplace.currentTerm}
-            onOpenSheet={onOpenSheet}
-          />
-        </>
-      )}
-
-      {onOpenAdvisory && (
-        <div className="card advisory-dash-card">
+    <section className="dash-ecr">
+      <div className="dash-ecr-main">
+        <div className="card dash-welcome">
           <div>
-            <h3>Advisory Class</h3>
-            <p className="muted">Consolidate finals and import Grade Transfer Files for one section.</p>
+            <h2>
+              {greetingFor()}, {firstName(teacherName)}.
+            </h2>
+            <p className="dash-welcome-kicker">
+              {workplace?.stats.classes ?? insights.loadCount} classes • {learnerCount} learners
+            </p>
           </div>
-          <button type="button" className="primary" onClick={onOpenAdvisory}>
-            Open Advisory
-          </button>
+          <div className="dash-welcome-controls">
+            <label>
+              Working class
+              <select
+                value={workplace?.currentLoadId || current?.id || ""}
+                onChange={(event) => void persistContext(event.target.value, (workplace?.currentTerm || "1") as Term)}
+              >
+                {loads.map((load) => (
+                  <option key={load.id} value={load.id}>
+                    {classOptionLabel(load)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Term
+              <select
+                value={workplace?.currentTerm || "1"}
+                onChange={(event) => void persistContext(workplace?.currentLoadId || current?.id || "", event.target.value as Term)}
+              >
+                <option value="1">Term 1</option>
+                <option value="2">Term 2</option>
+                <option value="3">Term 3</option>
+              </select>
+            </label>
+            <button type="button" className="primary" disabled={!current} onClick={() => current && onOpenSheet(current.id)}>
+              Continue grading
+            </button>
+          </div>
         </div>
-      )}
 
-      <div className="cards">
-        {cards.map((card) => (
-          <div className="card stat" key={card.label}>
-            <span className="stat-label">{card.label}</span>
-            <span className="stat-value" style={{ color: card.accent }}>
-              {card.value}
-            </span>
-            <span className="stat-hint">{card.hint}</span>
+        {coverage && analytics && (
+          <div className="dash-stat-grid">
+            <div className="card stat dash-stat">
+              <div>
+                <span className="stat-label">Score entry</span>
+                <span className="stat-value">{coverage.percent}%</span>
+                <span className="stat-hint">
+                  {coverage.entered} of {coverage.expected} cells
+                </span>
+              </div>
+              <div className="dash-ring" style={{ "--p": coverage.percent } as CSSProperties} />
+            </div>
+            <div className="card stat dash-stat dash-stat--green">
+              <div>
+                <span className="stat-label">HPS ready</span>
+                <span className="stat-value">{analytics.hpsPercent}%</span>
+                <span className="stat-hint">
+                  {analytics.hpsReady} of {analytics.assessments} assessments
+                </span>
+              </div>
+              <div className="dash-ring" style={{ "--p": analytics.hpsPercent, "--ring": "#22c55e" } as CSSProperties} />
+            </div>
+            <div className="card stat dash-stat dash-stat--orange">
+              <div>
+                <span className="stat-label">Assessments</span>
+                <span className="stat-value">{analytics.assessments}</span>
+                <span className="stat-hint">Across {workplace?.stats.classes ?? loads.length} active classes</span>
+              </div>
+            </div>
+            <div className="card stat dash-stat dash-stat--blue">
+              <div>
+                <span className="stat-label">Learners</span>
+                <span className="stat-value">{learnerCount}</span>
+                <span className="stat-hint">{workplace?.stats.learnerEntries ?? insights.enrollmentCount} class enrollments</span>
+                <label className="include-dup">
+                  <input
+                    type="checkbox"
+                    checked={workplace?.preferences.includeDuplicateLearners !== false}
+                    onChange={(event) => {
+                      void updateWorkplacePreferences({ includeDuplicateLearners: event.target.checked }).then(() => loadDashboard());
+                    }}
+                  />
+                  Include duplicates
+                </label>
+              </div>
+            </div>
           </div>
-        ))}
+        )}
+
+        {coverage && performance && (
+          <div className="grid-2">
+            <div className="card">
+              <h3>Score entry by class</h3>
+              {coverage.byClass.length === 0 ? (
+                <p className="muted">Add a teaching load to start seeing class progress.</p>
+              ) : (
+                coverage.byClass.map((row) => (
+                  <button type="button" className="dash-class-row" key={row.id} onClick={() => onOpenSheet(row.id)}>
+                    <span className="dash-link">
+                      <span>
+                        {row.label} {row.subject}
+                      </span>
+                      <span className="muted">{row.percent}%</span>
+                    </span>
+                    <div className="bar-track">
+                      <div className="bar-fill" style={{ width: `${row.percent}%`, background: "var(--primary)" }} />
+                    </div>
+                    <span className="muted small">
+                      {row.entered} of {row.expected} scores entered
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+            <div className="card">
+              <h3>Overall class performance</h3>
+              <p className="muted small">{current ? classTitle(current) : "Working class results"}</p>
+              {(
+                [
+                  ["written", "Written Works", performance.written, "#3b82f6"],
+                  ["performance", "Performance Tasks", performance.performance, "#22c55e"],
+                  ["quarterly", "SA & TE", performance.quarterly, "#f59e0b"],
+                ] as const
+              ).map(([key, label, bucket, color]) => (
+                <div className="dash-dual" key={key}>
+                  <strong>{label}</strong>
+                  <div className="bar-meta">
+                    <span>Class achievement</span>
+                    <span>{bucket.percent === null ? "—" : `${bucket.percent}%`}</span>
+                  </div>
+                  <div className="bar-track">
+                    <div className="bar-fill" style={{ width: `${bucket.percent ?? 0}%`, background: color }} />
+                  </div>
+                  <div className="bar-meta">
+                    <span>Entry completion</span>
+                    <span>{bucket.coverage}%</span>
+                  </div>
+                  <div className="bar-track">
+                    <div className="bar-fill" style={{ width: `${bucket.coverage}%`, background: "var(--primary)" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {workplace && (
+          <WorkplacePanel
+            attention={workplace.attention}
+            upcoming={workplace.upcoming}
+            tasks={workplace.tasks}
+            onNavigate={navigate}
+            onAddTask={async (title, dueDate) => {
+              await addWorkplaceTask(title, dueDate);
+              await loadDashboard();
+            }}
+            onToggleTask={async (id) => {
+              await toggleWorkplaceTask(id);
+              await loadDashboard();
+            }}
+            onRemoveTask={async (id) => {
+              await removeWorkplaceTask(id);
+              await loadDashboard();
+            }}
+          />
+        )}
+
+        {insights.pending.length > 0 && <PendingTasks tasks={insights.pending} onOpenSheet={onOpenSheet} />}
+
+        <div className="grid-2">
+          <StandingsTable rows={insights.standings} onOpenSheet={onOpenSheet} />
+          <SubjectPerformance loads={insights.loads} onOpenSheet={onOpenSheet} />
+        </div>
       </div>
 
-      {insights.pending.length > 0 && <PendingTasks tasks={insights.pending} onOpenSheet={onOpenSheet} />}
-
-      <h3 className="dash-section-title">Teaching loads</h3>
-      <div className="cards dash-load-cards">
-        {insights.loads.map((load) => (
-          <LoadCard key={load.loadId} load={load} onOpen={() => onOpenSheet(load.loadId)} />
-        ))}
-      </div>
-
-      <div className="grid-2">
-        <StandingsTable rows={insights.standings} onOpenSheet={onOpenSheet} />
-        <SubjectPerformance loads={insights.loads} onOpenSheet={onOpenSheet} />
-      </div>
+      <aside className="dash-rail">
+        <div className="dash-rail-head">
+          <h3>My Classes &amp; Advisory</h3>
+          <span className="muted">{loads.length} classes</span>
+        </div>
+        <div className="card">
+          <h3>Advisory Class</h3>
+          {advisoryClass ? (
+            <>
+              <p>
+                Grade {advisoryClass.gradeLevel} — {advisoryClass.section}
+              </p>
+              <button type="button" className="ghost" onClick={onOpenAdvisory}>
+                Open Advisory
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="muted">Not configured.</p>
+              {onOpenAdvisory && (
+                <button type="button" className="ghost" onClick={onOpenAdvisory}>
+                  Set up advisory
+                </button>
+              )}
+            </>
+          )}
+        </div>
+        {loads.map((load) => {
+          const sex = countSex(load.learners);
+          const active = load.id === (workplace?.currentLoadId || current?.id);
+          return (
+            <button
+              key={load.id}
+              type="button"
+              className={`rail-class ${active ? "is-active" : ""}`}
+              onClick={() => void persistContext(load.id, (workplace?.currentTerm || "1") as Term)}
+            >
+              <strong>
+                Grade {load.gradeLevel} - {load.section}
+              </strong>
+              <span className="muted">{load.subject}</span>
+              <span className="muted small">
+                {load.learners.length} learners M:{sex.male} F:{sex.female}
+              </span>
+            </button>
+          );
+        })}
+        {onOpenLoads && (
+          <button type="button" className="primary" onClick={() => onOpenLoads()}>
+            Add Class
+          </button>
+        )}
+        {onOpenClasses && (
+          <button type="button" className="ghost" onClick={onOpenClasses}>
+            Full View
+          </button>
+        )}
+      </aside>
     </section>
-  );
-}
-
-function LoadCard({ load, onOpen }: { load: LoadInsights; onOpen: () => void }) {
-  return (
-    <button type="button" className="card class-card dash-load-card" onClick={onOpen}>
-      <div className="class-card-top">
-        <h3>
-          G{load.gradeLevel} {load.section}
-        </h3>
-        <span className="class-count">{load.completionPercent}%</span>
-      </div>
-      <p>{load.subject}</p>
-      <p className="muted small">{load.schoolYear}</p>
-      <div className="dash-load-meta">
-        <span>{load.learnerCount} learners</span>
-        <span>{load.missingScores} missing</span>
-        <span>Avg {load.classAverageDisplay}</span>
-      </div>
-      <div className="bar-track">
-        <div
-          className="bar-fill"
-          style={{ width: `${Math.min(100, load.completionPercent)}%`, background: completionTone(load.completionPercent) }}
-        />
-      </div>
-      <div className="sex-chips">
-        <span className="chip">{load.passedCount} passed</span>
-        <span className="chip">{load.failedCount} failed</span>
-        {load.incompleteCount > 0 ? <span className="chip">{load.incompleteCount} pending</span> : null}
-      </div>
-    </button>
   );
 }
 

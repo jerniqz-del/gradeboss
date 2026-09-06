@@ -13,6 +13,7 @@ import {
 import type { AttendanceState } from "../../models/attendance";
 import { learnerDisplayName } from "../../models/learner";
 import type { TeachingLoad } from "../../models/teaching-load";
+import { learnerNameCaps } from "../shell/labels";
 import { LearnerAvatar } from "../roster/LearnerAvatar";
 import { sortDepEdRoster } from "../roster/sort";
 
@@ -21,15 +22,20 @@ export function AttendanceGrid({
   attendance,
   month,
   filters,
+  weekdaysOnly = false,
   onToggleCell,
 }: {
   load: TeachingLoad;
   attendance: AttendanceState;
   month: string;
   filters: AttendanceFilters;
+  weekdaysOnly?: boolean;
   onToggleCell: (learnerId: string, date: string) => void;
 }) {
-  const dates = useMemo(() => monthDates(month), [month]);
+  const dates = useMemo(
+    () => monthDates(month).filter((date) => (weekdaysOnly ? !isWeekend(date) : true)),
+    [month, weekdaysOnly],
+  );
   const learners = useMemo(() => {
     return sortDepEdRoster(load.learners).filter((learner) =>
       learnerMatchesFilters(learner, attendance, { month }, filters),
@@ -41,7 +47,9 @@ export function AttendanceGrid({
       <table className="sheet-table att-table">
         <thead>
           <tr>
+            <th className="sheet-sticky">No.</th>
             <th className="sheet-sticky att-name-head">Learner</th>
+            <th>Sex</th>
             {dates.map((date) => (
               <th
                 key={date}
@@ -61,12 +69,14 @@ export function AttendanceGrid({
           </tr>
         </thead>
         <tbody>
-          {learners.map((learner) => (
+          {learners.map((learner, index) => (
             <tr key={learner.id}>
+              <td className="sheet-sticky">{index + 1}</td>
               <th className="sheet-sticky att-name" scope="row">
                 <LearnerAvatar presetId={learner.avatarPresetId} size="xs" />
-                <span className="sheet-name">{learnerDisplayName(learner)}</span>
+                <span className="sheet-name">{learnerNameCaps(learnerDisplayName(learner))}</span>
               </th>
+              <td>{learner.sex || "—"}</td>
               {dates.map((date) => {
                 const status = cellStatus(attendance, learner.id, date);
                 const disabled = status === "no-class";

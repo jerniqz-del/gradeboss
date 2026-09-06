@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api } from "../../api";
 import {
   determinePolicy,
@@ -7,6 +7,8 @@ import {
 } from "../../domain/grading";
 import { Icon } from "../../Icon";
 import type { TeachingLoad } from "../../models/teaching-load";
+import { ActiveClassBar } from "../shell/ActiveClassBar";
+import { notifyWorkspaceChanged } from "../shell/chrome";
 import { RosterPanel } from "../roster/RosterPanel";
 import { SCHOOL_YEARS, subjectsForGrade } from "./catalog";
 import { createTeachingLoad, formatWeights, policyLabel } from "./create-load";
@@ -20,8 +22,9 @@ export function TeachingLoadsView({
 }) {
   const [loads, setLoads] = useState<TeachingLoad[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [rosterLoadId, setRosterLoadId] = useState<string | null>(initialRosterLoadId ?? null);
-  const [gradeLevel, setGradeLevel] = useState("10");
+  const [creating, setCreating] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(initialRosterLoadId ?? null);
+  const [gradeLevel, setGradeLevel] = useState("4");
   const [section, setSection] = useState("");
   const [subject, setSubject] = useState("Mathematics");
   const [schoolYear, setSchoolYear] = useState("2026-2027");
@@ -34,7 +37,9 @@ export function TeachingLoadsView({
 
   const refresh = async () => {
     try {
-      setLoads(await api.getTeachingLoads());
+      const next = await api.getTeachingLoads();
+      setLoads(next);
+      setSelectedId((current) => current || initialRosterLoadId || next[0]?.id || null);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load teaching loads");
@@ -46,14 +51,14 @@ export function TeachingLoadsView({
   }, []);
 
   useEffect(() => {
-    if (initialRosterLoadId) setRosterLoadId(initialRosterLoadId);
+    if (initialRosterLoadId) setSelectedId(initialRosterLoadId);
   }, [initialRosterLoadId]);
 
   useEffect(() => {
     if (!subjects.includes(subject)) setSubject(subjects[0] || "");
   }, [subjects, subject]);
 
-  const submit = async (event: React.FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!subject.trim() || !section.trim()) return;
     const load = createTeachingLoad({
@@ -65,15 +70,18 @@ export function TeachingLoadsView({
     });
     await api.saveTeachingLoad(load);
     setSection("");
+    setCreating(false);
     await refresh();
-    onOpenSheet(load.id);
+    setSelectedId(load.id);
+    notifyWorkspaceChanged();
   };
 
   const remove = async (id: string) => {
-    if (!window.confirm("Delete this teaching load and its scores?")) return;
+    if (!window.confirm("Delete this class and its scores?")) return;
     await api.deleteTeachingLoad(id);
-    if (rosterLoadId === id) setRosterLoadId(null);
+    if (selectedId === id) setSelectedId(null);
     await refresh();
+    notifyWorkspaceChanged();
   };
 
   const persistLoad = async (next: TeachingLoad) => {
@@ -86,127 +94,101 @@ export function TeachingLoadsView({
     await refresh();
   };
 
-  const rosterLoad = loads.find((item) => item.id === rosterLoadId) ?? null;
-  if (rosterLoad) {
-    return (
-      <RosterPanel
-        load={rosterLoad}
-        loads={loads}
-        onChange={persistLoad}
-        onChangeMany={persistLoads}
-        onBack={() => setRosterLoadId(null)}
-        onOpenSheet={() => onOpenSheet(rosterLoad.id)}
-      />
-    );
-  }
+  const selected = loads.find((item) => item.id === selectedId) ?? loads[0] ?? null;
 
   return (
     <section>
-      <div className="page-header">
-        <h2>Teaching loads</h2>
-        <p>Create a class + subject, import an SF1 roster, then open the grading sheet.</p>
-      </div>
-
       {error && <div className="banner error">{error}</div>}
 
-      <div className="card">
-        <form className="form-grid" onSubmit={submit}>
-          <label>
-            Grade
-            <select value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)}>
-              {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((g) => (
-                <option key={g} value={g}>
-                  Grade {g}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Section
-            <input
-              placeholder="e.g. Rizal"
-              value={section}
-              onChange={(e) => setSection(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Subject
-            <select value={subject} onChange={(e) => setSubject(e.target.value)}>
-              {subjects.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            School year
-            <select value={schoolYear} onChange={(e) => setSchoolYear(e.target.value)}>
-              {SCHOOL_YEARS.map((sy) => (
-                <option key={sy} value={sy}>
-                  {sy}
-                </option>
-              ))}
-            </select>
-          </label>
-          {isShs && (
-            <label>
-              SHS group
-              <select value={shsGroup} onChange={(e) => setShsGroup(e.target.value)}>
-                <option value="">Auto from subject</option>
-                {Object.entries(SENIOR_HIGH_SUBJECT_GROUPS).map(([key, config]) => (
-                  <option key={key} value={key}>
-                    {config.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <div className="form-preview">
-            <span className="pill">{policyLabel(previewPolicy)}</span>
-            <span className="pill">Weights {formatWeights(previewGroup)}</span>
-          </div>
-          <button type="submit" className="primary">
-            Add teaching load
-          </button>
-        </form>
-      </div>
-
-      {loads.length === 0 ? (
-        <div className="empty-state">
-          <Icon name="book" />
-          <p>No teaching loads yet. Add one above to start grading.</p>
-        </div>
+      {loads.length > 0 && selected && !creating ? (
+        <>
+          <ActiveClassBar loads={loads} selectedId={selected.id} onSelect={setSelectedId}>
+            <button type="button" className="primary btn-cyan" onClick={() => onOpenSheet(selected.id)}>
+              <Icon name="book" /> Proceed to Grading Sheet
+            </button>
+            <button type="button" className="ghost btn-danger" onClick={() => void remove(selected.id)}>
+              Delete This Class
+            </button>
+            <button type="button" className="ghost" onClick={() => setCreating(true)}>
+              Add Class
+            </button>
+          </ActiveClassBar>
+          <RosterPanel
+            load={selected}
+            loads={loads}
+            onChange={persistLoad}
+            onChangeMany={persistLoads}
+            onBack={() => setCreating(true)}
+            onOpenSheet={() => onOpenSheet(selected.id)}
+          />
+        </>
       ) : (
-        <div className="cards">
-          {loads.map((load) => (
-            <article className="card course load-card" key={load.id}>
-              <div className="course-period">G{load.gradeLevel}</div>
-              <h3>
-                {load.subject}
-              </h3>
-              <p className="muted">
-                {load.section} · SY {load.schoolYear}
-              </p>
-              <p className="muted">
-                {policyLabel(load.policy)} · {formatWeights(load.subjectGroup)} · {load.learners.length}{" "}
-                learners
-              </p>
-              <div className="load-actions">
-                <button type="button" className="primary" onClick={() => onOpenSheet(load.id)}>
-                  Open sheet
-                </button>
-                <button type="button" className="ghost" onClick={() => setRosterLoadId(load.id)}>
-                  Roster
-                </button>
-                <button type="button" className="ghost danger" onClick={() => void remove(load.id)}>
-                  Delete
-                </button>
+        <>
+          <div className="card">
+            <h3>{loads.length ? "Add a class" : "Create your first class"}</h3>
+            <form className="form-grid" onSubmit={submit}>
+              <label>
+                Grade
+                <select value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)}>
+                  {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((g) => (
+                    <option key={g} value={g}>
+                      Grade {g}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Section
+                <input placeholder="e.g. Mahogany" value={section} onChange={(e) => setSection(e.target.value)} required />
+              </label>
+              <label>
+                Subject
+                <select value={subject} onChange={(e) => setSubject(e.target.value)}>
+                  {subjects.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                School year
+                <select value={schoolYear} onChange={(e) => setSchoolYear(e.target.value)}>
+                  {SCHOOL_YEARS.map((sy) => (
+                    <option key={sy} value={sy}>
+                      {sy}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {isShs && (
+                <label>
+                  SHS group
+                  <select value={shsGroup} onChange={(e) => setShsGroup(e.target.value)}>
+                    <option value="">Auto from subject</option>
+                    {Object.entries(SENIOR_HIGH_SUBJECT_GROUPS).map(([key, config]) => (
+                      <option key={key} value={key}>
+                        {config.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <div className="form-preview">
+                <span className="pill">{policyLabel(previewPolicy)}</span>
+                <span className="pill">Weights {formatWeights(previewGroup)}</span>
               </div>
-            </article>
-          ))}
-        </div>
+              <button type="submit" className="primary">
+                Save class
+              </button>
+              {loads.length > 0 && (
+                <button type="button" className="ghost" onClick={() => setCreating(false)}>
+                  Cancel
+                </button>
+              )}
+            </form>
+          </div>
+        </>
       )}
     </section>
   );

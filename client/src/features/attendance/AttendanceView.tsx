@@ -17,7 +17,7 @@ import type { TeachingLoad } from "../../models/teaching-load";
 import { createDefaultProfile, type TeacherProfile } from "../../models/teacher-profile";
 import { ensureStorageReady, getTeacherProfile } from "../../storage/init";
 import { printSf2Report } from "../exports/print";
-import { policyLabel } from "../teaching-loads/create-load";
+import { ActiveClassBar } from "../shell/ActiveClassBar";
 import { AttendanceGrid } from "./AttendanceGrid";
 import { RollCallModal } from "./RollCallModal";
 import { Sf2Document } from "./Sf2Document";
@@ -34,6 +34,9 @@ export function AttendanceView({
   const [profile, setProfile] = useState<TeacherProfile>(createDefaultProfile);
   const [month, setMonth] = useState(() => monthValue());
   const [filters, setFilters] = useState<AttendanceFilters>({ query: "", sex: "", status: "" });
+  const [learnerId, setLearnerId] = useState("");
+  const [rangeStart, setRangeStart] = useState(() => `${monthValue()}-01`);
+  const [rangeEnd, setRangeEnd] = useState(() => monthEnd(monthValue()));
   const [rollOpen, setRollOpen] = useState(false);
   const [rollDate, setRollDate] = useState(() => todayIso());
   const [showSf2, setShowSf2] = useState(false);
@@ -73,9 +76,14 @@ export function AttendanceView({
 
   const attendance = useMemo(() => (load ? attendanceOf(load) : attendanceOf({ attendance: undefined })), [load]);
   const stats = useMemo(
-    () => computeClassAttendance(attendance, load?.learners || [], { month }),
-    [attendance, load?.learners, month],
+    () => computeClassAttendance(attendance, load?.learners || [], { start: rangeStart, end: rangeEnd }),
+    [attendance, load?.learners, rangeEnd, rangeStart],
   );
+
+  const shownStats = useMemo(() => {
+    if (!learnerId) return stats.totals;
+    return stats.summaries.find((row) => row.learnerId === learnerId) || stats.totals;
+  }, [learnerId, stats]);
   const payload = useMemo(
     () => (load ? buildSf2Payload(load, month, profile) : null),
     [load, month, profile],
@@ -105,140 +113,136 @@ export function AttendanceView({
 
   return (
     <section className="att-page">
-      <div className="page-header no-print">
-        <h2>Attendance</h2>
-        <p>Monthly grid, roll call, and School Form 2. Marks stay on this device and work offline.</p>
-      </div>
-
       {error && <div className="banner error no-print">{error}</div>}
       {pdfNote && <div className="banner warn no-print">{pdfNote}</div>}
 
-      <div className="sheet-toolbar no-print">
-        <label>
-          Teaching load
-          <select value={load?.id || ""} onChange={(event) => onSelectLoad(event.target.value)}>
-            {loads.map((item) => (
-              <option key={item.id} value={item.id}>
-                G{item.gradeLevel} {item.section} — {item.subject}
+      <ActiveClassBar loads={loads} selectedId={load?.id || ""} onSelect={onSelectLoad}>
+        <label className="ecr-active-label">
+          Learner
+          <select
+            value={learnerId}
+            onChange={(event) => {
+              const id = event.target.value;
+              setLearnerId(id);
+              const learner = load?.learners.find((item) => item.id === id);
+              setFilters((current) => ({ ...current, query: learner?.lrn || learner?.lastName || "" }));
+            }}
+          >
+            <option value="">Entire class</option>
+            {(load?.learners || []).map((learner) => (
+              <option key={learner.id} value={learner.id}>
+                {learner.lastName}, {learner.firstName}
               </option>
             ))}
           </select>
         </label>
-        <div className="att-month-nav">
-          <button type="button" className="ghost" onClick={() => setMonth((value) => shiftMonth(value, -1))} aria-label="Previous month">
-            ‹
-          </button>
-          <strong>{formatMonthLabel(month)}</strong>
-          <button type="button" className="ghost" onClick={() => setMonth((value) => shiftMonth(value, 1))} aria-label="Next month">
-            ›
-          </button>
-        </div>
-        {load && (
-          <div className="form-preview">
-            <span className="pill">{policyLabel(load.policy)}</span>
-            <span className="pill">{load.learners.length} learners</span>
-            <span className="pill">{stats.totals.sessionCount} school days</span>
-          </div>
-        )}
-      </div>
+        <label className="ecr-active-label">
+          Start date
+          <input type="date" value={rangeStart} onChange={(event) => setRangeStart(event.target.value)} />
+        </label>
+        <label className="ecr-active-label">
+          End date
+          <input type="date" value={rangeEnd} onChange={(event) => setRangeEnd(event.target.value)} />
+        </label>
+        <button type="button" className="ghost btn-cyan" onClick={() => printSf2Report()}>
+          Print
+        </button>
+        <button
+          type="button"
+          className="ghost btn-olive"
+          onClick={() => {
+            if (!payload || !load) return;
+            void (async () => {
+              try {
+                const { downloadSf2Pdf } = await import("./sf2-pdf");
+                downloadSf2Pdf(load, payload);
+                setPdfNote(null);
+              } catch (err) {
+                setPdfNote(err instanceof Error ? err.message : "Could not build the SF2 PDF.");
+              }
+            })();
+          }}
+        >
+          Download PDF
+        </button>
+      </ActiveClassBar>
 
       {load && (
         <>
-          <div className="cards att-stats no-print">
-            <Stat label="Present" value={stats.totals.present} tone="present" />
-            <Stat label="Tardy" value={stats.totals.tardy} tone="tardy" />
-            <Stat label="Absent" value={stats.totals.absent} tone="absent" />
-            <Stat label="Excused" value={stats.totals.excused} tone="excused" />
-            <Stat label="Absence rate" value={`${stats.totals.absenceRate}%`} />
+          <div className="att-summary-row no-print">
+            <Stat label="Checked" value={shownStats.checked} />
+            <Stat label="Present" value={shownStats.present} tone="present" />
+            <Stat label="Tardy" value={shownStats.tardy} tone="tardy" />
+            <Stat label="Absent" value={shownStats.absent} tone="absent" />
+            <Stat label="Excused" value={shownStats.excused} tone="excused" />
+            <Stat label="Absence rate" value={`${shownStats.absenceRate}%`} />
           </div>
 
-          <div className="att-filters no-print">
-            <input
-              className="roster-search"
-              placeholder="Search name or LRN"
-              value={filters.query || ""}
-              onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))}
-            />
-            <select
-              value={filters.sex || ""}
-              onChange={(event) => setFilters((current) => ({ ...current, sex: event.target.value as "" | "M" | "F" }))}
-              aria-label="Filter by sex"
-            >
-              <option value="">All sexes</option>
-              <option value="M">Male</option>
-              <option value="F">Female</option>
-            </select>
-            <select
-              value={filters.status || ""}
-              onChange={(event) =>
-                setFilters((current) => ({
-                  ...current,
-                  status: event.target.value as AttendanceFilters["status"],
-                }))
-              }
-              aria-label="Filter by status"
-            >
-              <option value="">All statuses</option>
-              <option value="present">Present</option>
-              <option value="tardy">Tardy</option>
-              <option value="absent">Absent</option>
-              <option value="excused">Excused</option>
-              <option value="no-class">No class</option>
-            </select>
-          </div>
-
-          <div className="att-legend no-print" aria-label="Attendance legend">
-            <span><b className="att-present">/</b> Present</span>
-            <span><b className="att-tardy">T</b> Tardy</span>
-            <span><b className="att-absent">X</b> Absent</span>
-            <span><b className="att-excused">E</b> Excused</span>
-            <span><b className="att-no-class">NC</b> No class</span>
-          </div>
-
-          <div className="sheet-export no-print">
-            <button
-              type="button"
-              className="primary"
-              onClick={() => {
-                setRollDate(todayIso().startsWith(month) ? todayIso() : `${month}-01`);
-                setRollOpen(true);
-              }}
-            >
-              Roll call
-            </button>
+          <div className="card att-month-card">
+            <div className="att-month-card-head">
+              <div>
+                <h3>Monthly Attendance</h3>
+                <p className="muted small">Weekdays only. Blank cells mean attendance was not taken for that date.</p>
+              </div>
+              <button
+                type="button"
+                className="primary"
+                onClick={() => {
+                  setRollDate(todayIso().startsWith(month) ? todayIso() : `${month}-01`);
+                  setRollOpen(true);
+                }}
+              >
+                Take Roll Call
+              </button>
+            </div>
+            <div className="att-month-nav">
+              <button
+                type="button"
+                className="ghost"
+                onClick={() => {
+                  const next = shiftMonth(month, -1);
+                  setMonth(next);
+                  setRangeStart(`${next}-01`);
+                  setRangeEnd(monthEnd(next));
+                }}
+                aria-label="Previous month"
+              >
+                ‹
+              </button>
+              <strong>{formatMonthLabel(month)}</strong>
+              <button
+                type="button"
+                className="ghost"
+                onClick={() => {
+                  const next = shiftMonth(month, 1);
+                  setMonth(next);
+                  setRangeStart(`${next}-01`);
+                  setRangeEnd(monthEnd(next));
+                }}
+                aria-label="Next month"
+              >
+                ›
+              </button>
+            </div>
+            <div className="att-legend no-print" aria-label="Attendance legend">
+              <span><b className="att-present">P</b> Present</span>
+              <span><b className="att-tardy">T</b> Tardy</span>
+              <span><b className="att-absent">X</b> Absent</span>
+              <span><b className="att-excused">E</b> Excused</span>
+              <span><b className="att-no-class">NC</b> No class</span>
+            </div>
             <button type="button" className="ghost" onClick={() => setShowSf2((value) => !value)}>
               {showSf2 ? "Hide SF2 preview" : "Preview SF2"}
             </button>
-            <button
-              type="button"
-              className="ghost"
-              onClick={() => {
-                if (!payload || !load) return;
-                void (async () => {
-                  try {
-                    const { downloadSf2Pdf } = await import("./sf2-pdf");
-                    downloadSf2Pdf(load, payload);
-                    setPdfNote(null);
-                  } catch (err) {
-                    setPdfNote(err instanceof Error ? err.message : "Could not build the SF2 PDF.");
-                  }
-                })();
-              }}
-            >
-              Download SF2 PDF
-            </button>
-            <button type="button" className="ghost" onClick={() => printSf2Report()}>
-              Print SF2
-            </button>
+            <AttendanceGrid
+              load={load}
+              attendance={attendance}
+              month={month}
+              filters={filters}
+              weekdaysOnly
+              onToggleCell={onToggleCell}
+            />
           </div>
-
-          <AttendanceGrid
-            load={load}
-            attendance={attendance}
-            month={month}
-            filters={filters}
-            onToggleCell={onToggleCell}
-          />
 
           {payload && (
             <div className={showSf2 ? "sf2-preview" : "sf2-print print-only"}>
@@ -263,6 +267,12 @@ export function AttendanceView({
       )}
     </section>
   );
+}
+
+function monthEnd(month: string): string {
+  const [year, mo] = month.split("-").map(Number);
+  const last = new Date(year, mo, 0).getDate();
+  return `${month}-${String(last).padStart(2, "0")}`;
 }
 
 function Stat({

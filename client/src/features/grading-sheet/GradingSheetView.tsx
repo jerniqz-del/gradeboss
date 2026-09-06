@@ -13,7 +13,12 @@ import {
 import { scoreKey } from "../../models/assessment";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { MapePart, Term } from "../../models/types";
+import { printGradingSheet } from "../exports/print";
 import { SheetExportBar } from "../exports/SheetExportBar";
+import { downloadClassRecordPdf } from "../exports/pdf-class-record";
+import { createDefaultProfile } from "../../models/teacher-profile";
+import { ensureStorageReady, getTeacherProfile } from "../../storage/init";
+import { ActiveClassBar } from "../shell/ActiveClassBar";
 import { formatWeights, policyLabel } from "../teaching-loads/create-load";
 import { QuickGradeModal } from "./QuickGradeModal";
 import { ScoreGrid } from "./ScoreGrid";
@@ -135,35 +140,28 @@ export function GradingSheetView({
 
   return (
     <section className="sheet-page">
-      <div className="page-header">
-        <h2>Grading sheet</h2>
-          <p>Enter scores by term. The Summary tab shows finals, annual average, and pass/fail.</p>
-      </div>
-
       {error && <div className="banner error">{error}</div>}
 
-      <div className="sheet-toolbar">
-        <label>
-          Teaching load
-          <select
-            value={load?.id || ""}
-            onChange={(e) => onSelectLoad(e.target.value)}
-          >
-            {loads.map((item) => (
-              <option key={item.id} value={item.id}>
-                G{item.gradeLevel} {item.section} — {item.subject}
-              </option>
-            ))}
-          </select>
-        </label>
+      <ActiveClassBar loads={loads} selectedId={load?.id || ""} onSelect={onSelectLoad}>
+        <button type="button" className="ghost btn-cyan" onClick={() => printGradingSheet()}>
+          Print
+        </button>
         {load && (
-          <div className="form-preview">
-            <span className="pill">{policyLabel(load.policy)}</span>
-            <span className="pill">Weights {formatWeights(load.subjectGroup)}</span>
-            <span className="pill">{load.learners.length} learners</span>
-          </div>
+          <button
+            type="button"
+            className="ghost btn-olive"
+            onClick={() => {
+              void (async () => {
+                const db = await ensureStorageReady();
+                const profile = (await getTeacherProfile(db)) || createDefaultProfile();
+                downloadClassRecordPdf(load, { tab, mapePart: activePart, profile });
+              })();
+            }}
+          >
+            Download PDF
+          </button>
         )}
-      </div>
+      </ActiveClassBar>
 
       {load && (
         <>
@@ -211,22 +209,30 @@ export function GradingSheetView({
           )}
 
           {tab !== "summary" && (
-            <div className="chk-actions no-print">
-              <button type="button" className="ghost" data-testid="sheet-undo" disabled={!stacks.undo.length} onClick={() => void runUndo()}>
-                Undo
-              </button>
-              <button type="button" className="ghost" data-testid="sheet-redo" disabled={!stacks.redo.length} onClick={() => void runRedo()}>
-                Redo
-              </button>
-              <button type="button" className="ghost" data-testid="sheet-quick-grade" onClick={() => setQuickOpen(true)}>
-                Quick grade
-              </button>
-              <button type="button" className="ghost" data-testid="sheet-transfer" onClick={() => setTransferOpen(true)}>
-                Transfer scores
-              </button>
-              <button type="button" className="ghost" data-testid="sheet-history" onClick={() => setHistoryOpen(true)}>
-                Score history
-              </button>
+            <div className="sheet-record-bar no-print">
+              <div>
+                <h3>Class Record — Term {tab}</h3>
+                <p className="muted small">
+                  {policyLabel(load.policy)} · Weights {formatWeights(load.subjectGroup)} · Saved locally
+                </p>
+              </div>
+              <div className="roster-page-actions">
+                <button type="button" className="ghost" data-testid="sheet-undo" disabled={!stacks.undo.length} onClick={() => void runUndo()}>
+                  Undo
+                </button>
+                <button type="button" className="ghost" data-testid="sheet-redo" disabled={!stacks.redo.length} onClick={() => void runRedo()}>
+                  Redo
+                </button>
+                <button type="button" className="ghost btn-cyan" data-testid="sheet-quick-grade" onClick={() => setQuickOpen(true)}>
+                  Quick Grade Entry
+                </button>
+                <button type="button" className="ghost" data-testid="sheet-transfer" onClick={() => setTransferOpen(true)}>
+                  Transfer Scores
+                </button>
+                <button type="button" className="ghost btn-olive" data-testid="sheet-history" onClick={() => setHistoryOpen(true)}>
+                  View Learner&apos;s Grades
+                </button>
+              </div>
             </div>
           )}
 

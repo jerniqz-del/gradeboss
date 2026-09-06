@@ -30,7 +30,7 @@ export function applyTheme(preference: ThemePreference): "light" | "dark" {
 
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) {
-    meta.setAttribute("content", resolved === "light" ? "#6d5efc" : "#0f1220");
+    meta.setAttribute("content", resolved === "light" ? "#0f9aa4" : "#151b28");
   }
 
   return resolved;

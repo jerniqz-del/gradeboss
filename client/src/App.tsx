@@ -4,8 +4,8 @@ import {
   clearUser,
   isLocalUser,
   loadUser,
-  roleLabel,
   saveUser,
+  SUPER_ADMIN_EMAIL,
   type User,
 } from "./auth";
 import {
@@ -24,7 +24,6 @@ import {
 import { Icon } from "./Icon";
 import { Avatar, Profile } from "./Profile";
 import { SignIn } from "./SignIn";
-import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "./useTheme";
 import { AdvisoryView } from "./features/advisory/AdvisoryView";
 import { AttendanceView } from "./features/attendance/AttendanceView";
@@ -32,34 +31,30 @@ import { CalendarView } from "./features/calendar/CalendarView";
 import { ChecklistView } from "./features/checklist/ChecklistView";
 import { DashboardView } from "./features/dashboard/DashboardView";
 import { BackupPanel } from "./features/exports/BackupPanel";
+import { downloadOpenBackup, uploadBackupFile } from "./features/exports/quick-backup";
 import { TeachingLoadsView } from "./features/teaching-loads/TeachingLoadsView";
 import { GradingSheetView } from "./features/grading-sheet/GradingSheetView";
+import { ToolsView } from "./features/tools/ToolsView";
+import { AppFooter } from "./features/shell/AppFooter";
+import { AppSidebar, BOTTOM_NAV, type AppView } from "./features/shell/AppSidebar";
+import { AppTopbar } from "./features/shell/AppTopbar";
+import { HelpDialog } from "./features/shell/HelpDialog";
+import {
+  loadSidebarCollapsed,
+  loadZoom,
+  notifyWorkspaceChanged,
+  saveSidebarCollapsed,
+  saveZoom,
+  WORKSPACE_CHANGED,
+} from "./features/shell/chrome";
+import { classTitle } from "./features/shell/labels";
+import { createDefaultProfile, type TeacherProfile } from "./models/teacher-profile";
+import type { TeachingLoad } from "./models/teaching-load";
+import { getLocalFolderStatus } from "./storage/local-profile";
+import { getTeacherProfile, saveTeacherProfile } from "./storage/init";
+import { openGradeBossDb } from "./storage/db";
 
-type View =
-  | "dashboard"
-  | "calendar"
-  | "advisory"
-  | "classes"
-  | "students"
-  | "loads"
-  | "sheet"
-  | "checklist"
-  | "attendance"
-  | "plans"
-  | "profile";
-
-const NAV: Array<{ id: View; label: string; short?: string; icon: string }> = [
-  { id: "dashboard", label: "Dashboard", short: "Home", icon: "chart" },
-  { id: "calendar", label: "Calendar", short: "Cal", icon: "calendar-days" },
-  { id: "advisory", label: "Advisory", icon: "clipboard" },
-  { id: "classes", label: "Classes", icon: "board" },
-  { id: "students", label: "Students", icon: "users" },
-  { id: "loads", label: "Loads", icon: "book" },
-  { id: "sheet", label: "Sheet", icon: "pencil" },
-  { id: "checklist", label: "Checklist", short: "Check", icon: "list-checks" },
-  { id: "attendance", label: "Attendance", short: "Attend", icon: "calendar" },
-  { id: "profile", label: "Profile", icon: "user" },
-];
+type View = AppView;
 
 const SYNC_PRICE_ANNUAL = 50; // PHP per extra device per year
 const SYNC_PRICE_MONTHLY = 5; // PHP per extra device per month
@@ -125,9 +120,32 @@ export default function App() {
   const [rosterLoadId, setRosterLoadId] = useState<string | null>(null);
   const [calendarDate, setCalendarDate] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loads, setLoads] = useState<TeachingLoad[]>([]);
+  const [profile, setProfile] = useState<TeacherProfile | null>(null);
+  const [folderReady, setFolderReady] = useState(false);
+  const [zoom, setZoom] = useState(() => loadZoom());
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => loadSidebarCollapsed());
+  const [dialog, setDialog] = useState<"help" | "feedback" | null>(null);
+  const [backupBusy, setBackupBusy] = useState(false);
+  const [welcome, setWelcome] = useState(true);
   const { canInstall, installed, install } = useInstallPrompt();
   const online = useOnline();
   const { preference, setTheme } = useTheme();
+
+  const refreshChrome = useCallback(async () => {
+    const db = await openGradeBossDb();
+    const [nextProfile, nextLoads, folder] = await Promise.all([
+      getTeacherProfile(db),
+      api.getTeachingLoads(),
+      getLocalFolderStatus(),
+    ]);
+    setProfile(nextProfile || createDefaultProfile());
+    setLoads(nextLoads);
+    setFolderReady(folder.connected);
+    if (!selectedLoadId && (nextProfile?.currentTeachingLoadId || nextLoads[0]?.id)) {
+      setSelectedLoadId(nextProfile?.currentTeachingLoadId || nextLoads[0]?.id || null);
+    }
+  }, [selectedLoadId]);
 
   const refresh = useCallback(async () => {
     try {
@@ -141,6 +159,69 @@ export default function App() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    void refreshChrome().catch(() => {
+      // Chrome metadata is best-effort; pages still load their own data.
+    });
+  }, [refreshChrome]);
+
+  useEffect(() => {
+    const onChanged = () => {
+      void refreshChrome();
+    };
+    window.addEventListener(WORKSPACE_CHANGED, onChanged);
+    return () => window.removeEventListener(WORKSPACE_CHANGED, onChanged);
+  }, [refreshChrome]);
+
+  useEffect(() => {
+    if (!welcome) return;
+    const timer = window.setTimeout(() => setWelcome(false), 4200);
+    return () => window.clearTimeout(timer);
+  }, [welcome]);
+
+  const changeSchoolYear = async (year: string) => {
+    const db = await openGradeBossDb();
+    const next = { ...(profile || createDefaultProfile()), schoolYear: year };
+    await saveTeacherProfile(db, next);
+    setProfile(next);
+    notifyWorkspaceChanged();
+  };
+
+  const changeZoom = (next: number) => {
+    setZoom(saveZoom(next));
+  };
+
+  const toggleSidebar = () => {
+    const next = !sidebarCollapsed;
+    setSidebarCollapsed(next);
+    saveSidebarCollapsed(next);
+  };
+
+  const runDownloadBackup = async () => {
+    setBackupBusy(true);
+    try {
+      await downloadOpenBackup();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not download backup.");
+    } finally {
+      setBackupBusy(false);
+    }
+  };
+
+  const runUploadBackup = async (file: File) => {
+    if (!window.confirm("Replace teaching loads, scores, and SF1 history on this device with this backup?")) return;
+    setBackupBusy(true);
+    try {
+      await uploadBackupFile(file, "replace");
+      notifyWorkspaceChanged();
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not import that backup.");
+    } finally {
+      setBackupBusy(false);
+    }
+  };
 
   const onSignedIn = useCallback((next: User) => {
     if (!isLocalUser(next)) setCurrentLocalProfileId(null);
@@ -189,6 +270,13 @@ export default function App() {
   }
 
   const showInstall = canInstall && !installed;
+  const currentLoad =
+    loads.find((item) => item.id === (selectedLoadId || profile?.currentTeachingLoadId)) || loads[0] || null;
+  const headerTitle =
+    view === "calendar" || view === "tools" ? "School Calendar" : classTitle(currentLoad);
+  const schoolYears = Array.from(
+    new Set(["2026-2027", profile?.schoolYear, ...loads.map((item) => item.schoolYear)].filter(Boolean) as string[]),
+  );
 
   return (
     <div className="app">
@@ -199,67 +287,36 @@ export default function App() {
         </div>
       )}
 
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">GB</div>
-          <div>
-            <h1>GradeBoss</h1>
-            <span>School command center</span>
-          </div>
-        </div>
-        <nav className="side-nav">
-          {NAV.map((item) => (
-            <button
-              key={item.id}
-              className={view === item.id ? "nav-item active" : "nav-item"}
-              onClick={() => setView(item.id)}
-            >
-              <Icon name={item.icon} />
-              {item.label}
-            </button>
-          ))}
-        </nav>
-        <div className="sidebar-footer">
-          {showInstall && <InstallButton onInstall={install} />}
-          <ThemeToggle preference={preference} onChange={setTheme} compact />
-          <button
-            className={view === "plans" ? "nav-item active" : "nav-item"}
-            onClick={() => setView("plans")}
-          >
-            <Icon name="spark" />
-            Plans
-          </button>
-        </div>
-      </aside>
+      <div className={`app-body ${sidebarCollapsed ? "is-sidebar-collapsed" : ""}`}>
+      <AppSidebar
+        user={user}
+        view={view}
+        collapsed={sidebarCollapsed}
+        showInstall={showInstall}
+        onNavigate={setView}
+        onToggleCollapsed={toggleSidebar}
+        onOpenSettings={() => setView("profile")}
+        onOpenHelp={() => setDialog("help")}
+        onOpenFeedback={() => setDialog("feedback")}
+        onSignOut={signOut}
+        onInstall={install}
+      />
 
-      <header className="topbar">
-        <div className="brand compact">
-          <div className="brand-mark">GB</div>
-          <h1>GradeBoss</h1>
-        </div>
-        <div className="topbar-actions">
-          <ThemeToggle preference={preference} onChange={setTheme} compact />
-          <button className="ghost small" onClick={() => setView("plans")}>
-            Plans
-          </button>
-          {showInstall && <InstallButton onInstall={install} />}
-          <button
-            type="button"
-            className={view === "profile" ? "profile-topbar-btn active" : "profile-topbar-btn"}
-            aria-label="Profile"
-            aria-current={view === "profile" ? "page" : undefined}
-            onClick={() => setView("profile")}
-          >
-            <Avatar user={user} size={32} />
-            <span className="profile-topbar-text">
-              <span className="profile-topbar-name">{user.name}</span>
-              <span className="profile-topbar-role">{roleLabel(user.role, user.authKind)}</span>
-            </span>
-          </button>
-        </div>
-      </header>
+      <AppTopbar
+        title={headerTitle}
+        profile={profile}
+        schoolYears={schoolYears}
+        folderReady={folderReady}
+        autoSaved={isLocalUser(user) || folderReady}
+        zoom={zoom}
+        busy={backupBusy}
+        onSchoolYearChange={(year) => void changeSchoolYear(year)}
+        onZoomChange={changeZoom}
+        onDownloadBackup={() => void runDownloadBackup()}
+        onUploadBackup={(file) => void runUploadBackup(file)}
+      />
 
-      <main className="content">
+      <main className="content" style={{ zoom: zoom / 100 }}>
         {error && <div className="banner error">{error}</div>}
 
         {view === "dashboard" && (
@@ -324,6 +381,13 @@ export default function App() {
             }}
           />
         )}
+        {view === "tools" && (
+          <ToolsView
+            onNavigate={(next) => {
+              setView(next);
+            }}
+          />
+        )}
         {view === "plans" && <Plans />}
         {view === "profile" && (
           <Profile
@@ -339,8 +403,11 @@ export default function App() {
         )}
       </main>
 
+      <AppFooter />
+      </div>
+
       <nav className="bottom-nav">
-        {NAV.map((item) => (
+        {BOTTOM_NAV.map((item) => (
           <button
             key={item.id}
             className={view === item.id ? "tab active" : "tab"}
@@ -353,10 +420,36 @@ export default function App() {
             ) : (
               <Icon name={item.icon} />
             )}
-            <span>{item.short || item.label}</span>
+            <span>{item.short}</span>
           </button>
         ))}
       </nav>
+
+      {welcome && (
+        <div className="welcome-toast" role="status">
+          Welcome back, {user.name}!
+        </div>
+      )}
+      {dialog === "help" && (
+        <HelpDialog title="Help & Tutorials" onClose={() => setDialog(null)}>
+          <p>GradeBoss keeps your class record on this device and works offline.</p>
+          <ul>
+            <li>Create a teaching load, then import or type the roster.</li>
+            <li>Enter scores on the grading sheet. HPS is the orange row.</li>
+            <li>Take attendance by the month and print SF2 when needed.</li>
+            <li>Download a backup before switching browsers or devices.</li>
+          </ul>
+          <p className="muted">Compliant with DepEd Order No. 15 s. 2026.</p>
+        </HelpDialog>
+      )}
+      {dialog === "feedback" && (
+        <HelpDialog title="Feedback" onClose={() => setDialog(null)}>
+          <p>Tell your school admin what to fix, or email the developer.</p>
+          <p>
+            <a href={`mailto:${SUPER_ADMIN_EMAIL}?subject=GradeBoss%20feedback`}>Email {SUPER_ADMIN_EMAIL}</a>
+          </p>
+        </HelpDialog>
+      )}
     </div>
   );
 }
@@ -921,11 +1014,3 @@ function Header({ title, subtitle }: { title: string; subtitle: string }) {
   );
 }
 
-function InstallButton({ onInstall }: { onInstall: () => void }) {
-  return (
-    <button type="button" className="install-btn" onClick={onInstall}>
-      <Icon name="download" />
-      <span>Install app</span>
-    </button>
-  );
-}

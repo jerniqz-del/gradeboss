@@ -21,8 +21,8 @@ export function AddActivityForm({
 
   if (!open) {
     return (
-      <button type="button" className="ghost" onClick={() => setOpen(true)}>
-        Add activity
+      <button type="button" className="primary" onClick={() => setOpen(true)}>
+        + Create Checklist
       </button>
     );
   }
