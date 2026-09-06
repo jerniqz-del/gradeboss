@@ -141,6 +141,12 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: var(--font);
@@ -1301,12 +1307,25 @@ button.ghost.back {
 
 /* Desktop (>= 900px) */
 @media (min-width: 900px) {
+  html,
+  body {
+    overflow: hidden;
+  }
+
+  #root,
+  .app {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
   .app-body {
     display: grid;
     grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     flex: 1;
     min-height: 0;
+    overflow: hidden;
   }
 
   .app-body.is-sidebar-collapsed {
@@ -1332,10 +1351,12 @@ button.ghost.back {
     -webkit-backdrop-filter: blur(20px) saturate(1.15);
     padding: calc(var(--space-4) + var(--safe-top)) 14px var(--space-4);
     padding-left: calc(14px + var(--safe-left));
-    position: sticky;
+    position: fixed;
     top: 0;
-    height: 100vh;
+    left: 0;
+    width: var(--sidebar-w);
     height: 100dvh;
+    z-index: 25;
     overflow: hidden;
   }
 
@@ -1346,6 +1367,8 @@ button.ghost.back {
 
   .content {
     grid-column: 2;
+    min-height: 0;
+    overflow: auto;
     max-width: none;
     padding: 28px 32px 40px;
     padding-bottom: 40px;
