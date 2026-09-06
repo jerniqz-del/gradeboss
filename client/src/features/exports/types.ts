@@ -1,8 +1,10 @@
 import type { SchoolClass } from "../../classes";
 import type { AdvisoryStore } from "../../models/advisory";
+import type { CalendarStore } from "../../models/calendar";
 import type { LegacyGradebook } from "../../models/legacy";
 import type { TeacherProfile } from "../../models/teacher-profile";
 import type { TeachingLoad } from "../../models/teaching-load";
+import type { WorkplaceStore } from "../../models/workplace";
 
 export const BACKUP_FORMAT = "gradeboss-backup";
 export const SEALED_FORMAT = "gradeboss-backup-sealed";
@@ -19,6 +21,8 @@ export interface BackupBundle {
   legacy: LegacyGradebook;
   schoolClasses: SchoolClass[];
   advisory: AdvisoryStore;
+  calendar?: CalendarStore;
+  workplace?: WorkplaceStore;
 }
 
 export interface SealedBackup {

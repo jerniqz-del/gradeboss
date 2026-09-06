@@ -23,7 +23,7 @@ function sampleLearners(): Learner[] {
         firstName,
         middleName,
         sex,
-        birthdate: `201${i}-0${(i % 9) + 1}-15`,
+        birthdate: i === 0 ? "2013-09-06" : `201${i}-0${(i % 9) + 1}-15`,
         avatarAssignment: "auto" as const,
       })),
     ),

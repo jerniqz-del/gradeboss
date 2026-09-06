@@ -23,6 +23,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "./useTheme";
 import { AdvisoryView } from "./features/advisory/AdvisoryView";
 import { AttendanceView } from "./features/attendance/AttendanceView";
+import { CalendarView } from "./features/calendar/CalendarView";
 import { ChecklistView } from "./features/checklist/ChecklistView";
 import { DashboardView } from "./features/dashboard/DashboardView";
 import { BackupPanel } from "./features/exports/BackupPanel";
@@ -31,6 +32,7 @@ import { GradingSheetView } from "./features/grading-sheet/GradingSheetView";
 
 type View =
   | "dashboard"
+  | "calendar"
   | "advisory"
   | "classes"
   | "students"
@@ -43,6 +45,7 @@ type View =
 
 const NAV: Array<{ id: View; label: string; short?: string; icon: string }> = [
   { id: "dashboard", label: "Dashboard", short: "Home", icon: "chart" },
+  { id: "calendar", label: "Calendar", short: "Cal", icon: "calendar-days" },
   { id: "advisory", label: "Advisory", icon: "clipboard" },
   { id: "classes", label: "Classes", icon: "board" },
   { id: "students", label: "Students", icon: "users" },
@@ -115,6 +118,7 @@ export default function App() {
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedLoadId, setSelectedLoadId] = useState<string | null>(null);
   const [rosterLoadId, setRosterLoadId] = useState<string | null>(null);
+  const [calendarDate, setCalendarDate] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { canInstall, installed, install } = useInstallPrompt();
   const online = useOnline();
@@ -230,6 +234,22 @@ export default function App() {
               setView("sheet");
             }}
             onOpenAdvisory={() => setView("advisory")}
+            onOpenCalendar={(date) => {
+              setCalendarDate(date || null);
+              setView("calendar");
+            }}
+            onOpenClasses={() => setView("classes")}
+            onOpenLoads={(id) => {
+              if (id) setRosterLoadId(id);
+              setView("loads");
+            }}
+          />
+        )}
+        {view === "calendar" && (
+          <CalendarView
+            selectedLoadId={selectedLoadId}
+            initialDate={calendarDate}
+            onSelectLoad={setSelectedLoadId}
           />
         )}
         {view === "advisory" && <AdvisoryView />}

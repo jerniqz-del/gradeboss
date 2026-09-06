@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-06 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 9–10 complete — Phase 11 next |
-| **Active phase** | 11 (Teacher tools & classroom suite) |
+| **Overall status** | 🔄 Phase 12 in progress |
+| **Active phase** | 12 (Calendar & workplace dashboard) |
 
 ---
 
@@ -60,7 +60,7 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 | **SF1** | Import links to matching teaching-load rosters (grade + section + SY) |
 | **Gradebook** | DepEd teaching loads + score grid (WW/PT/ST/TE, terms, transmutation); G1–12 |
 | **Advisory** | One active class per SY, grade matrix, GA (MAPEH once), GTF v1.0 export/import |
-| **Views** | Dashboard, Advisory, Attendance, Classes, Students, Loads, Sheet, Plans (backup), Profile |
+| **Views** | Dashboard, Calendar, Advisory, Attendance, Classes, Students, Loads, Sheet, Checklist, Plans (backup), Profile |
 | **Exports** | CSV, JSON backup, DepEd ECR Excel, class-record / learner / completion / analysis / advisory / SF2 PDFs |
 | **PWA** | Vite + Workbox, offline banner, install prompt; `/templates/` CacheFirst for optional ECR overlay |
 | **UI** | Material-inspired flat + elevation, light/dark/system themes |
@@ -122,7 +122,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 9 | Excel & PDF reports | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #12](https://github.com/jerniqz-del/gradeboss/pull/12) |
 | 10 | Performance checklist & quick grade | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #13](https://github.com/jerniqz-del/gradeboss/pull/13) |
 | 11 | Teacher tools & classroom suite | ⬜ Not started | — | — | |
-| 12 | Calendar & workplace dashboard | ⬜ Not started | — | — | |
+| 12 | Calendar & workplace dashboard | 🔄 In progress | 2026-09-06 | — | |
 | 13 | Encrypted backup, sync bridge & mobile | ⬜ Not started | — | — | |
 | 14 | Help center, polish & release parity | ⬜ Not started | — | — | |
 
@@ -688,6 +688,7 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-06 | 9 | Phase 9 complete — DepEd ECR Excel, class/learner/completion/analysis/advisory PDFs | Agent |
 | 2026-09-06 | 10 | Started Phase 10 — performance checklist & quick grade | Agent |
 | 2026-09-06 | 10 | Phase 10 complete — checklist publish to WW/PT, quick grade, undo/redo, score transfer | Agent |
+| 2026-09-06 | 12 | Started Phase 12 — calendar & workplace dashboard | Agent |
 
 ### How to update when a phase finishes
 

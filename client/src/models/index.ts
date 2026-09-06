@@ -8,3 +8,5 @@ export * from "./advisory";
 export * from "./attendance";
 export * from "./checklist";
 export * from "./score-history";
+export * from "./calendar";
+export * from "./workplace";

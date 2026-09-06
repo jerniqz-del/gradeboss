@@ -3,6 +3,8 @@ import type { LegacyGradebook } from "../../models/legacy";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { SchoolClass } from "../../classes";
 import { createEmptyAdvisoryStore, type AdvisoryStore } from "../../models/advisory";
+import { createEmptyCalendarStore, type CalendarStore } from "../../models/calendar";
+import { createEmptyWorkplaceStore, type WorkplaceStore } from "../../models/workplace";
 import { parseAdvisoryStore } from "../../domain/advisory/transfer";
 import { BACKUP_FORMAT, BACKUP_VERSION, type BackupBundle } from "./types";
 
@@ -39,6 +41,8 @@ export function buildBackupBundle(input: {
   legacy?: LegacyGradebook;
   schoolClasses?: SchoolClass[];
   advisory?: AdvisoryStore;
+  calendar?: CalendarStore;
+  workplace?: WorkplaceStore;
   exportedAt?: string;
 }): BackupBundle {
   return {
@@ -50,6 +54,8 @@ export function buildBackupBundle(input: {
     legacy: input.legacy || { students: [], courses: [], grades: [] },
     schoolClasses: input.schoolClasses || [],
     advisory: input.advisory || createEmptyAdvisoryStore(),
+    calendar: input.calendar || createEmptyCalendarStore(),
+    workplace: input.workplace || createEmptyWorkplaceStore(),
   };
 }
 
@@ -77,6 +83,8 @@ export function parseBackupBundle(value: unknown): BackupBundle {
     legacy: asLegacy(item.legacy),
     schoolClasses: asArray<SchoolClass>(item.schoolClasses),
     advisory: parseAdvisoryStore(item.advisory),
+    calendar: item.calendar || createEmptyCalendarStore(),
+    workplace: item.workplace || createEmptyWorkplaceStore(),
   };
 }
 
@@ -118,6 +126,12 @@ export function mergeBackupBundles(local: BackupBundle, incoming: BackupBundle):
       importBatches: mergeById(local.advisory.importBatches, incoming.advisory.importBatches),
       sourceMappings: mergeById(local.advisory.sourceMappings, incoming.advisory.sourceMappings),
     },
+    calendar: {
+      version: 1,
+      events: mergeById(local.calendar?.events || [], incoming.calendar?.events || []),
+      filters: incoming.calendar?.filters || local.calendar?.filters || createEmptyCalendarStore().filters,
+    },
+    workplace: incoming.workplace || local.workplace || createEmptyWorkplaceStore(),
     exportedAt: incoming.exportedAt,
   });
 }
