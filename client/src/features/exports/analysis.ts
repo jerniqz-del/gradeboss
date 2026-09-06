@@ -1,7 +1,6 @@
 /**
- * Compact class-analysis stats for PDF export.
- * Port of eclassrecord `class-analysis.js` `computeClassAnalysis` (no charts).
- * Full interactive analysis UI is Phase 11.
+ * Class-analysis stats for PDF export and the Phase 11 Teacher Tools view.
+ * Port of eclassrecord `class-analysis.js` `computeClassAnalysis`.
  */
 
 import { computeTermResult, isMapehSubject, isPassing } from "../../domain/grading";
@@ -23,6 +22,13 @@ export interface AssessmentStats {
   stdDev: number;
   mps: number;
   mastery: string;
+  min: number;
+  max: number;
+  itemPassRate: number;
+  distribution: number[];
+  performanceLevel: { advanced: number; proficient: number; developing: number; beginning: number };
+  variability: string;
+  discriminationLabel: string;
 }
 
 export interface AnalysisLearner {
@@ -92,6 +98,25 @@ function masteryLabel(mps: number): string {
   return "Difficult / reteaching needed";
 }
 
+function performanceBucket(percent: number): "advanced" | "proficient" | "developing" | "beginning" {
+  if (percent >= 90) return "advanced";
+  if (percent >= 75) return "proficient";
+  if (percent >= 50) return "developing";
+  return "beginning";
+}
+
+function discriminationLabel(scores: number[], hps: number): string {
+  if (scores.length < 6 || hps <= 0) return "Insufficient data";
+  const sorted = [...scores].sort((a, b) => b - a);
+  const groupSize = Math.max(1, Math.round(sorted.length * 0.27));
+  const upper = sorted.slice(0, groupSize);
+  const lower = sorted.slice(sorted.length - groupSize);
+  const gap = (mean(upper) / hps) * 100 - (mean(lower) / hps) * 100;
+  if (gap >= 30) return "Strong separation";
+  if (gap >= 15) return "Moderate separation";
+  return "Weak separation";
+}
+
 function round1(value: number): number {
   return Math.round(value * 10) / 10;
 }
@@ -116,6 +141,14 @@ export function computeClassAnalysis(
     });
     const avg = mean(scores);
     const mps = hps > 0 ? (avg / hps) * 100 : 0;
+    const distribution = [0, 0, 0, 0, 0];
+    const performanceLevel = { advanced: 0, proficient: 0, developing: 0, beginning: 0 };
+    scores.forEach((score) => {
+      const pct = hps > 0 ? (score / hps) * 100 : 0;
+      distribution[Math.min(4, Math.floor(pct / 20))] += 1;
+      performanceLevel[performanceBucket(pct)] += 1;
+    });
+    const deviation = stdDev(scores);
     return {
       title: assessment.title || assessment.component,
       component: assessment.component,
@@ -124,9 +157,16 @@ export function computeClassAnalysis(
       mean: round1(avg),
       median: round1(median(scores)),
       mode: mode(scores),
-      stdDev: round1(stdDev(scores)),
+      stdDev: round1(deviation),
       mps: round1(mps),
       mastery: masteryLabel(mps),
+      min: scores.length ? Math.min(...scores) : 0,
+      max: scores.length ? Math.max(...scores) : 0,
+      itemPassRate: scores.length > 0 && hps > 0 ? round1((scores.filter((score) => score >= hps * 0.75).length / scores.length) * 100) : 0,
+      distribution,
+      performanceLevel,
+      variability: deviation <= hps * 0.1 ? "consistent" : deviation <= hps * 0.2 ? "moderately varied" : "highly varied",
+      discriminationLabel: discriminationLabel(scores, hps),
     };
   });
 
