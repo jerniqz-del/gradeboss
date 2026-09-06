@@ -119,7 +119,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 6 | Export, print & backup (CSV/JSON) | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #9](https://github.com/jerniqz-del/gradeboss/pull/9) (stacked on #8) |
 | 7 | Advisory class & grade transfer | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #10](https://github.com/jerniqz-del/gradeboss/pull/10) (stacked on #9) |
 | 8 | Attendance tracker & SF2 | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #11](https://github.com/jerniqz-del/gradeboss/pull/11) |
-| 9 | Excel & PDF reports | ✅ Complete | 2026-09-06 | 2026-09-06 | |
+| 9 | Excel & PDF reports | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #12](https://github.com/jerniqz-del/gradeboss/pull/12) |
 | 10 | Performance checklist & quick grade | ⬜ Not started | — | — | |
 | 11 | Teacher tools & classroom suite | ⬜ Not started | — | — | |
 | 12 | Calendar & workplace dashboard | ⬜ Not started | — | — | |
