@@ -4,6 +4,7 @@ import type { AttendanceState } from "./attendance";
 import type { PerformanceChecklist } from "./checklist";
 import type { Learner } from "./learner";
 import type { ScoreHistoryEntry } from "./score-history";
+import type { SimulationHistoryEntry } from "./simulation";
 import type {
   ComponentWeights,
   GradingPolicy,
@@ -33,6 +34,8 @@ export interface TeachingLoad {
   checklists?: PerformanceChecklist[];
   /** Per-cell score audit (Phase 10). */
   scoreHistory?: ScoreHistoryEntry[];
+  /** Applied grade-simulator history (Phase 11). */
+  simulationHistory?: SimulationHistoryEntry[];
   createdAt: string;
   updatedAt: string;
 }

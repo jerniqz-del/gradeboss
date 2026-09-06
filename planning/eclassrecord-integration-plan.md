@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-06 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 9–10 complete — Phase 11 next |
-| **Active phase** | 11 (Teacher tools & classroom suite) |
+| **Overall status** | 🔄 Phase 11 complete — Phase 12 next |
+| **Active phase** | 12 (Calendar & workplace dashboard) |
 
 ---
 
@@ -121,7 +121,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 8 | Attendance tracker & SF2 | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #11](https://github.com/jerniqz-del/gradeboss/pull/11) |
 | 9 | Excel & PDF reports | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #12](https://github.com/jerniqz-del/gradeboss/pull/12) |
 | 10 | Performance checklist & quick grade | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #13](https://github.com/jerniqz-del/gradeboss/pull/13) |
-| 11 | Teacher tools & classroom suite | ⬜ Not started | — | — | |
+| 11 | Teacher tools & classroom suite | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #14](https://github.com/jerniqz-del/gradeboss/pull/14) (stacked on #13) |
 | 12 | Calendar & workplace dashboard | ⬜ Not started | — | — | |
 | 13 | Encrypted backup, sync bridge & mobile | ⬜ Not started | — | — | |
 | 14 | Help center, polish & release parity | ⬜ Not started | — | — | |
@@ -475,7 +475,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 ---
 
-### Phase 11 — Teacher tools & classroom suite
+### Phase 11 — Teacher tools & classroom suite ✅
 
 **Goal:** Classroom management utilities from desktop app.
 
@@ -489,17 +489,17 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | P1 | Name Picker (no-repeat roulette + avatars) | name picker modules |
 | P1 | Grade Simulator (what-if scoring) | simulator |
 | P2 | Class Analysis (stats, rankings, distribution) | `class-analysis.js` |
-| P3 | Classroom timer, agenda, participation tracker | `classroom-management-*.js` |
-| P3 | Seating chart, exit tickets, anecdotal notes | classroom mgmt |
-| P4 | Offline games (2048, Sudoku, etc.) | `classroom-games-core.js`, `games/` |
+| P3 | Classroom timer, agenda, participation tracker | classroom-management-*.js — deferred to Phase 12+ |
+| P3 | Seating chart, exit tickets, anecdotal notes | deferred to Phase 12+ |
+| P4 | Offline games (2048, Sudoku, etc.) | deferred (PWA cache size) |
 
 **Deliverables:**
-- Teacher Tools view (new nav section)
-- P1 features first; P3/P4 optional stretch
+- [x] Teacher Tools view (new nav section)
+- [x] P1 features first; P3/P4 optional stretch (deferred)
 
 **Acceptance tests:**
-- Randomizer produces balanced groups for sample roster
-- Simulator recomputes TG using Phase 2 engine
+- [x] Randomizer produces balanced groups for sample roster
+- [x] Simulator recomputes TG using Phase 2 engine
 
 **Exit criteria:** P1 tools shipped; P3/P4 tracked as follow-ups if deferred.
 
@@ -688,6 +688,8 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-06 | 9 | Phase 9 complete — DepEd ECR Excel, class/learner/completion/analysis/advisory PDFs | Agent |
 | 2026-09-06 | 10 | Started Phase 10 — performance checklist & quick grade | Agent |
 | 2026-09-06 | 10 | Phase 10 complete — checklist publish to WW/PT, quick grade, undo/redo, score transfer | Agent |
+| 2026-09-06 | 11 | Started Phase 11 — teacher tools & classroom suite | Agent |
+| 2026-09-06 | 11 | Phase 11 complete — group randomizer, name picker, grade simulator, class analysis; P3/P4 deferred | Agent |
 
 ### How to update when a phase finishes
 
@@ -725,4 +727,4 @@ Append a row when a phase status changes. **Do not delete entries.**
 
 ---
 
-*Next action: Begin **Phase 11 — Teacher tools & classroom suite**.*
+*Next action: Begin **Phase 12 — Calendar & workplace dashboard**.*

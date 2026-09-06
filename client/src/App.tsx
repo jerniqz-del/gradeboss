@@ -26,6 +26,7 @@ import { AttendanceView } from "./features/attendance/AttendanceView";
 import { ChecklistView } from "./features/checklist/ChecklistView";
 import { DashboardView } from "./features/dashboard/DashboardView";
 import { BackupPanel } from "./features/exports/BackupPanel";
+import { TeacherToolsView } from "./features/teacher-tools/TeacherToolsView";
 import { TeachingLoadsView } from "./features/teaching-loads/TeachingLoadsView";
 import { GradingSheetView } from "./features/grading-sheet/GradingSheetView";
 
@@ -37,6 +38,7 @@ type View =
   | "loads"
   | "sheet"
   | "checklist"
+  | "tools"
   | "attendance"
   | "plans"
   | "profile";
@@ -49,6 +51,7 @@ const NAV: Array<{ id: View; label: string; short?: string; icon: string }> = [
   { id: "loads", label: "Loads", icon: "book" },
   { id: "sheet", label: "Sheet", icon: "pencil" },
   { id: "checklist", label: "Checklist", short: "Check", icon: "list-checks" },
+  { id: "tools", label: "Tools", icon: "wrench" },
   { id: "attendance", label: "Attendance", short: "Attend", icon: "calendar" },
   { id: "profile", label: "Profile", icon: "user" },
 ];
@@ -268,6 +271,9 @@ export default function App() {
               setView("sheet");
             }}
           />
+        )}
+        {view === "tools" && (
+          <TeacherToolsView selectedLoadId={selectedLoadId} onSelectLoad={setSelectedLoadId} />
         )}
         {view === "plans" && <Plans />}
         {view === "profile" && (

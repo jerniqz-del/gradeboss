@@ -17,3 +17,8 @@ export function printGradingSheet(): void {
 export function printSf2Report(): void {
   printWithClass("print-sf2");
 }
+
+/** Print group lists from Teacher Tools (hides app chrome, shows `.tools-print`). */
+export function printGroupLists(): void {
+  printWithClass("print-groups");
+}
