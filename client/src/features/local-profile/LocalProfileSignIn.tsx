@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { createLocalUser, type User } from "../../auth";
 import { Icon } from "../../Icon";
 import {
-  connectLocalUsersFolder,
   createLocalProfile,
   getLocalFolderStatus,
   openLocalProfile,
@@ -10,39 +9,53 @@ import {
   type LocalProfileMeta,
 } from "../../storage/local-profile";
 
+function initial(name: string): string {
+  const trimmed = name.trim();
+  return trimmed ? trimmed[0].toUpperCase() : "?";
+}
+
+function shortName(name: string): string {
+  return name.trim().length > 18 ? `${name.trim().slice(0, 17)}…` : name.trim();
+}
+
 export function LocalProfileSignIn({ onSignedIn }: { onSignedIn: (user: User) => void }) {
   const [status, setStatus] = useState<LocalFolderStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [name, setName] = useState("");
-  const [school, setSchool] = useState("");
-  const [pin, setPin] = useState("");
-  const [copyDeviceData, setCopyDeviceData] = useState(false);
+  const [mode, setMode] = useState<"pick" | "unlock" | "create">("pick");
+  const [selected, setSelected] = useState<LocalProfileMeta | null>(null);
   const [unlockPin, setUnlockPin] = useState("");
-  const [selectedId, setSelectedId] = useState("");
+  const [name, setName] = useState("");
+  const [pin, setPin] = useState("");
 
-  const refresh = async () => {
-    setStatus(await getLocalFolderStatus());
-  };
+  const users = status?.users ?? [];
 
   useEffect(() => {
-    void refresh();
+    void getLocalFolderStatus().then(setStatus);
   }, []);
 
-  const users: LocalProfileMeta[] = status?.users ?? [];
-
-  const chooseFolder = async () => {
+  const open = async (profile: LocalProfileMeta, pinValue: string) => {
     setBusy(true);
     setError(null);
     try {
-      await connectLocalUsersFolder();
-      await refresh();
+      const meta = await openLocalProfile(profile.id, pinValue);
+      onSignedIn(createLocalUser(meta.displayName, meta.id));
     } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return;
-      setError(err instanceof Error ? err.message : "Could not open the Documents folder.");
+      setError(err instanceof Error ? err.message : "Could not open that profile.");
     } finally {
       setBusy(false);
     }
+  };
+
+  const selectProfile = (profile: LocalProfileMeta) => {
+    setError(null);
+    if (profile.pin) {
+      setSelected(profile);
+      setUnlockPin("");
+      setMode("unlock");
+      return;
+    }
+    void open(profile, "");
   };
 
   const create = async () => {
@@ -51,144 +64,125 @@ export function LocalProfileSignIn({ onSignedIn }: { onSignedIn: (user: User) =>
     try {
       const meta = await createLocalProfile({
         displayName: name,
-        schoolName: school,
         pin,
-        copyDeviceData,
       });
       onSignedIn(createLocalUser(meta.displayName, meta.id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not create a local profile.");
+      setError(err instanceof Error ? err.message : "Could not create a profile.");
     } finally {
       setBusy(false);
     }
   };
 
-  const open = async (id: string) => {
-    setBusy(true);
-    setError(null);
-    try {
-      const meta = await openLocalProfile(id, unlockPin);
-      onSignedIn(createLocalUser(meta.displayName, meta.id));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not open that local profile.");
-    } finally {
-      setBusy(false);
-    }
-  };
+  if (mode === "create") {
+    return (
+      <div className="profile-gate-body">
+        <h2>Create New Profile</h2>
+        <p className="profile-gate-sub">A local profile on this device. Sync to school Cloudflare later.</p>
+        {error ? <div className="banner error">{error}</div> : null}
+        <form
+          className="profile-gate-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void create();
+          }}
+        >
+          <label>
+            Your name
+            <input value={name} onChange={(event) => setName(event.target.value)} required placeholder="Teacher name" />
+          </label>
+          <label>
+            Optional PIN
+            <input
+              type="password"
+              inputMode="numeric"
+              autoComplete="new-password"
+              value={pin}
+              onChange={(event) => setPin(event.target.value)}
+              placeholder="4–8 digits"
+            />
+          </label>
+          <button type="submit" className="profile-gate-primary" disabled={busy || !name.trim()}>
+            Create profile
+          </button>
+          <button type="button" className="profile-gate-text" onClick={() => setMode("pick")}>
+            Back
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  if (mode === "unlock" && selected) {
+    return (
+      <div className="profile-gate-body">
+        <h2>{selected.displayName}</h2>
+        <p className="profile-gate-sub">Enter your PIN to unlock this profile.</p>
+        {error ? <div className="banner error">{error}</div> : null}
+        <form
+          className="profile-gate-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void open(selected, unlockPin);
+          }}
+        >
+          <label>
+            PIN
+            <input
+              type="password"
+              inputMode="numeric"
+              autoComplete="current-password"
+              value={unlockPin}
+              onChange={(event) => setUnlockPin(event.target.value)}
+              placeholder="4–8 digits"
+              autoFocus
+            />
+          </label>
+          <button type="submit" className="profile-gate-primary" disabled={busy || !unlockPin.trim()}>
+            Unlock
+          </button>
+          <button type="button" className="profile-gate-text" onClick={() => setMode("pick")}>
+            Back
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   return (
-    <div className="auth-local">
-      <h3>Local profile</h3>
-      <p className="muted">
-        Stay fully offline. GradeBoss writes this device’s database under{" "}
-        <code>{status?.pathHint || "Documents/ecrecord_users_local"}</code>.
-      </p>
-
+    <div className="profile-gate-body">
+      <h2>Who is grading today?</h2>
+      <p className="profile-gate-sub">Select your user profile to unlock your class loads and records.</p>
       {error ? <div className="banner error">{error}</div> : null}
-
-      {!status?.supported ? (
-        <div className="banner warn">
-          <Icon name="cloud-off" />
-          This browser cannot write to Documents. Use Chrome or Edge on a computer to create{" "}
-          <code>ecrecord_users_local</code>, or continue after choosing a folder on a supported browser.
-        </div>
-      ) : null}
-
-      <button type="button" className="primary auth-local-folder" onClick={() => void chooseFolder()} disabled={busy}>
-        {status?.connected ? "Change Documents folder" : "Choose Documents folder"}
-      </button>
-      {status?.connected ? (
-        <p className="muted small">
-          Connected to <strong>{status.folderName}</strong> ({status.pathHint}).
-        </p>
-      ) : (
-        <p className="muted small">Pick your Documents folder. GradeBoss will create ecrecord_users_local inside it.</p>
-      )}
-
       {users.length > 0 ? (
-        <div className="local-user-list">
-          <h4>Open an existing profile</h4>
-          <ul>
-            {users.map((user) => (
-              <li key={user.id}>
-                <button
-                  type="button"
-                  className={selectedId === user.id ? "ghost local-user-btn active" : "ghost local-user-btn"}
-                  onClick={() => setSelectedId(user.id)}
-                >
-                  <strong>{user.displayName}</strong>
-                  <span className="muted small">{user.schoolName || user.id}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-          {selectedId && users.find((user) => user.id === selectedId)?.pin ? (
-            <label>
-              PIN
-              <input
-                type="password"
-                inputMode="numeric"
-                autoComplete="current-password"
-                value={unlockPin}
-                onChange={(event) => setUnlockPin(event.target.value)}
-                placeholder="4–8 digits"
-              />
-            </label>
-          ) : null}
-          <button
-            type="button"
-            className="primary"
-            disabled={busy || !selectedId}
-            onClick={() => void open(selectedId)}
-          >
-            Open local profile
-          </button>
+        <div className="profile-tile-grid">
+          {users.map((profile) => (
+            <button
+              key={profile.id}
+              type="button"
+              className="profile-tile"
+              onClick={() => selectProfile(profile)}
+              disabled={busy}
+            >
+              <span className="profile-tile-avatar">{initial(profile.displayName)}</span>
+              <span className="profile-tile-name">{shortName(profile.displayName)}</span>
+              {profile.pin ? (
+                <span className="profile-tile-lock">
+                  <Icon name="lock" />
+                  PIN Locked
+                </span>
+              ) : (
+                <span className="profile-tile-lock">Open</span>
+              )}
+            </button>
+          ))}
         </div>
-      ) : null}
-
-      <form
-        className="local-profile-form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void create();
-        }}
-      >
-        <h4>Create a local profile</h4>
-        <label>
-          Your name
-          <input value={name} onChange={(event) => setName(event.target.value)} required placeholder="Teacher name" />
-        </label>
-        <label>
-          School (optional)
-          <input value={school} onChange={(event) => setSchool(event.target.value)} placeholder="School name" />
-        </label>
-        <label>
-          Optional PIN
-          <input
-            type="password"
-            inputMode="numeric"
-            autoComplete="new-password"
-            value={pin}
-            onChange={(event) => setPin(event.target.value)}
-            placeholder="4–8 digits"
-          />
-        </label>
-        <label className="checkbox-row">
-          <input
-            type="checkbox"
-            checked={copyDeviceData}
-            onChange={(event) => setCopyDeviceData(event.target.checked)}
-          />
-          Copy grade data already on this device
-        </label>
-        <button
-          type="submit"
-          className="primary"
-          disabled={busy || !name.trim() || Boolean(status?.supported && !status.connected)}
-        >
-          Use local profile
-        </button>
-      </form>
+      ) : (
+        <p className="profile-gate-empty">No profiles on this device yet.</p>
+      )}
+      <button type="button" className="profile-create-btn" onClick={() => setMode("create")} disabled={busy}>
+        Create New Profile
+      </button>
     </div>
   );
 }

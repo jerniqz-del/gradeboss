@@ -14,6 +14,7 @@ import {
 } from "./local-folder";
 
 export const LOCAL_PROFILE_ID_KEY = "gradeboss:local-profile-id";
+export const LOCAL_REGISTRY_KEY = "gradeboss:local-profiles";
 export const LOCAL_USERS_INDEX = "users.json";
 export const LOCAL_DATABASE_FILE = "database.json";
 export const LOCAL_PROFILE_FILE = "profile.json";
@@ -133,6 +134,33 @@ function emptyIndex(): LocalUsersIndex {
   return { version: 1, folder: LOCAL_USERS_FOLDER, users: [] };
 }
 
+function readRegistry(): LocalProfileMeta[] {
+  try {
+    const raw = localStorage.getItem(LOCAL_REGISTRY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { users?: LocalProfileMeta[] };
+    return Array.isArray(parsed.users) ? parsed.users : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeRegistry(users: LocalProfileMeta[]): void {
+  localStorage.setItem(LOCAL_REGISTRY_KEY, JSON.stringify({ version: 1, users }));
+}
+
+function upsertRegistry(meta: LocalProfileMeta): void {
+  const users = readRegistry().filter((user) => user.id !== meta.id).concat(meta);
+  writeRegistry(users);
+}
+
+function mergeProfiles(folderUsers: LocalProfileMeta[], registryUsers: LocalProfileMeta[]): LocalProfileMeta[] {
+  const byId = new Map<string, LocalProfileMeta>();
+  for (const user of registryUsers) byId.set(user.id, user);
+  for (const user of folderUsers) byId.set(user.id, user);
+  return [...byId.values()].sort((a, b) => a.displayName.localeCompare(b.displayName));
+}
+
 async function readIndex(folder: FileSystemDirectoryHandle): Promise<LocalUsersIndex> {
   const stored = await readJsonFile<LocalUsersIndex>(folder, LOCAL_USERS_INDEX);
   if (!stored || !Array.isArray(stored.users)) return emptyIndex();
@@ -150,20 +178,20 @@ export async function connectLocalUsersFolder(): Promise<FileSystemDirectoryHand
 export async function getLocalFolderStatus(): Promise<LocalFolderStatus> {
   const supported = isLocalFolderSupported();
   const folder = supported ? await restoreLocalUsersFolder() : null;
-  const users = folder ? (await readIndex(folder)).users : [];
+  const folderUsers = folder ? (await readIndex(folder)).users : [];
   return {
     supported,
     connected: Boolean(folder),
     folderName: folder?.name || LOCAL_USERS_FOLDER,
     pathHint: documentsPathHint(),
-    users,
+    users: mergeProfiles(folderUsers, readRegistry()),
   };
 }
 
 export async function listLocalProfiles(): Promise<LocalProfileMeta[]> {
   const folder = await restoreLocalUsersFolder();
-  if (!folder) return [];
-  return (await readIndex(folder)).users;
+  const folderUsers = folder ? (await readIndex(folder)).users : [];
+  return mergeProfiles(folderUsers, readRegistry());
 }
 
 function newProfileId(): string {
@@ -181,9 +209,6 @@ export async function createLocalProfile(input: {
   if (!displayName) throw new Error("Enter a name for this local profile.");
 
   const folder = await restoreLocalUsersFolder();
-  if (!folder && isLocalFolderSupported()) {
-    throw new Error(`Choose your Documents folder first so GradeBoss can create ${LOCAL_USERS_FOLDER}.`);
-  }
 
   if (!input.copyDeviceData) {
     await wipeGradeData();
@@ -216,26 +241,28 @@ export async function createLocalProfile(input: {
     index.users = index.users.filter((user) => user.id !== meta.id).concat(meta);
     await writeIndex(folder, index);
   }
+  upsertRegistry(meta);
   setCurrentLocalProfileId(meta.id);
   return meta;
 }
 
 export async function openLocalProfile(id: string, pin = ""): Promise<LocalProfileMeta> {
   const folder = await restoreLocalUsersFolder();
-  if (!folder) {
-    throw new Error(`Choose your Documents folder first (${documentsPathHint()}).`);
-  }
-  const index = await readIndex(folder);
-  const meta = index.users.find((user) => user.id === id);
-  if (!meta) throw new Error("That local profile was not found in ecrecord_users_local.");
+  const folderUsers = folder ? (await readIndex(folder)).users : [];
+  const meta = mergeProfiles(folderUsers, readRegistry()).find((user) => user.id === id);
+  if (!meta) throw new Error("That local profile was not found.");
   if (!(await verifyLocalProfilePin(meta.pin, pin))) {
     throw new Error("Wrong PIN for this local profile.");
   }
 
-  const userDir = await getChildDirectory(folder, meta.id, false);
-  const bundle = await readJsonFile<BackupBundle>(userDir, LOCAL_DATABASE_FILE);
-  if (bundle) {
-    await importBackupBundle(bundle, "replace");
+  if (folder) {
+    try {
+      const userDir = await getChildDirectory(folder, meta.id, false);
+      const bundle = await readJsonFile<BackupBundle>(userDir, LOCAL_DATABASE_FILE);
+      if (bundle) await importBackupBundle(bundle, "replace");
+    } catch {
+      // Folder copy may not exist yet — IndexedDB stays as the working copy.
+    }
   }
   setCurrentLocalProfileId(meta.id);
   return meta;
@@ -258,6 +285,7 @@ export async function persistLocalDatabase(): Promise<void> {
   await writeJsonFile(userDir, LOCAL_DATABASE_FILE, bundle);
   index.users = index.users.map((user) => (user.id === id ? next : user));
   await writeIndex(folder, index);
+  upsertRegistry(next);
 }
 
 let persistTimer: number | null = null;

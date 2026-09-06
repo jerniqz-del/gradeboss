@@ -23,6 +23,7 @@ const PATHS: Record<string, string> = {
   "list-checks": "M10 6h11M10 12h11M10 18h11M3 6l1.5 1.5L7 4M3 12l1.5 1.5L7 10M3 18l1.5 1.5L7 16",
   "calendar-days":
     "M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01",
+  lock: "M7 11V7a5 5 0 0 1 10 0v4M5 11h14v10H5z",
 };
 
 export function Icon({ name }: { name: string }) {
