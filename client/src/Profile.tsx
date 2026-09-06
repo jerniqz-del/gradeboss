@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { roleLabel, type User } from "./auth";
+import { BackupPanel } from "./features/exports/BackupPanel";
 import { ThemeToggle } from "./ThemeToggle";
 import type { ThemePreference } from "./theme";
 
@@ -102,6 +103,8 @@ export function Profile({
           Sign out
         </button>
       </div>
+
+      <BackupPanel />
     </section>
   );
 }
