@@ -52,6 +52,7 @@ const PATHS: Record<string, string> = {
 export function Icon({ name }: { name: string }) {
   return (
     <svg
+      className="icon"
       viewBox="0 0 24 24"
       width="18"
       height="18"

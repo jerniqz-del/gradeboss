@@ -319,7 +319,8 @@ select:focus:not(:focus-visible) {
 .install-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: center;
+  gap: 10px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 46%), var(--primary);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -644,7 +645,18 @@ button {
   font-family: inherit;
 }
 
+.icon {
+  display: block;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+}
+
 button.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   background: var(--gradient-primary);
   color: #fff;
   border: none;
@@ -669,6 +681,10 @@ button.primary:active {
 }
 
 button.ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   background: transparent;
   border: 1px solid var(--border);
   color: var(--muted);
@@ -1180,7 +1196,7 @@ button.ghost.back {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 6px;
   background: none;
   border: none;
   color: var(--muted);
@@ -1197,8 +1213,8 @@ button.ghost.back {
   color: var(--primary);
 }
 
-.bottom-nav .tab.active svg {
-  transform: translateY(-1px);
+.bottom-nav .tab svg {
+  display: block;
 }
 
 .bottom-nav .tab .avatar {
@@ -1223,6 +1239,7 @@ button.ghost.back {
 .nav-item {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 12px;
   padding: 10px 14px;
   border: none;
@@ -3782,14 +3799,20 @@ button.ghost.back {
   align-items: center;
   gap: 12px;
   min-height: 56px;
-  padding: 0 4px 12px;
+  padding: 0 14px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .sidebar-brand .brand-mark {
+  display: grid;
+  place-items: center;
   width: 40px;
   height: 40px;
   background: var(--primary);
+}
+
+.sidebar-brand .brand-mark .icon {
+  display: block;
 }
 
 .sidebar-brand-text h1 {
@@ -3812,7 +3835,7 @@ button.ghost.back {
 }
 
 .sidebar-kicker {
-  margin: 0 0 10px 10px;
+  margin: 0 0 10px 14px;
   font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: var(--tracking-caps);
@@ -3827,14 +3850,32 @@ button.ghost.back {
 
 .sidebar .nav-item {
   position: relative;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
   color: var(--sidebar-text);
   border-radius: 10px;
-  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-base);
+  line-height: 1.2;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar .nav-item .icon,
+.sidebar .install-btn .icon {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.sidebar .nav-item span,
+.sidebar .install-btn span {
+  display: block;
+  line-height: 1.2;
 }
 
 .sidebar-footer .nav-item {
   min-height: 42px;
-  padding: 9px 12px;
+  padding: 9px 14px;
   font-size: var(--fs-md);
 }
 
@@ -3850,8 +3891,10 @@ button.ghost.back {
 
 .sidebar-end .install-btn {
   width: 100%;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 12px;
   margin: 0;
+  padding: 10px 14px;
   min-height: 40px;
   background: transparent;
   border: 1px solid rgba(126, 224, 230, 0.45);
@@ -3866,6 +3909,7 @@ button.ghost.back {
 
 .sidebar-profile {
   justify-content: flex-start;
+  gap: 12px;
 }
 
 .sidebar .nav-item:hover {
@@ -3905,12 +3949,14 @@ button.ghost.back {
 .app-body.is-sidebar-collapsed .nav-item,
 .app-body.is-sidebar-collapsed .install-btn {
   justify-content: center;
-  padding-left: 10px;
-  padding-right: 10px;
+  gap: 0;
+  padding: 10px;
 }
 
 .app-body.is-sidebar-collapsed .sidebar-brand {
   justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .ecr-topbar {
@@ -3966,7 +4012,7 @@ button.ghost.back {
 .ecr-status {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-height: 32px;
   font-size: var(--fs-sm);
   font-weight: 650;
@@ -3996,6 +4042,7 @@ button.ghost.back {
 
 .ecr-backup-btn {
   min-height: 40px;
+  gap: 8px;
 }
 
 .ecr-backup-btn span {
@@ -4634,7 +4681,7 @@ button.ghost.back {
 
 @media (min-width: 900px) {
   .sidebar .nav-item:hover {
-    transform: translateX(3px);
+    transform: none;
   }
 
   .dash-stat:hover,
