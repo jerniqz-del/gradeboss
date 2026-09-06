@@ -1298,6 +1298,99 @@ button.ghost.back {
   line-height: 1.5;
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-5) 0 var(--space-4);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-local h3,
+.auth-local h4,
+.local-user-list h4,
+.local-profile-form h4,
+.local-folder-card h4 {
+  margin: 0 0 var(--space-2);
+  font-size: 1rem;
+}
+
+.auth-local-folder,
+.local-profile-form .primary,
+.local-user-list .primary,
+.local-folder-actions .primary,
+.local-folder-actions .ghost {
+  min-height: 44px;
+  width: 100%;
+}
+
+.local-profile-form,
+.local-user-list,
+.local-folder-card {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.local-profile-form label,
+.local-user-list label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.local-profile-form input,
+.local-user-list input {
+  font-size: 16px;
+  min-height: 44px;
+  width: 100%;
+}
+
+.local-user-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.local-user-btn {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.local-user-btn.active {
+  border-color: var(--primary);
+}
+
+.local-folder-actions {
+  display: grid;
+  gap: var(--space-2);
+}
+
+@media (min-width: 600px) {
+  .auth-card {
+    max-width: 28rem;
+  }
+
+  .local-folder-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .avatar {
   display: block;
   border-radius: 50%;

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Icon } from "../../Icon";
 import { exportBackupBundle, importBackupBundle } from "../../storage";
+import { persistLocalDatabase } from "../../storage/local-profile";
 import { backupFilename, downloadJson } from "./download";
 import { isSealedBackup, sealBackup, unsealBackup } from "./pin";
 import type { BackupMode } from "./types";
@@ -47,6 +48,7 @@ export function BackupPanel() {
         return;
       }
       const applied = await importBackupBundle(bundle, mode);
+      await persistLocalDatabase();
       setNotice(
         mode === "replace"
           ? `Restored ${applied.teachingLoads.length} teaching load${applied.teachingLoads.length === 1 ? "" : "s"}.`

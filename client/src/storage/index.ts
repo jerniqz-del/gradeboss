@@ -9,6 +9,13 @@ export {
   upsertTeachingLoadFromSchoolClass,
 } from "./sync-sf1";
 export { exportBackupBundle, importBackupBundle, wipeGradeData } from "./backup";
+export {
+  connectLocalUsersFolder,
+  createLocalProfile,
+  getLocalFolderStatus,
+  persistLocalDatabase,
+  scheduleLocalDatabasePersist,
+} from "./local-profile";
 export * from "./repositories/advisory";
 export * from "./repositories/calendar";
 export * from "./repositories/workplace";

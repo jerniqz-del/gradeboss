@@ -3,11 +3,17 @@ import { api, type Student } from "./api";
 import {
   clearUser,
   disableGoogleAutoSelect,
+  isLocalUser,
   loadUser,
   roleLabel,
   saveUser,
   type User,
 } from "./auth";
+import {
+  persistLocalDatabase,
+  scheduleLocalDatabasePersist,
+  setCurrentLocalProfileId,
+} from "./storage/local-profile";
 import { fullName, parseSf1, type ParsedSf1, type Sf1Learner } from "./sf1";
 import {
   countBySex,
@@ -138,16 +144,47 @@ export default function App() {
   }, [refresh]);
 
   const onSignedIn = useCallback((next: User) => {
+    if (!isLocalUser(next)) setCurrentLocalProfileId(null);
     saveUser(next);
     setUser(next);
   }, []);
 
   const signOut = useCallback(() => {
-    disableGoogleAutoSelect();
-    clearUser();
-    setUser(null);
-    setView("dashboard");
-  }, []);
+    void (async () => {
+      if (user && isLocalUser(user)) {
+        try {
+          await persistLocalDatabase();
+        } catch {
+          // Folder permission may have been revoked — session still clears.
+        }
+      }
+      setCurrentLocalProfileId(null);
+      disableGoogleAutoSelect();
+      clearUser();
+      setUser(null);
+      setView("dashboard");
+    })();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || !isLocalUser(user)) return;
+    const persist = () => {
+      void persistLocalDatabase();
+    };
+    persist();
+    const timer = window.setInterval(persist, 60_000);
+    document.addEventListener("visibilitychange", persist);
+    window.addEventListener("pagehide", persist);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", persist);
+      window.removeEventListener("pagehide", persist);
+    };
+  }, [user]);
+
+  useEffect(() => {
+    if (user && isLocalUser(user)) scheduleLocalDatabasePersist();
+  }, [students, user]);
 
   if (!user) {
     return <SignIn online={online} onSignedIn={onSignedIn} themePreference={preference} onThemeChange={setTheme} />;
@@ -218,7 +255,7 @@ export default function App() {
             <Avatar user={user} size={32} />
             <span className="profile-topbar-text">
               <span className="profile-topbar-name">{user.name}</span>
-              <span className="profile-topbar-role">{roleLabel(user.role)}</span>
+              <span className="profile-topbar-role">{roleLabel(user.role, user.authKind)}</span>
             </span>
           </button>
         </div>

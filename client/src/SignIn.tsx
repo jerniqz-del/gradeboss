@@ -5,6 +5,7 @@ import {
   userFromGoogleCredential,
   type User,
 } from "./auth";
+import { LocalProfileSignIn } from "./features/local-profile/LocalProfileSignIn";
 import { Icon } from "./Icon";
 import { ThemeToggle } from "./ThemeToggle";
 import type { ThemePreference } from "./theme";
@@ -97,16 +98,16 @@ export function SignIn({
             <span>School command center</span>
           </div>
         </div>
-        <h2>Sign in with your DepEd account</h2>
+        <h2>Sign in</h2>
         <p className="muted">
-          Use a Google account ending in @deped.gov.ph. Your grades stay on this
-          device.
+          Use a DepEd Google account, or a local profile that stays on this device
+          under Documents/ecrecord_users_local.
         </p>
 
         {!online && (
           <div className="banner warn">
             <Icon name="cloud-off" />
-            Connect to the internet to sign in with Google.
+            Google Sign-In needs the internet. Local profiles work offline.
           </div>
         )}
 
@@ -132,9 +133,16 @@ export function SignIn({
         )}
 
         <ul className="auth-notes">
-          <li>Teachers and admins: @deped.gov.ph only</li>
-          <li>Works offline after the first sign-in</li>
+          <li>DepEd Google: @deped.gov.ph</li>
+          <li>Local profile: no Google, database in Documents/ecrecord_users_local</li>
+          <li>Works offline after the first Google sign-in, or immediately with a local profile</li>
         </ul>
+
+        <div className="auth-divider" role="separator">
+          <span>or stay fully local</span>
+        </div>
+
+        <LocalProfileSignIn onSignedIn={onSignedIn} />
       </div>
     </div>
   );

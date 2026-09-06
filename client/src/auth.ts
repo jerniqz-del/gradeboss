@@ -1,4 +1,5 @@
 export type Role = "superAdmin" | "teacher";
+export type AuthKind = "google" | "local";
 
 export interface User {
   id: string;
@@ -7,7 +8,10 @@ export interface User {
   picture: string;
   role: Role;
   signedInAt: string;
+  authKind?: AuthKind;
 }
+
+export const LOCAL_EMAIL_SUFFIX = "@ecrecord.local";
 
 export const SUPER_ADMIN_EMAIL = "jerniqz@gmail.com";
 export const ALLOWED_DOMAIN = "deped.gov.ph";
@@ -43,8 +47,25 @@ export function isAllowedEmail(email: string): boolean {
   return normalized === SUPER_ADMIN_EMAIL || normalized.endsWith(`@${ALLOWED_DOMAIN}`);
 }
 
-export function roleLabel(role: Role): string {
+export function roleLabel(role: Role, kind?: AuthKind): string {
+  if (kind === "local") return "Local profile";
   return role === "superAdmin" ? "Super admin" : "DepEd teacher";
+}
+
+export function isLocalUser(user: User): boolean {
+  return user.authKind === "local" || user.email.endsWith(LOCAL_EMAIL_SUFFIX);
+}
+
+export function createLocalUser(name: string, profileId: string): User {
+  return {
+    id: profileId,
+    email: `${profileId}${LOCAL_EMAIL_SUFFIX}`,
+    name: name.trim(),
+    picture: "",
+    role: "teacher",
+    signedInAt: new Date().toISOString(),
+    authKind: "local",
+  };
 }
 
 function isUser(value: unknown): value is User {
@@ -56,7 +77,8 @@ function isUser(value: unknown): value is User {
     typeof user.name === "string" &&
     typeof user.picture === "string" &&
     (user.role === "superAdmin" || user.role === "teacher") &&
-    typeof user.signedInAt === "string"
+    typeof user.signedInAt === "string" &&
+    (user.authKind === undefined || user.authKind === "google" || user.authKind === "local")
   );
 }
 
@@ -65,7 +87,11 @@ export function loadUser(): User | null {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
     const stored = JSON.parse(raw) as StoredAuth;
-    if (!isUser(stored?.user) || !isAllowedEmail(stored.user.email)) {
+    if (!isUser(stored?.user)) {
+      localStorage.removeItem(KEY);
+      return null;
+    }
+    if (!isLocalUser(stored.user) && !isAllowedEmail(stored.user.email)) {
       localStorage.removeItem(KEY);
       return null;
     }
@@ -134,6 +160,7 @@ export function userFromGoogleCredential(credential: string): User {
     picture: payload.picture ?? "",
     role,
     signedInAt: new Date().toISOString(),
+    authKind: "google",
   };
 }
 
