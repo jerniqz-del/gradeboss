@@ -115,6 +115,7 @@ export function PublishModal({
           <button
             type="button"
             className="primary"
+            data-testid="chk-publish-confirm"
             disabled={!plan?.canApply || busy}
             onClick={() => {
               if (!plan) return;

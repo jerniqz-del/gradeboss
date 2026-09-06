@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../../api";
 import {
   addChecklistActivity,
@@ -76,34 +76,58 @@ export function ChecklistView({
     })();
   }, [onSelectLoad, refreshList, selectedLoadId]);
 
-  const persist = useCallback(async (next: TeachingLoad) => {
-    setLoad(next);
-    await api.saveTeachingLoad(next);
-    setLoads((current) => current.map((item) => (item.id === next.id ? next : item)));
-  }, []);
-
   const mapeh = load ? isMapehSubject(load.subject) : false;
   const activePart = mapeh ? mapePart : "";
+
+  const persistChain = useRef(Promise.resolve());
+  const loadRef = useRef<TeachingLoad | null>(null);
+  loadRef.current = load;
+  const termRef = useRef(term);
+  termRef.current = term;
+  const partRef = useRef<MapePart | "">(mapeh ? mapePart : "");
+  partRef.current = mapeh ? mapePart : "";
+
+  const persist = useCallback((next: TeachingLoad) => {
+    loadRef.current = next;
+    setLoad(next);
+    setLoads((current) => current.map((item) => (item.id === next.id ? next : item)));
+    persistChain.current = persistChain.current
+      .then(async () => {
+        const latest = loadRef.current;
+        if (latest) await api.saveTeachingLoad(latest);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Failed to save checklist");
+      });
+    return persistChain.current;
+  }, []);
+
+  const currentChecklist = () => {
+    const currentLoad = loadRef.current;
+    if (!currentLoad) return null;
+    return { load: currentLoad, checklist: findChecklist(currentLoad, termRef.current, partRef.current) };
+  };
 
   useEffect(() => {
     if (!load) return;
     if (findChecklist(load, term, activePart)) return;
-    void persist(ensureChecklist(load, term, activePart).load);
+    persist(ensureChecklist(load, term, activePart).load);
   }, [activePart, load, persist, term]);
 
   const checklist = load ? findChecklist(load, term, activePart) : undefined;
   const workingLoad = load;
 
-  const applyChecklist = async (nextChecklist: NonNullable<typeof checklist>, nextLoad = workingLoad) => {
-    if (!nextLoad) return;
-    await persist(upsertChecklist(nextLoad, nextChecklist));
+  const applyChecklist = (nextChecklist: NonNullable<typeof checklist>, nextLoad = loadRef.current) => {
+    if (!nextLoad) return persistChain.current;
+    return persist(upsertChecklist(nextLoad, nextChecklist));
   };
 
   const savePoints = (sessionId: string, learnerId: string, criterionId: string, value: number | "") => {
-    if (!checklist || !workingLoad) return;
+    const ctx = currentChecklist();
+    if (!ctx?.checklist) return;
     try {
-      const tracked = applyChecklistEntryTransaction(checklist, workingLoad, [{ sessionId, learnerId, criterionId, value }], { operation: "entry" });
-      void applyChecklist(tracked.checklist);
+      const tracked = applyChecklistEntryTransaction(ctx.checklist, ctx.load, [{ sessionId, learnerId, criterionId, value }], { operation: "entry" });
+      void applyChecklist(tracked.checklist, ctx.load);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save that score.");
@@ -111,14 +135,15 @@ export function ChecklistView({
   };
 
   const onNudge = (sessionId: string, learnerId: string, criterionId: string, delta: number) => {
-    if (!checklist || !workingLoad) return;
+    const ctx = currentChecklist();
+    if (!ctx?.checklist) return;
     try {
-      const nudged = nudgeChecklistEntry(checklist, workingLoad, sessionId, learnerId, criterionId, delta);
+      const nudged = nudgeChecklistEntry(ctx.checklist, ctx.load, sessionId, learnerId, criterionId, delta);
       const after = nudged.sessions.find((item) => item.id === sessionId)?.entries?.[learnerId]?.[criterionId];
-      const tracked = applyChecklistEntryTransaction(checklist, workingLoad, [{ sessionId, learnerId, criterionId, value: after ? after.points : "" }], {
+      const tracked = applyChecklistEntryTransaction(ctx.checklist, ctx.load, [{ sessionId, learnerId, criterionId, value: after ? after.points : "" }], {
         operation: "entry",
       });
-      void applyChecklist(tracked.checklist);
+      void applyChecklist(tracked.checklist, ctx.load);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update points.");
@@ -126,9 +151,10 @@ export function ChecklistView({
   };
 
   const onEditNote = (sessionId: string, learnerId: string, criterionId: string, note: string) => {
-    if (!checklist || !workingLoad) return;
+    const ctx = currentChecklist();
+    if (!ctx?.checklist) return;
     try {
-      void applyChecklist(setEntryNote(checklist, workingLoad, sessionId, learnerId, criterionId, note));
+      void applyChecklist(setEntryNote(ctx.checklist, ctx.load, sessionId, learnerId, criterionId, note), ctx.load);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not save note.");
     }
@@ -214,7 +240,7 @@ export function ChecklistView({
                 }
               }}
             />
-            <button type="button" className="ghost" onClick={() => setBulkOpen(true)}>
+            <button type="button" className="ghost" data-testid="chk-bulk" onClick={() => setBulkOpen(true)}>
               Bulk mark
             </button>
             <button
@@ -234,6 +260,7 @@ export function ChecklistView({
             <button
               type="button"
               className="primary"
+              data-testid="chk-publish"
               disabled={!publishable}
               onClick={() => setPublishActivityId(publishable?.activity?.id || publishable?.id || null)}
             >
@@ -366,10 +393,13 @@ export function ChecklistView({
           onClose={() => setBulkOpen(false)}
           onApply={(sessionId, criterionId, points, scope) => {
             try {
-              const result = bulkMarkChecklist(checklist, workingLoad, sessionId, criterionId, points, scope);
-              void applyChecklist(result.checklist);
+              const ctx = currentChecklist();
+              if (!ctx?.checklist) return;
+              const result = bulkMarkChecklist(ctx.checklist, ctx.load, sessionId, criterionId, points, scope);
+              void applyChecklist(result.checklist, ctx.load);
               setBulkOpen(false);
               setNotice("Bulk mark applied.");
+              setError(null);
             } catch (err) {
               setError(err instanceof Error ? err.message : "Could not bulk mark.");
             }
@@ -385,7 +415,9 @@ export function ChecklistView({
           onClose={() => setPublishActivityId(null)}
           onPublish={async (plan: ActivityPublicationPlan, pin: string) => {
             await requireToolsPin(pin);
-            const published = applyChecklistActivityPublication(checklist, workingLoad, plan);
+            const ctx = currentChecklist();
+            if (!ctx?.checklist) throw new Error("The checklist is no longer available.");
+            const published = applyChecklistActivityPublication(ctx.checklist, ctx.load, plan);
             await persist(upsertChecklist(published.load, published.checklist));
             setPublishActivityId(null);
             setNotice(`Published ${plan.activityTitle} to ${plan.assessmentTitle}.`);

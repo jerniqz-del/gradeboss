@@ -94,6 +94,7 @@ export function ChecklistGrid({
                       <button
                         type="button"
                         className="chk-step"
+                        data-testid="chk-plus"
                         aria-label={`Increase ${learnerDisplayName(learner)} ${activity?.title || ""}`}
                         disabled={published || Boolean(learner.transferredOutTerm) || (entry?.points ?? 0) >= max}
                         onClick={() => onNudge(session.id, learner.id, criterionId, 1)}

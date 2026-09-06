@@ -49,6 +49,7 @@ export function BulkMarkModal({
           Points (HPS {activity?.maxPointsPerSession ?? 0})
           <input
             inputMode="decimal"
+            data-testid="chk-bulk-points"
             value={points}
             onChange={(event) => setPoints(event.target.value)}
           />
@@ -73,7 +74,11 @@ export function BulkMarkModal({
             disabled={!session || !activity}
             onClick={() => {
               if (!session || !activity) return;
-              onApply(session.id, activity.criterionId, Number(points), scope);
+              const value = Number(points);
+              if (!Number.isFinite(value) || value < 0 || value > (activity.maxPointsPerSession || 0)) {
+                return;
+              }
+              onApply(session.id, activity.criterionId, value, scope);
             }}
           >
             Apply

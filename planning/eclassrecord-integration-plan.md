@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-06 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 10 in progress (Phase 9 still open) |
-| **Active phase** | 10 (Performance checklist & quick grade) |
+| **Overall status** | 🔄 Phase 10 complete — Phase 9 still open |
+| **Active phase** | 9 (Excel & PDF reports) |
 
 ---
 
@@ -119,7 +119,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 7 | Advisory class & grade transfer | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #10](https://github.com/jerniqz-del/gradeboss/pull/10) (stacked on #9) |
 | 8 | Attendance tracker & SF2 | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #11](https://github.com/jerniqz-del/gradeboss/pull/11) |
 | 9 | Excel & PDF reports | ⬜ Not started | — | — | |
-| 10 | Performance checklist & quick grade | 🔄 In progress | 2026-09-06 | — | |
+| 10 | Performance checklist & quick grade | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #13](https://github.com/jerniqz-del/gradeboss/pull/13) |
 | 11 | Teacher tools & classroom suite | ⬜ Not started | — | — | |
 | 12 | Calendar & workplace dashboard | ⬜ Not started | — | — | |
 | 13 | Encrypted backup, sync bridge & mobile | ⬜ Not started | — | — | |
@@ -454,23 +454,23 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 
 **Work items:**
 
-1. Performance Checklist view — repeatable criteria columns (Recitation, Notebook, Assignment, custom).
-2. HPS-aware +/- controls, bulk mark, notes, undo/reset.
-3. PIN-confirmed publication to compatible WW/PT scores (optional local PIN from Phase 6).
-4. Quick Grade Entry wizard (sequential learner scoring).
-5. Score history / undo-redo stack for grading sheet.
-6. Score transfer between classes (preview + confirm).
+1. [x] Performance Checklist view — repeatable criteria columns (Recitation, Notebook, Assignment, custom).
+2. [x] HPS-aware +/- controls, bulk mark, notes, undo/reset.
+3. [x] PIN-confirmed publication to compatible WW/PT scores (optional local PIN from Phase 6).
+4. [x] Quick Grade Entry wizard (sequential learner scoring).
+5. [x] Score history / undo-redo stack for grading sheet.
+6. [x] Score transfer between classes (preview + confirm).
 
 **E-Class Record reference:** `performance-checklist.js`, quick grade modals, score history modules
 
 **Deliverables:**
-- Checklist feature module
-- Quick grade overlay
-- Undo/redo for score grid
+- [x] Checklist feature module (`features/checklist/`, `domain/checklist/`)
+- [x] Quick grade overlay
+- [x] Undo/redo for score grid
 
 **Acceptance tests:**
-- Publish checklist → WW column updates with correct HPS cap
-- Undo restores prior score state
+- [x] Publish checklist → WW column updates with correct HPS cap
+- [x] Undo restores prior score state
 
 **Exit criteria:** Checklist-to-grade pipeline works.
 
@@ -686,6 +686,7 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-06 | 8 | Started Phase 8 — attendance tracker & SF2 | Agent |
 | 2026-09-06 | 8 | Phase 8 complete — monthly grid, roll call, SF2 preview/print/PDF | Agent |
 | 2026-09-06 | 10 | Started Phase 10 — performance checklist & quick grade (Phase 9 remains open) | Agent |
+| 2026-09-06 | 10 | Phase 10 complete — checklist publish to WW/PT, quick grade, undo/redo, score transfer | Agent |
 
 ### How to update when a phase finishes
 
@@ -722,4 +723,4 @@ Append a row when a phase status changes. **Do not delete entries.**
 
 ---
 
-*Next action: Begin **Phase 9 — Excel & PDF reports**.*
+*Next action: Begin **Phase 9 — Excel & PDF reports** (still open) or **Phase 11 — Teacher tools**.*

@@ -212,19 +212,19 @@ export function GradingSheetView({
 
           {tab !== "summary" && (
             <div className="chk-actions no-print">
-              <button type="button" className="ghost" disabled={!stacks.undo.length} onClick={() => void runUndo()}>
+              <button type="button" className="ghost" data-testid="sheet-undo" disabled={!stacks.undo.length} onClick={() => void runUndo()}>
                 Undo
               </button>
-              <button type="button" className="ghost" disabled={!stacks.redo.length} onClick={() => void runRedo()}>
+              <button type="button" className="ghost" data-testid="sheet-redo" disabled={!stacks.redo.length} onClick={() => void runRedo()}>
                 Redo
               </button>
-              <button type="button" className="ghost" onClick={() => setQuickOpen(true)}>
+              <button type="button" className="ghost" data-testid="sheet-quick-grade" onClick={() => setQuickOpen(true)}>
                 Quick grade
               </button>
-              <button type="button" className="ghost" onClick={() => setTransferOpen(true)}>
+              <button type="button" className="ghost" data-testid="sheet-transfer" onClick={() => setTransferOpen(true)}>
                 Transfer scores
               </button>
-              <button type="button" className="ghost" onClick={() => setHistoryOpen(true)}>
+              <button type="button" className="ghost" data-testid="sheet-history" onClick={() => setHistoryOpen(true)}>
                 Score history
               </button>
             </div>

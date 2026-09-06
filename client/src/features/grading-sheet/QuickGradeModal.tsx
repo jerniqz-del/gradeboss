@@ -182,5 +182,6 @@ function assessmentLabel(item: Assessment): string {
   const component = names[item.component] || item.component;
   const title = (item.title || "").trim();
   if (!title || title.toUpperCase() === item.component) return component;
+  if (title.toLowerCase().includes(component.toLowerCase())) return title;
   return `${component} ${title}`;
 }
