@@ -23,7 +23,6 @@ export const SIDE_NAV: Array<{ id: AppView; label: string; icon: string }> = [
   { id: "checklist", label: "Performance Checklist", icon: "list-checks" },
   { id: "calendar", label: "Calendar", icon: "calendar-days" },
   { id: "tools", label: "Tools", icon: "tools" },
-  { id: "profile", label: "Mobile Sync", icon: "sync" },
 ];
 
 export const BOTTOM_NAV: Array<{ id: AppView; label: string; short: string; icon: string }> = [
@@ -38,10 +37,8 @@ export function AppSidebar({
   user,
   view,
   collapsed,
-  showInstall,
   onNavigate,
   onToggleCollapsed,
-  onOpenSettings,
   onOpenHelp,
   onOpenFeedback,
   onSignOut,
@@ -50,10 +47,8 @@ export function AppSidebar({
   user: User;
   view: AppView;
   collapsed: boolean;
-  showInstall: boolean;
   onNavigate: (view: AppView) => void;
   onToggleCollapsed: () => void;
-  onOpenSettings: () => void;
   onOpenHelp: () => void;
   onOpenFeedback: () => void;
   onSignOut: () => void;
@@ -90,19 +85,9 @@ export function AppSidebar({
       </div>
 
       <div className="sidebar-footer">
-        {showInstall && (
-          <button type="button" className="install-btn" onClick={onInstall}>
-            <Icon name="download" />
-            <span>Install app</span>
-          </button>
-        )}
         <button type="button" className="nav-item" onClick={onToggleCollapsed}>
           <Icon name="chevron-left" />
           <span>{collapsed ? "Expand Sidebar" : "Collapse Sidebar"}</span>
-        </button>
-        <button type="button" className={`nav-item ${view === "profile" ? "active" : ""}`} onClick={onOpenSettings}>
-          <Icon name="settings" />
-          <span>Settings</span>
         </button>
         <button type="button" className="nav-item" onClick={onOpenHelp}>
           <Icon name="help" />
@@ -116,6 +101,21 @@ export function AppSidebar({
           <Icon name="logout" />
           <span>Logout</span>
         </button>
+        <div className="sidebar-end">
+          <button type="button" className="install-btn" onClick={onInstall}>
+            <Icon name="download" />
+            <span>Install App</span>
+          </button>
+          <button
+            type="button"
+            className={view === "profile" ? "nav-item sidebar-profile active" : "nav-item sidebar-profile"}
+            onClick={() => onNavigate("profile")}
+            title="Profile"
+          >
+            <Icon name="user" />
+            <span>Profile</span>
+          </button>
+        </div>
       </div>
     </aside>
   );

@@ -125,7 +125,7 @@ export default function App() {
   const [folderReady, setFolderReady] = useState(false);
   const [zoom, setZoom] = useState(() => loadZoom());
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => loadSidebarCollapsed());
-  const [dialog, setDialog] = useState<"help" | "feedback" | null>(null);
+  const [dialog, setDialog] = useState<"help" | "feedback" | "install" | null>(null);
   const [backupBusy, setBackupBusy] = useState(false);
   const [welcome, setWelcome] = useState(true);
   const { canInstall, installed, install } = useInstallPrompt();
@@ -292,14 +292,15 @@ export default function App() {
         user={user}
         view={view}
         collapsed={sidebarCollapsed}
-        showInstall={showInstall}
         onNavigate={setView}
         onToggleCollapsed={toggleSidebar}
-        onOpenSettings={() => setView("profile")}
         onOpenHelp={() => setDialog("help")}
         onOpenFeedback={() => setDialog("feedback")}
         onSignOut={signOut}
-        onInstall={install}
+        onInstall={() => {
+          if (showInstall) void install();
+          else setDialog("install");
+        }}
       />
 
       <AppTopbar
@@ -448,6 +449,16 @@ export default function App() {
           <p>
             <a href={`mailto:${SUPER_ADMIN_EMAIL}?subject=GradeBoss%20feedback`}>Email {SUPER_ADMIN_EMAIL}</a>
           </p>
+        </HelpDialog>
+      )}
+      {dialog === "install" && (
+        <HelpDialog title="Install App" onClose={() => setDialog(null)}>
+          <p>Install GradeBoss on this device so it opens like an app and keeps working offline.</p>
+          <ul>
+            <li>Chrome or Edge: use the browser install icon in the address bar, or this button when your browser offers it.</li>
+            <li>iPhone or iPad: Share → Add to Home Screen.</li>
+            <li>Android: browser menu → Install app or Add to Home screen.</li>
+          </ul>
         </HelpDialog>
       )}
     </div>
