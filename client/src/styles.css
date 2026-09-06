@@ -1243,10 +1243,11 @@ button.ghost.back {
 /* Auth / profile */
 .auth-screen {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   min-height: 100vh;
   min-height: 100dvh;
+  overflow: auto;
   padding: calc(var(--space-5) + var(--safe-top)) calc(var(--space-4) + var(--safe-right))
     calc(var(--space-5) + var(--safe-bottom)) calc(var(--space-4) + var(--safe-left));
   position: relative;
@@ -1261,6 +1262,7 @@ button.ghost.back {
 .auth-card {
   width: 100%;
   max-width: 420px;
+  margin-top: clamp(2.5rem, 8vh, 5rem);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);

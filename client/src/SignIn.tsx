@@ -132,17 +132,17 @@ export function SignIn({
           <p className="muted">Loading Google Sign-In…</p>
         )}
 
-        <ul className="auth-notes">
-          <li>DepEd Google: @deped.gov.ph</li>
-          <li>Local profile: no Google, database in Documents/ecrecord_users_local</li>
-          <li>Works offline after the first Google sign-in, or immediately with a local profile</li>
-        </ul>
-
         <div className="auth-divider" role="separator">
           <span>or stay fully local</span>
         </div>
 
         <LocalProfileSignIn onSignedIn={onSignedIn} />
+
+        <ul className="auth-notes">
+          <li>DepEd Google: @deped.gov.ph</li>
+          <li>Local profile: no Google, database in Documents/ecrecord_users_local</li>
+          <li>Works offline after the first Google sign-in, or immediately with a local profile</li>
+        </ul>
       </div>
     </div>
   );
