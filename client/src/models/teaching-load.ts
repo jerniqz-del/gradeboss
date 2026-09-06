@@ -1,5 +1,6 @@
 import type { Sf1Meta } from "../sf1";
 import type { Assessment } from "./assessment";
+import type { AttendanceState } from "./attendance";
 import type { Learner } from "./learner";
 import type {
   ComponentWeights,
@@ -25,6 +26,7 @@ export interface TeachingLoad {
   learners: Learner[];
   assessments: Assessment[];
   scores: ScoreMap;
+  attendance?: AttendanceState;
   createdAt: string;
   updatedAt: string;
 }

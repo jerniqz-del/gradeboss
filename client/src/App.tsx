@@ -22,6 +22,7 @@ import { SignIn } from "./SignIn";
 import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "./useTheme";
 import { AdvisoryView } from "./features/advisory/AdvisoryView";
+import { AttendanceView } from "./features/attendance/AttendanceView";
 import { DashboardView } from "./features/dashboard/DashboardView";
 import { BackupPanel } from "./features/exports/BackupPanel";
 import { TeachingLoadsView } from "./features/teaching-loads/TeachingLoadsView";
@@ -34,6 +35,7 @@ type View =
   | "students"
   | "loads"
   | "sheet"
+  | "attendance"
   | "plans"
   | "profile";
 
@@ -44,6 +46,7 @@ const NAV: Array<{ id: View; label: string; icon: string }> = [
   { id: "students", label: "Students", icon: "users" },
   { id: "loads", label: "Loads", icon: "book" },
   { id: "sheet", label: "Sheet", icon: "pencil" },
+  { id: "attendance", label: "Attendance", icon: "calendar" },
   { id: "profile", label: "Profile", icon: "user" },
 ];
 
@@ -249,6 +252,9 @@ export default function App() {
               setView("loads");
             }}
           />
+        )}
+        {view === "attendance" && (
+          <AttendanceView selectedLoadId={selectedLoadId} onSelectLoad={setSelectedLoadId} />
         )}
         {view === "plans" && <Plans />}
         {view === "profile" && (
