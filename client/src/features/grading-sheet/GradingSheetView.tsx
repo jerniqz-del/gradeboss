@@ -1,12 +1,24 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api";
 import { isMapehSubject } from "../../domain/grading";
+import { recordScoreChange, recordScoreDiff } from "../../domain/scores/history";
+import {
+  applyLoadSnapshot,
+  emptyUndoStacks,
+  pushUndo,
+  redoOnce,
+  snapshotLoads,
+  undoOnce,
+} from "../../domain/scores/undo";
 import { scoreKey } from "../../models/assessment";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { MapePart, Term } from "../../models/types";
 import { SheetExportBar } from "../exports/SheetExportBar";
 import { formatWeights, policyLabel } from "../teaching-loads/create-load";
+import { QuickGradeModal } from "./QuickGradeModal";
 import { ScoreGrid } from "./ScoreGrid";
+import { ScoreHistoryModal } from "./ScoreHistoryModal";
+import { ScoreTransferModal } from "./ScoreTransferModal";
 import { SummaryTable } from "./SummaryTable";
 
 type SheetTab = Term | "summary";
@@ -25,6 +37,10 @@ export function GradingSheetView({
   const [tab, setTab] = useState<SheetTab>("1");
   const [mapePart, setMapePart] = useState<MapePart>("music_arts");
   const [error, setError] = useState<string | null>(null);
+  const [stacks, setStacks] = useState(emptyUndoStacks);
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const refreshList = useCallback(async () => {
     const next = await api.getTeachingLoads();
@@ -41,6 +57,7 @@ export function GradingSheetView({
         if (id) {
           const found = list.find((item) => item.id === id) || (await api.getTeachingLoad(id));
           setLoad(found ?? null);
+          setStacks(emptyUndoStacks());
         }
         setError(null);
       } catch (err) {
@@ -55,20 +72,51 @@ export function GradingSheetView({
     setLoads((current) => current.map((item) => (item.id === next.id ? next : item)));
   };
 
-  const onScoreChange = (learnerId: string, assessmentId: string, value: number | "") => {
+  const persistMany = async (updated: TeachingLoad[]) => {
+    await Promise.all(updated.map((item) => api.saveTeachingLoad(item)));
+    setLoads((current) => current.map((item) => updated.find((row) => row.id === item.id) || item));
+    const current = updated.find((item) => item.id === load?.id);
+    if (current) setLoad(current);
+  };
+
+  const onScoreChange = (learnerId: string, assessmentId: string, value: number | "", source = "grading-sheet") => {
     if (!load) return;
-    void persist({
-      ...load,
-      scores: { ...load.scores, [scoreKey(learnerId, assessmentId)]: value },
-    });
+    const key = scoreKey(learnerId, assessmentId);
+    if ((load.scores[key] ?? "") === value) return;
+    setStacks((current) => pushUndo(current, snapshotLoads([load])));
+    const nextScores = { ...load.scores, [key]: value };
+    if (value === "") delete nextScores[key];
+    const next: TeachingLoad = { ...load, scores: nextScores };
+    void persist(recordScoreChange(next, { learnerId, assessmentId, previousValue: load.scores[key], newValue: value, source }));
   };
 
   const onHpsChange = (assessmentId: string, maxScore: number) => {
     if (!load) return;
+    const current = load.assessments.find((item) => item.id === assessmentId);
+    if (!current || current.maxScore === maxScore) return;
+    setStacks((currentStacks) => pushUndo(currentStacks, snapshotLoads([load])));
     void persist({
       ...load,
       assessments: load.assessments.map((item) => (item.id === assessmentId ? { ...item, maxScore } : item)),
     });
+  };
+
+  const runUndo = async () => {
+    if (!load) return;
+    const result = undoOnce(stacks, snapshotLoads([load]));
+    if (!result) return;
+    setStacks(result.stacks);
+    const restored = { ...applyLoadSnapshot(load, result.snapshot.loads[0]), scoreHistory: load.scoreHistory };
+    await persist(recordScoreDiff(restored, load.scores, restored.scores, "undo"));
+  };
+
+  const runRedo = async () => {
+    if (!load) return;
+    const result = redoOnce(stacks, snapshotLoads([load]));
+    if (!result) return;
+    setStacks(result.stacks);
+    const restored = { ...applyLoadSnapshot(load, result.snapshot.loads[0]), scoreHistory: load.scoreHistory };
+    await persist(recordScoreDiff(restored, load.scores, restored.scores, "redo"));
   };
 
   const mapeh = load ? isMapehSubject(load.subject) : false;
@@ -162,6 +210,26 @@ export function GradingSheetView({
             </div>
           )}
 
+          {tab !== "summary" && (
+            <div className="chk-actions no-print">
+              <button type="button" className="ghost" disabled={!stacks.undo.length} onClick={() => void runUndo()}>
+                Undo
+              </button>
+              <button type="button" className="ghost" disabled={!stacks.redo.length} onClick={() => void runRedo()}>
+                Redo
+              </button>
+              <button type="button" className="ghost" onClick={() => setQuickOpen(true)}>
+                Quick grade
+              </button>
+              <button type="button" className="ghost" onClick={() => setTransferOpen(true)}>
+                Transfer scores
+              </button>
+              <button type="button" className="ghost" onClick={() => setHistoryOpen(true)}>
+                Score history
+              </button>
+            </div>
+          )}
+
           {tab === "summary" ? (
             <SummaryTable load={load} />
           ) : (
@@ -169,7 +237,7 @@ export function GradingSheetView({
               load={load}
               term={tab}
               mapePart={activePart}
-              onScoreChange={onScoreChange}
+              onScoreChange={(learnerId, assessmentId, value) => onScoreChange(learnerId, assessmentId, value)}
               onHpsChange={onHpsChange}
             />
           )}
@@ -184,6 +252,30 @@ export function GradingSheetView({
               </button>
             </div>
           )}
+
+          {quickOpen && tab !== "summary" && (
+            <QuickGradeModal
+              load={load}
+              term={tab}
+              mapePart={activePart}
+              onClose={() => setQuickOpen(false)}
+              onScoreChange={(learnerId, assessmentId, value) => onScoreChange(learnerId, assessmentId, value, "quick-grade")}
+            />
+          )}
+          {transferOpen && tab !== "summary" && (
+            <ScoreTransferModal
+              loads={loads}
+              current={load}
+              term={tab}
+              mapePart={activePart}
+              onClose={() => setTransferOpen(false)}
+              onApply={async (source, target) => {
+                setStacks((currentStacks) => pushUndo(currentStacks, snapshotLoads([load, source, target].filter((item, index, all) => all.findIndex((row) => row.id === item.id) === index))));
+                await persistMany(source.id === target.id ? [target] : [source, target]);
+              }}
+            />
+          )}
+          {historyOpen && tab !== "summary" && <ScoreHistoryModal load={load} term={tab} onClose={() => setHistoryOpen(false)} />}
         </>
       )}
     </section>

@@ -6,3 +6,5 @@ export * from "./teacher-profile";
 export * from "./legacy";
 export * from "./advisory";
 export * from "./attendance";
+export * from "./checklist";
+export * from "./score-history";

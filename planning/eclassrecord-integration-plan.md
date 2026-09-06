@@ -11,8 +11,8 @@
 | **Last updated** | 2026-09-06 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 8 complete — Phase 9 next |
-| **Active phase** | 9 (Excel & PDF reports) |
+| **Overall status** | 🔄 Phase 10 in progress (Phase 9 still open) |
+| **Active phase** | 10 (Performance checklist & quick grade) |
 
 ---
 
@@ -119,7 +119,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 7 | Advisory class & grade transfer | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #10](https://github.com/jerniqz-del/gradeboss/pull/10) (stacked on #9) |
 | 8 | Attendance tracker & SF2 | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #11](https://github.com/jerniqz-del/gradeboss/pull/11) |
 | 9 | Excel & PDF reports | ⬜ Not started | — | — | |
-| 10 | Performance checklist & quick grade | ⬜ Not started | — | — | |
+| 10 | Performance checklist & quick grade | 🔄 In progress | 2026-09-06 | — | |
 | 11 | Teacher tools & classroom suite | ⬜ Not started | — | — | |
 | 12 | Calendar & workplace dashboard | ⬜ Not started | — | — | |
 | 13 | Encrypted backup, sync bridge & mobile | ⬜ Not started | — | — | |
@@ -685,6 +685,7 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-06 | 7 | Phase 7 complete — Advisory view, GTF v1.0 export/import, GA + conflict tests | Agent |
 | 2026-09-06 | 8 | Started Phase 8 — attendance tracker & SF2 | Agent |
 | 2026-09-06 | 8 | Phase 8 complete — monthly grid, roll call, SF2 preview/print/PDF | Agent |
+| 2026-09-06 | 10 | Started Phase 10 — performance checklist & quick grade (Phase 9 remains open) | Agent |
 
 ### How to update when a phase finishes
 
