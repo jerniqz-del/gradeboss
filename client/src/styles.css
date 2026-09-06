@@ -3026,6 +3026,13 @@ button.ghost.back {
   min-height: 44px;
 }
 
+.tools-actions .primary:disabled,
+.tools-actions .ghost:disabled,
+.tool-segmented button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .tool-stat {
   min-height: 44px;
   display: flex;
@@ -3075,7 +3082,6 @@ button.ghost.back {
   padding: var(--space-3);
 }
 
-.group-result__title,
 .group-result__title-btn {
   display: flex;
   align-items: center;

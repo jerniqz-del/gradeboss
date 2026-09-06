@@ -159,14 +159,10 @@ export function RandomizerPanel({ load }: { load: TeachingLoad }) {
                 onDrop={(event) => onDrop(event, index)}
               >
                 <header className="group-result__header">
-                  <button type="button" className="group-result__title-btn no-print" onClick={() => applyMove(index)}>
+                  <button type="button" className="group-result__title-btn" onClick={() => applyMove(index)}>
                     <span className="group-result__swatch" title={`${color.name} group color`} aria-hidden="true" />
                     Group {index + 1}
                   </button>
-                  <h2 className="group-result__title print-only">
-                    <span className="group-result__swatch" aria-hidden="true" />
-                    Group {index + 1}
-                  </h2>
                   <span className="group-result__sex">
                     M {counts.M} · F {counts.F}
                     {counts.U ? ` · Unspecified ${counts.U}` : ""}

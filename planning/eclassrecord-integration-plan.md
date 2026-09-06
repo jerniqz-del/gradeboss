@@ -121,7 +121,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 8 | Attendance tracker & SF2 | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #11](https://github.com/jerniqz-del/gradeboss/pull/11) |
 | 9 | Excel & PDF reports | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #12](https://github.com/jerniqz-del/gradeboss/pull/12) |
 | 10 | Performance checklist & quick grade | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #13](https://github.com/jerniqz-del/gradeboss/pull/13) |
-| 11 | Teacher tools & classroom suite | ✅ Complete | 2026-09-06 | 2026-09-06 | P1+P2; P3/P4 deferred |
+| 11 | Teacher tools & classroom suite | ✅ Complete | 2026-09-06 | 2026-09-06 | [PR #14](https://github.com/jerniqz-del/gradeboss/pull/14) (stacked on #13) |
 | 12 | Calendar & workplace dashboard | ⬜ Not started | — | — | |
 | 13 | Encrypted backup, sync bridge & mobile | ⬜ Not started | — | — | |
 | 14 | Help center, polish & release parity | ⬜ Not started | — | — | |
