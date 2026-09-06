@@ -22,6 +22,7 @@ import { SignIn } from "./SignIn";
 import { ThemeToggle } from "./ThemeToggle";
 import { useTheme } from "./useTheme";
 import { DashboardView } from "./features/dashboard/DashboardView";
+import { BackupPanel } from "./features/exports/BackupPanel";
 import { TeachingLoadsView } from "./features/teaching-loads/TeachingLoadsView";
 import { GradingSheetView } from "./features/grading-sheet/GradingSheetView";
 
@@ -813,6 +814,8 @@ function Plans() {
           )}
         </div>
       </div>
+
+      <BackupPanel />
     </section>
   );
 }

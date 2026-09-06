@@ -8,3 +8,4 @@ export {
   syncSchoolClassToTeachingLoads,
   upsertTeachingLoadFromSchoolClass,
 } from "./sync-sf1";
+export { exportBackupBundle, importBackupBundle, wipeGradeData } from "./backup";

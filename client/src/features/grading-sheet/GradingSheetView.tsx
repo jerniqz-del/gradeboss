@@ -4,6 +4,7 @@ import { isMapehSubject } from "../../domain/grading";
 import { scoreKey } from "../../models/assessment";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { MapePart, Term } from "../../models/types";
+import { SheetExportBar } from "../exports/SheetExportBar";
 import { formatWeights, policyLabel } from "../teaching-loads/create-load";
 import { ScoreGrid } from "./ScoreGrid";
 import { SummaryTable } from "./SummaryTable";
@@ -118,7 +119,16 @@ export function GradingSheetView({
 
       {load && (
         <>
-          <div className="sheet-tabs" role="tablist" aria-label="Term">
+          <div className="print-only print-sheet-title">
+            <h2>
+              G{load.gradeLevel} {load.section} — {load.subject}
+            </h2>
+            <p>
+              {load.schoolYear} · {policyLabel(load.policy)} · {tab === "summary" ? "Summary" : `Term ${tab}`}
+            </p>
+          </div>
+
+          <div className="sheet-tabs no-print" role="tablist" aria-label="Term">
             {(["1", "2", "3", "summary"] as const).map((id) => (
               <button
                 key={id}
@@ -164,8 +174,10 @@ export function GradingSheetView({
             />
           )}
 
+          <SheetExportBar load={load} tab={tab} mapePart={activePart} />
+
           {onManageRoster && load && (
-            <div className="card">
+            <div className="card no-print">
               <p className="muted">Add, import, transfer, or clone learners from the roster panel.</p>
               <button type="button" className="primary" onClick={() => onManageRoster(load.id)}>
                 Manage roster

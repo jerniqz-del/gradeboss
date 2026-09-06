@@ -8,10 +8,10 @@
 | Field | Value |
 | --- | --- |
 | **Created** | 2026-09-05 |
-| **Last updated** | 2026-09-05 |
+| **Last updated** | 2026-09-06 |
 | **Source repo** | `jerniqz-del/eclassrecord` (Electron desktop, v1.9.x) |
 | **Target repo** | `jerniqz-del/gradeboss` (React PWA, v1.0.x) |
-| **Overall status** | 🔄 Phase 5 complete — Phase 6 next |
+| **Overall status** | 🔄 Phase 6 in progress — export, print & backup |
 | **Active phase** | 6 (Export, print & backup) |
 
 ---
@@ -114,7 +114,7 @@ Update this table when a phase changes state. Use: ⬜ Not started · 🔄 In pr
 | 3 | Teaching loads & score grid UI | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #6](https://github.com/jerniqz-del/gradeboss/pull/6) |
 | 4 | Roster operations & SF1 linking | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #7](https://github.com/jerniqz-del/gradeboss/pull/7) |
 | 5 | Term summary, pass/fail & dashboard | ✅ Complete | 2026-09-05 | 2026-09-05 | [PR #8](https://github.com/jerniqz-del/gradeboss/pull/8) |
-| 6 | Export, print & backup (CSV/JSON) | ⬜ Not started | — | — | |
+| 6 | Export, print & backup (CSV/JSON) | 🔄 In progress | 2026-09-06 | — | |
 | 7 | Advisory class & grade transfer | ⬜ Not started | — | — | |
 | 8 | Attendance tracker & SF2 | ⬜ Not started | — | — | |
 | 9 | Excel & PDF reports | ⬜ Not started | — | — | |
@@ -678,6 +678,7 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | 4 | Phase 4 complete — SF1→load merge, learner CRUD, DepEd sort, CSV/clone/transfer, procedural avatars, G1–12 | Agent |
 | 2026-09-05 | 5 | Started Phase 5 — term summary, pass/fail & dashboard | Agent |
 | 2026-09-05 | 5 | Phase 5 complete — year-result/insights domain, summary pass/fail, DepEd dashboard | Agent |
+| 2026-09-06 | 6 | Started Phase 6 — export, print & backup | Agent |
 
 ### How to update when a phase finishes
 
@@ -714,4 +715,4 @@ Append a row when a phase status changes. **Do not delete entries.**
 
 ---
 
-*Next action: Begin **Phase 6 — Export, print & backup (CSV/JSON)**.*
+*Next action: Finish **Phase 6 — Export, print & backup (CSV/JSON)** (verify + merge).*
