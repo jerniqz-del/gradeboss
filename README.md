@@ -4,8 +4,10 @@ GradeBoss is the ultimate solution for the most demanding school tasks, from tea
 
 It is an **offline-first** web app (PWA) for managing classes, students,
 courses, and grades, with a live dashboard that tracks student standings and course
-performance. All school data lives on your device. Sign-in uses Google and is
-limited to DepEd accounts.
+performance. All school data lives on your device. There is no Google Sign-In.
+The school admin registers with the official DepEd email (the same address used
+for the school’s Cloudflare account). Personnel sign in with the DepEd emails
+the school issued, or with a local profile.
 
 ## Tech stack
 
@@ -32,27 +34,23 @@ npm install     # install dependencies
 npm run dev     # start the web client at http://localhost:5173
 ```
 
-That's it — open http://localhost:5173 and sign in with a DepEd Google account
-(see below). After the first sign-in the app works fully offline and can be
-installed to your device (Add to Home Screen).
+That's it — open http://localhost:5173. Create the school admin account with the
+official `@deped.gov.ph` email, or use a local profile. After that the app works
+offline and can be installed (Add to Home Screen).
 
-## Google Sign-In
+## School accounts (no Google)
 
-Only `@deped.gov.ph` Google accounts can sign up or sign in. One designated
-Gmail address is allowed as super admin.
+The school admin creates a Cloudflare account using the school’s official DepEd
+email, then issues DepEd emails to personnel. GradeBoss sign-in uses those
+addresses plus an optional PIN — not Google OAuth.
 
-1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials),
-   create an OAuth 2.0 Client ID of type **Web application**.
-2. Add authorized JavaScript origins: `http://localhost:5173` and your production
-   origin (for example `https://your-app.vercel.app`).
-3. Copy `client/.env.example` to `client/.env.local` and set `VITE_GOOGLE_CLIENT_ID`
-   to that client ID.
-4. On Vercel, set the same `VITE_GOOGLE_CLIENT_ID` environment variable, then
-   redeploy.
+1. First `@deped.gov.ph` account on a device becomes **School admin**.
+2. Later emails on the same device sign in as teachers.
+3. Optional: put the deployed PWA behind **Cloudflare Access** so only those
+   school-issued emails can reach the site.
 
-Restart `npm run dev` after changing `.env.local`. Sign-in requires a network
-connection; the profile is then stored on-device (`gradeboss:auth`) so the PWA
-keeps working offline.
+A **local profile** still writes `Documents/ecrecord_users_local` for fully
+offline teachers.
 
 ## Useful scripts
 
@@ -70,15 +68,15 @@ Run from the repository root:
 
 - Students, courses, and grades are stored under the `gradeboss:data` key in
   `localStorage`; classes imported from SF1 are stored under `gradeboss:classes`;
-  the signed-in Google profile is stored under `gradeboss:auth`.
+  the signed-in profile is stored under `gradeboss:auth`.
 - School records are not sent to a server. Clearing site data signs you out and
   resets the app to seed data.
 
 ## Deployment
 
 The app is a static site. `vercel.json` builds the client (`npm run build --workspace
-client`) and serves `client/dist`. Set `VITE_GOOGLE_CLIENT_ID` in the Vercel project
-environment. No backend is required.
+client`) and serves `client/dist`. No Google client ID is required. No backend is
+required. Optional: Cloudflare Access in front of the site.
 
 ## Cloud Agent environment
 

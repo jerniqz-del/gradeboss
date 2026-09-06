@@ -11,3 +11,4 @@ The owner tests features themselves. Agents edit code only.
 - Do not run automated tests, typecheck/lint as a gate, or browser/manual verification unless the owner asks.
 - When the change is in place, say you are done so the owner can test.
 - Local-only profiles must persist the database under the device Documents folder `ecrecord_users_local`.
+- Do not add Google OAuth. School identity is the official DepEd email on the school Cloudflare account.

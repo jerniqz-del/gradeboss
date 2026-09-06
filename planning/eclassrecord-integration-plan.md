@@ -55,7 +55,7 @@ Each phase has **entry criteria**, **deliverables**, **acceptance tests**, and a
 
 | Area | Scope |
 | --- | --- |
-| **Auth** | Google OAuth (`@deped.gov.ph`), offline profile cache |
+| **Auth** | School DepEd email (Cloudflare-issued, no Google) + local profiles |
 | **Storage** | IndexedDB schema v3 (`teachingLoads`, profile, legacy gradebook, advisory, calendar, workplace); `localStorage` kept as SF1 history + migration source |
 | **SF1** | Import links to matching teaching-load rosters (grade + section + SY) |
 | **Gradebook** | DepEd teaching loads + score grid (WW/PT/ST/TE, terms, transmutation); G1–12 |
@@ -721,6 +721,7 @@ Append a row when a phase status changes. **Do not delete entries.**
 | 2026-09-05 | IndexedDB over localStorage for schema v1 | E-Class Record JSON model too large/complex for localStorage |
 | 2026-09-05 | Port `grading.js` as pure TS domain module first | Highest risk / highest value; enables all downstream UI |
 | 2026-09-05 | Keep Google DepEd auth; add optional local PIN later | GradeBoss identity model differs from desktop profiles |
+| 2026-09-06 | Remove Google OAuth; school DepEd email + Cloudflare | School admin owns a Cloudflare account on the official DepEd email and issues personnel emails |
 | 2026-09-05 | 15 phases (0–14) | Groups work into shippable increments without multi-month blocks |
 | 2026-09-05 | Port desktop procedural SVG avatars instead of 100 PNG files | Matches eclassrecord `learner-avatars.js`; keeps PWA cache small and works offline |
 | 2026-09-06 | Generate DepEd ECR workbook from the official cell map instead of bundling `Templates.xlsx` (1.3MB) | Protects PWA cache size; optional `/templates/ecr.xlsx` overlay with CacheFirst |

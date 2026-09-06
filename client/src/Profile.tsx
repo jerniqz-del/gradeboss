@@ -74,7 +74,11 @@ export function Profile({
     <section>
       <div className="page-header">
         <h2>Profile</h2>
-        <p>{local ? "Local profile on this device." : "Your Google account on this device."}</p>
+        <p>
+          {local
+            ? "Local profile on this device."
+            : "School-issued DepEd account on this device."}
+        </p>
       </div>
 
       <div className="card profile-card">
@@ -89,7 +93,11 @@ export function Profile({
           <div>
             <h3>{user.name}</h3>
             <p className="muted">{user.email}</p>
-            <span className={user.role === "superAdmin" ? "role-badge super" : "role-badge"}>
+            <span
+              className={
+                user.role === "superAdmin" || user.role === "schoolAdmin" ? "role-badge super" : "role-badge"
+              }
+            >
               {roleLabel(user.role, user.authKind)}
             </span>
           </div>
@@ -110,11 +118,12 @@ export function Profile({
           </div>
         </dl>
 
-        {user.role === "superAdmin" && !local && (
+        {user.role === "schoolAdmin" && !local ? (
           <p className="muted small">
-            Super admin can sign in without a @deped.gov.ph address.
+            School admin registered with the official DepEd email. Personnel sign in
+            with the emails the school issued (Cloudflare).
           </p>
-        )}
+        ) : null}
 
         {local ? (
           <div className="local-folder-card">

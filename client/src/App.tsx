@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type Student } from "./api";
 import {
   clearUser,
-  disableGoogleAutoSelect,
   isLocalUser,
   loadUser,
   roleLabel,
@@ -159,7 +158,6 @@ export default function App() {
         }
       }
       setCurrentLocalProfileId(null);
-      disableGoogleAutoSelect();
       clearUser();
       setUser(null);
       setView("dashboard");
