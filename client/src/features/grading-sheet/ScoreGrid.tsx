@@ -82,7 +82,15 @@ export function ScoreGrid({
 
   return (
     <div className="table-scroll sheet-scroll">
-      <table className="sheet-table">
+      <table className="sheet-table" style={{ minWidth: 384 + (columns.length + 5) * 68 }}>
+        <colgroup>
+          <col style={{ width: 40 }} />
+          <col style={{ width: 180 }} />
+          <col style={{ width: 44 }} />
+          {columns.map((col) => <col key={col.id} />)}
+          <col span={5} />
+          <col style={{ width: 120 }} />
+        </colgroup>
         <thead>
           <tr>
             <th className="sheet-sticky sheet-number" rowSpan={2}>
