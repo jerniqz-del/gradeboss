@@ -5128,3 +5128,114 @@ button.ghost.back {
     zoom: 1;
   }
 }
+/* Grading controls stay in place; only the table scrolls. */
+@media screen {
+  .app.app--sheet {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .app--sheet .app-body {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .app--sheet .topbar,
+  .app--sheet .app-footer {
+    flex-shrink: 0;
+  }
+  .content.content--sheet {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    padding: 8px;
+    padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom) + 8px);
+    animation: none;
+    transform: none;
+  }
+  .content--sheet > .sheet-page {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    gap: 8px;
+  }
+  .sheet-page > .ecr-active-bar,
+  .sheet-page > .sheet-record-bar,
+  .sheet-page > .sheet-tabs {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+  .sheet-page .sheet-record-bar {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .sheet-page .sheet-record-bar p {
+    margin: 4px 0 0;
+  }
+  .sheet-page .ecr-active-actions,
+  .sheet-page .roster-page-actions {
+    gap: 6px;
+  }
+  .sheet-page .ecr-active-actions > *,
+  .sheet-page .roster-page-actions > button {
+    font-size: 12px;
+    padding-inline: 10px;
+  }
+  .sheet-page > .sheet-scroll.sheet-fit {
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  .sheet-more-exports {
+    position: relative;
+  }
+  .sheet-more-exports > summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    cursor: pointer;
+    list-style: none;
+  }
+  .sheet-more-exports > summary::-webkit-details-marker {
+    display: none;
+  }
+  .sheet-more-exports-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    width: min(360px, calc(100vw - 32px));
+    max-height: 60dvh;
+    overflow-y: auto;
+    z-index: 30;
+    padding: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow-1);
+  }
+  .sheet-more-exports-panel .sheet-export-wrap {
+    margin: 0;
+  }
+  .sheet-more-exports-panel .sheet-export {
+    gap: 6px;
+  }
+  .sheet-more-exports-panel .sheet-export > * {
+    flex: 1 1 100%;
+  }
+  .sheet-more-exports-panel .report-menu-panel {
+    position: static;
+    min-width: 0;
+    box-shadow: none;
+  }
+}
+@media screen and (min-width: 900px) {
+  .content.content--sheet {
+    padding: 10px 12px;
+  }
+}

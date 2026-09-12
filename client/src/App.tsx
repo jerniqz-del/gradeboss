@@ -251,7 +251,7 @@ export default function App() {
   );
 
   return (
-    <div className="app">
+    <div className={view === "sheet" ? "app app--sheet" : "app"}>
       <Changelog user={user} view={view} />
       {!online && (
         <div className="offline-bar">
@@ -286,7 +286,7 @@ export default function App() {
         onZoomChange={changeZoom}
       />
 
-      <main className="content content--view-transition" key={view} style={{ zoom: zoom / 100 }}>
+      <main className={`content content--view-transition${view === "sheet" ? " content--sheet" : ""}`} key={view} style={{ zoom: zoom / 100 }}>
         {error && <div className="banner error">{error}</div>}
 
         {view === "dashboard" && (

@@ -154,6 +154,14 @@ export function GradingSheetView({
             Download PDF
           </button>
         )}
+        {load && (
+          <details className="sheet-more-exports no-print">
+            <summary className="ghost">More exports</summary>
+            <div className="sheet-more-exports-panel">
+              <SheetExportBar load={load} tab={tab} mapePart={activePart} />
+            </div>
+          </details>
+        )}
       </ActiveClassBar>
 
       {load && (
@@ -226,7 +234,6 @@ export function GradingSheetView({
             />
           )}
 
-          <SheetExportBar load={load} tab={tab} mapePart={activePart} />
 
 
           {quickOpen && tab !== "summary" && (
