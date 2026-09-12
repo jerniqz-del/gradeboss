@@ -205,6 +205,11 @@ export function GradingSheetView({
                 <button type="button" className="ghost btn-olive" data-testid="sheet-history" onClick={() => setHistoryOpen(true)}>
                   View Learner&apos;s Grades
                 </button>
+                {onManageRoster && (
+                  <button type="button" className="primary" onClick={() => onManageRoster(load.id)}>
+                    Manage Roster
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -223,14 +228,6 @@ export function GradingSheetView({
 
           <SheetExportBar load={load} tab={tab} mapePart={activePart} />
 
-          {onManageRoster && load && (
-            <div className="card no-print">
-              <p className="muted">Add, import, transfer, or clone learners from the roster panel.</p>
-              <button type="button" className="primary" onClick={() => onManageRoster(load.id)}>
-                Manage roster
-              </button>
-            </div>
-          )}
 
           {quickOpen && tab !== "summary" && (
             <QuickGradeModal
