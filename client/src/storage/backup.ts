@@ -1,3 +1,4 @@
+import { notifyDataSaved } from "./change-events";
 import { listClasses, replaceClasses } from "../classes";
 import { createEmptyAdvisoryStore } from "../models/advisory";
 import { createEmptyCalendarStore } from "../models/calendar";
@@ -44,16 +45,27 @@ export async function wipeGradeData(): Promise<void> {
 
 async function writeBundle(bundle: BackupBundle): Promise<void> {
   const db = await ensureStorageReady();
-  const tx = db.transaction("teachingLoads", "readwrite");
-  await tx.store.clear();
-  await Promise.all(bundle.teachingLoads.map((load) => tx.store.put(load)));
-  await tx.done;
-  await db.put("advisory", bundle.advisory || createEmptyAdvisoryStore(), "default");
-  await db.put("calendar", bundle.calendar || createEmptyCalendarStore(), "default");
-  await db.put("workplace", bundle.workplace || createEmptyWorkplaceStore(), "default");
-  await saveTeacherProfile(db, bundle.profile);
-  await saveLegacyGradebook(db, bundle.legacy);
-  replaceClasses(bundle.schoolClasses);
+  const previousClasses = localStorage.getItem("gradeboss:classes");
+  // Validate local storage capacity before replacing the IndexedDB records.
+  localStorage.setItem("gradeboss:classes", JSON.stringify(bundle.schoolClasses));
+  try {
+    const tx = db.transaction(["teachingLoads", "advisory", "calendar", "workplace", "profile", "legacyGradebook"], "readwrite");
+    await tx.objectStore("teachingLoads").clear();
+    await Promise.all([
+      ...bundle.teachingLoads.map((load) => tx.objectStore("teachingLoads").put(load)),
+      tx.objectStore("advisory").put(bundle.advisory || createEmptyAdvisoryStore(), "default"),
+      tx.objectStore("calendar").put(bundle.calendar || createEmptyCalendarStore(), "default"),
+      tx.objectStore("workplace").put(bundle.workplace || createEmptyWorkplaceStore(), "default"),
+      tx.objectStore("profile").put(bundle.profile, "default"),
+      tx.objectStore("legacyGradebook").put(bundle.legacy, "default"),
+    ]);
+    await tx.done;
+  } catch (error) {
+    if (previousClasses === null) localStorage.removeItem("gradeboss:classes");
+    else localStorage.setItem("gradeboss:classes", previousClasses);
+    throw error;
+  }
+  notifyDataSaved("Imported workspace backup");
 }
 
 export async function importBackupBundle(raw: unknown, mode: BackupMode): Promise<BackupBundle> {

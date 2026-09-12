@@ -1,3 +1,4 @@
+import { notifyDataSaved } from "../change-events";
 import type { TeachingLoad } from "../../models/teaching-load";
 import { ensureStorageReady } from "../init";
 import { openGradeBossDb } from "../db";
@@ -27,12 +28,14 @@ export async function saveTeachingLoad(load: TeachingLoad): Promise<TeachingLoad
     updatedAt: new Date().toISOString(),
   };
   await db.put("teachingLoads", next);
+  notifyDataSaved("Saved teaching-loads changes");
   return next;
 }
 
 export async function deleteTeachingLoad(id: string): Promise<void> {
   const db = await ensureStorageReady();
   await db.delete("teachingLoads", id);
+  notifyDataSaved("Saved teaching-loads changes");
 }
 
 export async function countTeachingLoads(): Promise<number> {

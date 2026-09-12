@@ -4982,3 +4982,44 @@ button.ghost.back {
     outline: none;
   }
 }
+.changelog-modal {
+  width: min(960px, 96vw);
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+.changelog-tools,
+.changelog-entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.changelog-tools {
+  margin-block: 16px;
+}
+.changelog-tools input {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.changelog-entry {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.changelog-entry > div:first-child {
+  min-width: 0;
+  flex: 1 1 260px;
+  overflow-wrap: anywhere;
+}
+.changelog-entry time {
+  margin-right: 8px;
+  font-size: var(--fs-sm);
+}
+.changelog-entry p {
+  margin-block: 8px;
+}
+.changelog-entry-actions {
+  align-items: center;
+}

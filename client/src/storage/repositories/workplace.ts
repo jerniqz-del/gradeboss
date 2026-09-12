@@ -1,3 +1,4 @@
+import { notifyDataSaved } from "../change-events";
 import {
   createWorkplaceTaskId,
   type WorkplaceContext,
@@ -18,6 +19,7 @@ export async function saveWorkplaceStore(store: WorkplaceStore): Promise<Workpla
   const db = await ensureStorageReady();
   const next = normalizeWorkplace(store);
   await db.put("workplace", next, "default");
+  notifyDataSaved("Saved workplace changes");
   return next;
 }
 
@@ -75,4 +77,5 @@ export async function rememberWorkplaceContext(context: Partial<WorkplaceContext
 export async function putWorkplaceStoreForTest(store: WorkplaceStore): Promise<void> {
   const db = await openGradeBossDb();
   await db.put("workplace", normalizeWorkplace(store), "default");
+  notifyDataSaved("Saved workplace changes");
 }

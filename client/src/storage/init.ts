@@ -1,3 +1,4 @@
+import { notifyDataSaved } from "./change-events";
 import type { LegacyGradebook } from "../models/legacy";
 import type { TeacherProfile } from "../models/teacher-profile";
 import type { TeachingLoad } from "../models/teaching-load";
@@ -93,6 +94,7 @@ export async function saveLegacyGradebook(
   legacy: LegacyGradebook,
 ): Promise<void> {
   await db.put("legacyGradebook", legacy, "default");
+  notifyDataSaved("Saved gradebook changes");
 }
 
 export async function getTeacherProfile(db: GradeBossDb): Promise<TeacherProfile | undefined> {
@@ -104,4 +106,5 @@ export async function saveTeacherProfile(
   profile: TeacherProfile,
 ): Promise<void> {
   await db.put("profile", profile, "default");
+  notifyDataSaved("Saved teacher profile");
 }

@@ -1,3 +1,4 @@
+import { notifyDataSaved } from "./storage/change-events";
 import type { Sf1Learner, Sf1Meta } from "./sf1";
 import {
   removeTeachingLoadForSchoolClass,
@@ -31,6 +32,7 @@ export function listClasses(): SchoolClass[] {
 function persist(list: SchoolClass[]): void {
   try {
     localStorage.setItem(KEY, JSON.stringify(list));
+    notifyDataSaved("Saved class roster");
   } catch {
     // Storage unavailable (private mode / quota) — best effort.
   }

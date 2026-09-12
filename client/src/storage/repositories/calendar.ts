@@ -1,3 +1,4 @@
+import { notifyDataSaved } from "../change-events";
 import { createEmptyCalendarStore, type CalendarEvent, type CalendarFilters, type CalendarStore } from "../../models/calendar";
 import { ensureStorageReady } from "../init";
 import { openGradeBossDb } from "../db";
@@ -26,6 +27,7 @@ export async function saveCalendarStore(store: CalendarStore): Promise<CalendarS
   const db = await ensureStorageReady();
   const next = normalize(store);
   await db.put("calendar", next, "default");
+  notifyDataSaved("Saved calendar changes");
   return next;
 }
 
@@ -52,4 +54,5 @@ export async function saveCalendarFilters(filters: CalendarFilters): Promise<Cal
 export async function putCalendarStoreForTest(store: CalendarStore): Promise<void> {
   const db = await openGradeBossDb();
   await db.put("calendar", normalize(store), "default");
+  notifyDataSaved("Saved calendar changes");
 }

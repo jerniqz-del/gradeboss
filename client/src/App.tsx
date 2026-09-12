@@ -1,3 +1,4 @@
+import { Changelog } from "./features/shell/Changelog";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type Student } from "./api";
@@ -282,6 +283,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <Changelog user={user} view={view} />
       {!online && (
         <div className="offline-bar">
           <Icon name="cloud-off" />

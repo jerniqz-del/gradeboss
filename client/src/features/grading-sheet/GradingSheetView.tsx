@@ -1,15 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../../api";
 import { isMapehSubject } from "../../domain/grading";
-import { recordScoreChange, recordScoreDiff } from "../../domain/scores/history";
-import {
-  applyLoadSnapshot,
-  emptyUndoStacks,
-  pushUndo,
-  redoOnce,
-  snapshotLoads,
-  undoOnce,
-} from "../../domain/scores/undo";
+import { recordScoreChange } from "../../domain/scores/history";
 import { scoreKey } from "../../models/assessment";
 import type { TeachingLoad } from "../../models/teaching-load";
 import type { MapePart, Term } from "../../models/types";
@@ -42,7 +34,6 @@ export function GradingSheetView({
   const [tab, setTab] = useState<SheetTab>("1");
   const [mapePart, setMapePart] = useState<MapePart>("music_arts");
   const [error, setError] = useState<string | null>(null);
-  const [stacks, setStacks] = useState(emptyUndoStacks);
   const [quickOpen, setQuickOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -62,7 +53,6 @@ export function GradingSheetView({
         if (id) {
           const found = list.find((item) => item.id === id) || (await api.getTeachingLoad(id));
           setLoad(found ?? null);
-          setStacks(emptyUndoStacks());
         }
         setError(null);
       } catch (err) {
@@ -88,7 +78,6 @@ export function GradingSheetView({
     if (!load) return;
     const key = scoreKey(learnerId, assessmentId);
     if ((load.scores[key] ?? "") === value) return;
-    setStacks((current) => pushUndo(current, snapshotLoads([load])));
     const nextScores = { ...load.scores, [key]: value };
     if (value === "") delete nextScores[key];
     const next: TeachingLoad = { ...load, scores: nextScores };
@@ -99,29 +88,10 @@ export function GradingSheetView({
     if (!load) return;
     const current = load.assessments.find((item) => item.id === assessmentId);
     if (!current || current.maxScore === maxScore) return;
-    setStacks((currentStacks) => pushUndo(currentStacks, snapshotLoads([load])));
     void persist({
       ...load,
       assessments: load.assessments.map((item) => (item.id === assessmentId ? { ...item, maxScore } : item)),
     });
-  };
-
-  const runUndo = async () => {
-    if (!load) return;
-    const result = undoOnce(stacks, snapshotLoads([load]));
-    if (!result) return;
-    setStacks(result.stacks);
-    const restored = { ...applyLoadSnapshot(load, result.snapshot.loads[0]), scoreHistory: load.scoreHistory };
-    await persist(recordScoreDiff(restored, load.scores, restored.scores, "undo"));
-  };
-
-  const runRedo = async () => {
-    if (!load) return;
-    const result = redoOnce(stacks, snapshotLoads([load]));
-    if (!result) return;
-    setStacks(result.stacks);
-    const restored = { ...applyLoadSnapshot(load, result.snapshot.loads[0]), scoreHistory: load.scoreHistory };
-    await persist(recordScoreDiff(restored, load.scores, restored.scores, "redo"));
   };
 
   const mapeh = load ? isMapehSubject(load.subject) : false;
@@ -142,16 +112,11 @@ export function GradingSheetView({
     <section className="sheet-page">
       {error && <div className="banner error">{error}</div>}
 
-      {load && tab !== "summary" && (
-        <div className="sheet-utility-actions no-print">
-          <button type="button" className="ghost" data-testid="sheet-undo" disabled={!stacks.undo.length} onClick={() => void runUndo()}>
-            Undo
-          </button>
-          <button type="button" className="ghost" data-testid="sheet-redo" disabled={!stacks.redo.length} onClick={() => void runRedo()}>
-            Redo
-          </button>
-        </div>
-      )}
+      <div className="sheet-utility-actions no-print">
+        <button type="button" className="ghost" onClick={() => window.dispatchEvent(new Event("gradeboss:open-changelog"))}>
+          Changelog
+        </button>
+      </div>
       <ActiveClassBar
         loads={loads}
         selectedId={load?.id || ""}
@@ -286,7 +251,6 @@ export function GradingSheetView({
               mapePart={activePart}
               onClose={() => setTransferOpen(false)}
               onApply={async (source, target) => {
-                setStacks((currentStacks) => pushUndo(currentStacks, snapshotLoads([load, source, target].filter((item, index, all) => all.findIndex((row) => row.id === item.id) === index))));
                 await persistMany(source.id === target.id ? [target] : [source, target]);
               }}
             />
