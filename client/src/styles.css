@@ -4908,3 +4908,77 @@ button.ghost.back {
     flex: 0 0 auto;
   }
 }
+@media (min-width: 900px) {
+  .app-body {
+    --sidebar-w: var(--sidebar-expanded-w, 240px);
+  }
+
+  .app-body.is-sidebar-collapsed {
+    --sidebar-w: 76px;
+  }
+
+  .sidebar {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+  }
+
+  .sidebar-nav-wrap {
+    flex: 1 0 auto;
+  }
+
+  .sidebar-brand .brand-mark {
+    flex: 0 0 40px;
+  }
+
+  .sidebar-brand-text {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-brand-text h1,
+  .sidebar-brand-text span,
+  .sidebar .nav-item span,
+  .sidebar .install-btn span {
+    width: max-content;
+    max-width: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .sidebar .nav-item,
+  .sidebar .install-btn {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .sidebar-end,
+  .app-body.is-sidebar-collapsed .sidebar-end {
+    align-items: stretch;
+    min-width: 0;
+  }
+
+  .sidebar.is-collapsed .sidebar-toggle .icon {
+    transform: rotate(180deg);
+  }
+
+  .sidebar-resizer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--sidebar-w) - 7px);
+    width: 7px;
+    cursor: col-resize;
+    touch-action: none;
+    user-select: none;
+    z-index: 26;
+  }
+
+  .sidebar-resizer:hover,
+  .sidebar-resizer:focus-visible {
+    background: var(--primary);
+    outline: none;
+  }
+}

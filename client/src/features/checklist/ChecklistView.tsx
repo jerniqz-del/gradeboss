@@ -195,7 +195,7 @@ export function ChecklistView({
 
       <div className="chk-info-grid">
         <div className="card chk-info">
-          <h3>Performance Checklist</h3>
+          <h3>Checklist</h3>
           <p className="muted">{types} checklist types</p>
           <p className="muted">{available} available checklists</p>
           <p className="muted">{load?.learners.length || 0} active learners</p>

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type Student } from "./api";
 import {
@@ -124,6 +125,7 @@ export default function App() {
   const [profile, setProfile] = useState<TeacherProfile | null>(null);
   const [folderReady, setFolderReady] = useState(false);
   const [zoom, setZoom] = useState(() => loadZoom());
+  const [sidebarWidth, setSidebarWidth] = useState(240);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => loadSidebarCollapsed());
   const [dialog, setDialog] = useState<"help" | "feedback" | "install" | null>(null);
   const [backupBusy, setBackupBusy] = useState(false);
@@ -287,11 +289,12 @@ export default function App() {
         </div>
       )}
 
-      <div className={`app-body ${sidebarCollapsed ? "is-sidebar-collapsed" : ""}`}>
+      <div className={`app-body ${sidebarCollapsed ? "is-sidebar-collapsed" : ""}`} style={{ "--sidebar-expanded-w": sidebarWidth + "px" } as CSSProperties}>
       <AppSidebar
         user={user}
         view={view}
         collapsed={sidebarCollapsed}
+        onWidthChange={setSidebarWidth}
         onNavigate={setView}
         onToggleCollapsed={toggleSidebar}
         onOpenHelp={() => setDialog("help")}

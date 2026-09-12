@@ -148,7 +148,7 @@ export function normalizePerformanceChecklist(checklist: Partial<PerformanceChec
     schoolYear: String(checklist.schoolYear || ""),
     term,
     mapePart: checklist.mapePart === "music_arts" || checklist.mapePart === "pe_health" ? checklist.mapePart : "",
-    title: String(checklist.title || "Performance Checklist").trim() || "Performance Checklist",
+    title: String(checklist.title || "Checklist").trim() || "Checklist",
     status: checklist.status === "archived" ? "archived" : "active",
     criteria,
     sessions,
@@ -190,7 +190,7 @@ export function createPerformanceChecklist(
     schoolYear: String(load.schoolYear || ""),
     term,
     mapePart: options.mapePart || "",
-    title: options.title || "Performance Checklist",
+    title: options.title || "Checklist",
     status: "active",
     criteria,
     sessions: [
