@@ -85,10 +85,10 @@ export function ScoreGrid({
       <table className="sheet-table">
         <thead>
           <tr>
-            <th className="sheet-sticky" rowSpan={2}>
+            <th className="sheet-sticky sheet-number" rowSpan={2}>
               No.
             </th>
-            <th className="sheet-sticky" rowSpan={2}>
+            <th className="sheet-sticky sheet-learner-column" rowSpan={2}>
               Learner
             </th>
             <th rowSpan={2}>Sex</th>
@@ -156,12 +156,19 @@ export function ScoreGrid({
             const row = rowIndex + 1;
             return (
               <tr key={learner.id}>
-                <td className="sheet-sticky">{rowIndex + 1}</td>
-                <th className="sheet-sticky sheet-name">
+                <td className="sheet-sticky sheet-number">{rowIndex + 1}</td>
+                <th className="sheet-sticky sheet-learner-column sheet-name" scope="row">
                   <span className="sheet-learner">
                     <LearnerAvatar presetId={learner.avatarPresetId} size="xs" />
-                    <span>
-                      {learnerNameCaps(learnerDisplayName(learner))}
+                    <span className="sheet-name-lines">
+                      <strong>{learnerNameCaps(learner.lastName.trim())}</strong>
+                      <span>
+                        {learnerNameCaps([
+                          learner.firstName.trim(),
+                          learner.extensionName?.trim(),
+                          learner.middleName.trim() ? learner.middleName.trim().charAt(0) + "." : "",
+                        ].filter(Boolean).join(" "))}
+                      </span>
                       {learner.transferredOutTerm ? <span className="pill">T/O</span> : null}
                     </span>
                   </span>

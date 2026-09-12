@@ -2031,6 +2031,7 @@ button.ghost.back {
 }
 
 .sheet-table {
+  --sheet-number-width: 40px;
   width: max-content;
   min-width: 100%;
   border-collapse: separate;
@@ -2094,10 +2095,20 @@ button.ghost.back {
 }
 
 .sheet-name {
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 400;
+  white-space: normal;
+}
+
+.sheet-table .sheet-number {
+  width: var(--sheet-number-width);
+  min-width: var(--sheet-number-width);
+  max-width: var(--sheet-number-width);
+  padding-inline: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sheet-learner-column {
+  left: var(--sheet-number-width);
 }
 
 .sheet-hps td,
@@ -2285,9 +2296,19 @@ button.ghost.back {
   min-width: 0;
 }
 
-.sheet-learner span {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.sheet-name-lines {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  max-width: clamp(112px, 32vw, 220px);
+  text-align: left;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.sheet-name-lines strong {
+  font-weight: 700;
 }
 
 .csv-paste {
