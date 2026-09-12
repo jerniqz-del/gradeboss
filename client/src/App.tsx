@@ -33,7 +33,6 @@ import { CalendarView } from "./features/calendar/CalendarView";
 import { ChecklistView } from "./features/checklist/ChecklistView";
 import { DashboardView } from "./features/dashboard/DashboardView";
 import { BackupPanel } from "./features/exports/BackupPanel";
-import { downloadOpenBackup, uploadBackupFile } from "./features/exports/quick-backup";
 import { TeachingLoadsView } from "./features/teaching-loads/TeachingLoadsView";
 import { GradingSheetView } from "./features/grading-sheet/GradingSheetView";
 import { ToolsView } from "./features/tools/ToolsView";
@@ -52,7 +51,6 @@ import {
 import { classTitle } from "./features/shell/labels";
 import { createDefaultProfile, type TeacherProfile } from "./models/teacher-profile";
 import type { TeachingLoad } from "./models/teaching-load";
-import { getLocalFolderStatus } from "./storage/local-profile";
 import { getTeacherProfile, saveTeacherProfile } from "./storage/init";
 import { openGradeBossDb } from "./storage/db";
 
@@ -124,12 +122,10 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [loads, setLoads] = useState<TeachingLoad[]>([]);
   const [profile, setProfile] = useState<TeacherProfile | null>(null);
-  const [folderReady, setFolderReady] = useState(false);
   const [zoom, setZoom] = useState(() => loadZoom());
   const [sidebarWidth, setSidebarWidth] = useState(240);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => loadSidebarCollapsed());
   const [dialog, setDialog] = useState<"help" | "feedback" | "install" | null>(null);
-  const [backupBusy, setBackupBusy] = useState(false);
   const [welcome, setWelcome] = useState(true);
   const { canInstall, installed, install } = useInstallPrompt();
   const online = useOnline();
@@ -137,14 +133,12 @@ export default function App() {
 
   const refreshChrome = useCallback(async () => {
     const db = await openGradeBossDb();
-    const [nextProfile, nextLoads, folder] = await Promise.all([
+    const [nextProfile, nextLoads] = await Promise.all([
       getTeacherProfile(db),
       api.getTeachingLoads(),
-      getLocalFolderStatus(),
     ]);
     setProfile(nextProfile || createDefaultProfile());
     setLoads(nextLoads);
-    setFolderReady(folder.connected);
     if (!selectedLoadId && (nextProfile?.currentTeachingLoadId || nextLoads[0]?.id)) {
       setSelectedLoadId(nextProfile?.currentTeachingLoadId || nextLoads[0]?.id || null);
     }
@@ -199,31 +193,6 @@ export default function App() {
     const next = !sidebarCollapsed;
     setSidebarCollapsed(next);
     saveSidebarCollapsed(next);
-  };
-
-  const runDownloadBackup = async () => {
-    setBackupBusy(true);
-    try {
-      await downloadOpenBackup();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not download backup.");
-    } finally {
-      setBackupBusy(false);
-    }
-  };
-
-  const runUploadBackup = async (file: File) => {
-    if (!window.confirm("Replace teaching loads, scores, and SF1 history on this device with this backup?")) return;
-    setBackupBusy(true);
-    try {
-      await uploadBackupFile(file, "replace");
-      notifyWorkspaceChanged();
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not import that backup.");
-    } finally {
-      setBackupBusy(false);
-    }
   };
 
   const onSignedIn = useCallback((next: User) => {
@@ -312,14 +281,9 @@ export default function App() {
         title={headerTitle}
         profile={profile}
         schoolYears={schoolYears}
-        folderReady={folderReady}
-        autoSaved={isLocalUser(user) || folderReady}
         zoom={zoom}
-        busy={backupBusy}
         onSchoolYearChange={(year) => void changeSchoolYear(year)}
         onZoomChange={changeZoom}
-        onDownloadBackup={() => void runDownloadBackup()}
-        onUploadBackup={(file) => void runUploadBackup(file)}
       />
 
       <main className="content content--view-transition" key={view} style={{ zoom: zoom / 100 }}>

@@ -5051,3 +5051,56 @@ button.ghost.back {
     font-size: 12px;
   }
 }
+.topbar.ecr-topbar {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 12px;
+  padding-block: 10px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.ecr-topbar .ecr-topbar-title {
+  flex: 0 1 280px;
+  min-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+.ecr-topbar .ecr-year-label {
+  flex: 0 0 auto;
+}
+.ecr-topbar .ecr-topbar-school {
+  flex: 1 1 180px;
+  min-width: 0;
+  max-width: none;
+  font-size: 11px;
+}
+.ecr-topbar .ecr-topbar-actions {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  margin-left: auto;
+}
+.ecr-cloud-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+  color: var(--primary);
+}
+.ecr-cloud-save svg {
+  width: 24px;
+  height: 24px;
+}
+.ecr-cloud-save.is-saving .cloud-save-arrow {
+  animation: cloud-save-rise 600ms ease-in-out 2;
+}
+@keyframes cloud-save-rise {
+  0%, 100% { transform: translateY(1px); opacity: 0.55; }
+  50% { transform: translateY(-2px); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ecr-cloud-save.is-saving .cloud-save-arrow {
+    animation: none;
+  }
+}
