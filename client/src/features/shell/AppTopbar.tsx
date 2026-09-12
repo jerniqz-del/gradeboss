@@ -66,7 +66,7 @@ export function AppTopbar({
 
       <div className="ecr-topbar-actions">
         <button type="button" className="ghost ecr-backup-btn" onClick={() => window.dispatchEvent(new Event("gradeboss:open-changelog"))}>
-          Changelog
+          Activity Log
         </button>
         <button type="button" className="ghost ecr-backup-btn" disabled={busy} onClick={onDownloadBackup}>
           <Icon name="download" />

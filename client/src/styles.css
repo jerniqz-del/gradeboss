@@ -5023,3 +5023,31 @@ button.ghost.back {
 .changelog-entry-actions {
   align-items: center;
 }
+/* Compact, equally distributed assessment and calculation columns. */
+.sheet-table {
+  font-size: 11px;
+}
+.sheet-table th,
+.sheet-table td {
+  padding: 4px;
+}
+.sheet-table thead th,
+.sheet-table .sheet-name,
+.sheet-table .sheet-hps th {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+.sheet-table .sheet-computed,
+.sheet-table .badge {
+  font-size: 11px;
+}
+.sheet-table .score-input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 2px;
+}
+@media (min-width: 900px) {
+  .sheet-table .score-input {
+    font-size: 12px;
+  }
+}

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { User } from "../../auth";
 import {
-  CHANGELOG_ERROR, CHANGELOG_UPDATED, DATA_SAVED, checkpoint, getRestorePoint,
-  logActivity, readChangelog, reportHistoryError, restorePoint, setHistoryOwner, type LogEntry,
+  CHANGELOG_ERROR, CHANGELOG_UPDATED, DATA_SAVED,
+  logActivity, readChangelog, reportHistoryError, type LogEntry,
 } from "../../storage/changelog";
 
 export const OPEN_CHANGELOG = "gradeboss:open-changelog";
@@ -11,8 +11,6 @@ export function Changelog({ user, view }: { user: User; view: string }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<LogEntry[]>([]);
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [selected, setSelected] = useState<LogEntry | null>(null);
   const [filter, setFilter] = useState("");
   const modalRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef(view);
@@ -20,12 +18,11 @@ export function Changelog({ user, view }: { user: User; view: string }) {
 
   useEffect(() => {
     let active = true;
-    setHistoryOwner(owner);
     const refresh = () => { void readChangelog(owner).then((next) => { if (active) setRows(next); }).catch(reportHistoryError); };
     const show = () => { setOpen(true); refresh(); };
     const failure = (event: Event) => setError(String((event as CustomEvent).detail));
     const saved = (event: Event) => {
-      void checkpoint(owner, user.name, String((event as CustomEvent).detail || "Saved changes")).catch(reportHistoryError);
+      void logActivity(owner, user.name, "action", String((event as CustomEvent).detail || "Saved changes")).catch(reportHistoryError);
     };
     const click = (event: MouseEvent) => {
       const element = event.target instanceof Element ? event.target.closest<HTMLElement>("button, [role=button]") : null;
@@ -49,11 +46,9 @@ export function Changelog({ user, view }: { user: User; view: string }) {
     window.addEventListener(DATA_SAVED, saved);
     document.addEventListener("click", click, true);
     document.addEventListener("change", input, true);
-    void checkpoint(owner, user.name, "Workspace when session opened").catch(reportHistoryError);
     refresh();
     return () => {
       active = false;
-      setHistoryOwner(null);
       window.removeEventListener(OPEN_CHANGELOG, show);
       window.removeEventListener(CHANGELOG_UPDATED, refresh);
       window.removeEventListener(CHANGELOG_ERROR, failure);
@@ -70,25 +65,13 @@ export function Changelog({ user, view }: { user: User; view: string }) {
     return () => previous?.focus();
   }, [open]);
 
-  const download = async (entry: LogEntry) => {
-    try {
-      const bundle = await getRestorePoint(owner, entry.snapshotId!);
-      const url = URL.createObjectURL(new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" }));
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "gradeboss-restore-" + entry.at.replace(/[:.]/g, "-") + ".json";
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (err) { reportHistoryError(err); }
-  };
-
-  if (!open) return error ? <div className="banner error" role="alert">Changelog: {error} <button onClick={() => setOpen(true)}>Open Changelog</button></div> : null;
+  if (!open) return error ? <div className="banner error" role="alert">Activity Log: {error} <button onClick={() => setOpen(true)}>Open Activity Log</button></div> : null;
   const visible = rows.filter((row) => (row.label + " " + row.actor).toLowerCase().includes(filter.toLowerCase()));
   return (
     <div className="att-modal-backdrop" data-changelog>
       <div ref={modalRef} className="card att-modal changelog-modal" role="dialog" aria-modal="true" aria-labelledby="changelog-title"
         onKeyDown={(event) => {
-          if (event.key === "Escape" && !busy) { setOpen(false); setSelected(null); }
+          if (event.key === "Escape") { setOpen(false); }
           if (event.key !== "Tab") return;
           const items = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), [tabindex="0"]'));
           const first = items[0];
@@ -97,47 +80,25 @@ export function Changelog({ user, view }: { user: User; view: string }) {
           else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
         }}>
         <div className="att-modal-head">
-          <h3 id="changelog-title">Changelog</h3>
-          <button className="ghost" disabled={busy} onClick={() => { setOpen(false); setSelected(null); }}>Close</button>
+          <h3 id="changelog-title">Activity Log</h3>
+          <button className="ghost" onClick={() => { setOpen(false); }}>Close</button>
         </div>
-        <p className="muted">Timestamped activity and restore points for this profile on this device. Keeps the latest 1,000 actions and 100 restore points. History begins when this feature is enabled.</p>
-        <p className="muted">Restore points cover classes, learners, grades, attendance, checklists, calendar, advisory, tasks, and teacher profile. Button activity is a record only; printing and downloads cannot be undone.</p>
+        <p className="muted">The latest 1,000 actions and input changes for this profile on this device, with local date and time. Passwords and PINs are not recorded.</p>
         {error && <div className="banner error" role="alert">{error}</div>}
         <div className="changelog-tools">
-          <input autoFocus aria-label="Search changelog" placeholder="Search history…" value={filter} onChange={(event) => setFilter(event.target.value)} />
-          <button className="primary" disabled={busy} onClick={async () => {
-            setBusy(true);
-            try { await checkpoint(owner, user.name, "Manual restore point", true); }
-            catch (err) { reportHistoryError(err); }
-            finally { setBusy(false); }
-          }}>Create restore point</button>
+          <input autoFocus aria-label="Search activity log" placeholder="Search history…" value={filter} onChange={(event) => setFilter(event.target.value)} />
+
         </div>
-        {selected && <div className="card" role="alert">
-          <strong>Restore all workspace data to {new Date(selected.at).toLocaleString()}?</strong>
-          <p>This replaces current saved data across all classes with this restore point. A backup of the current data will be saved first. The app will reload after restoring.</p>
-          <button className="primary" disabled={busy} onClick={async () => {
-            setBusy(true); setError("");
-            try {
-              await restorePoint(owner, user.name, selected);
-              window.dispatchEvent(new Event("gradeboss:workspace-changed"));
-              window.location.reload();
-            } catch (err) { reportHistoryError(err); setBusy(false); }
-          }}>{busy ? "Restoring…" : "Back up current data and restore"}</button>
-          <button className="ghost" disabled={busy} onClick={() => setSelected(null)}>Cancel</button>
-        </div>}
         <div className="changelog-entries">
           {visible.length === 0 && <p className="muted">No matching history yet.</p>}
           {visible.map((entry) => <article className="changelog-entry" key={entry.id}>
             <div>
               <time dateTime={entry.at}>{new Date(entry.at).toLocaleString()}</time>
-              <span className="pill">{entry.kind === "snapshot" ? "Restore point" : entry.kind === "input" ? "Input" : "Button / action"}</span>
+              <span className="pill">{entry.kind === "input" ? "Input" : "Button / action"}</span>
               <p>{entry.label}</p>
               <small className="muted">{entry.actor}</small>
             </div>
-            {entry.snapshotId && <div className="changelog-entry-actions">
-              <button className="ghost" disabled={busy} onClick={() => void download(entry)}>Download backup</button>
-              <button className="primary" disabled={busy} onClick={() => { setSelected(entry); modalRef.current?.scrollTo({ top: 0 }); }}>Restore…</button>
-            </div>}
+
           </article>)}
         </div>
       </div>

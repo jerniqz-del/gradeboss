@@ -114,7 +114,7 @@ export function GradingSheetView({
 
       <div className="sheet-utility-actions no-print">
         <button type="button" className="ghost" onClick={() => window.dispatchEvent(new Event("gradeboss:open-changelog"))}>
-          Changelog
+          Activity Log
         </button>
       </div>
       <ActiveClassBar
