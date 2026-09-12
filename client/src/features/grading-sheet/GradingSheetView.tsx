@@ -142,7 +142,37 @@ export function GradingSheetView({
     <section className="sheet-page">
       {error && <div className="banner error">{error}</div>}
 
-      <ActiveClassBar loads={loads} selectedId={load?.id || ""} onSelect={onSelectLoad}>
+      {load && tab !== "summary" && (
+        <div className="sheet-utility-actions no-print">
+          <button type="button" className="ghost" data-testid="sheet-undo" disabled={!stacks.undo.length} onClick={() => void runUndo()}>
+            Undo
+          </button>
+          <button type="button" className="ghost" data-testid="sheet-redo" disabled={!stacks.redo.length} onClick={() => void runRedo()}>
+            Redo
+          </button>
+        </div>
+      )}
+      <ActiveClassBar
+        loads={loads}
+        selectedId={load?.id || ""}
+        onSelect={onSelectLoad}
+        controls={load ? (
+          <div className="sheet-tabs no-print" role="tablist" aria-label="Term">
+            {(["1", "2", "3", "summary"] as const).map((id) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={tab === id}
+                className={tab === id ? "sheet-tab active" : "sheet-tab"}
+                onClick={() => setTab(id)}
+              >
+                {id === "summary" ? "Summary" : `Term ${id}`}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      >
         <button type="button" className="ghost btn-cyan" onClick={() => printGradingSheet()}>
           Print
         </button>
@@ -174,20 +204,6 @@ export function GradingSheetView({
             </p>
           </div>
 
-          <div className="sheet-tabs no-print" role="tablist" aria-label="Term">
-            {(["1", "2", "3", "summary"] as const).map((id) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={tab === id}
-                className={tab === id ? "sheet-tab active" : "sheet-tab"}
-                onClick={() => setTab(id)}
-              >
-                {id === "summary" ? "Summary" : `Term ${id}`}
-              </button>
-            ))}
-          </div>
 
           {mapeh && tab !== "summary" && (
             <div className="sheet-tabs mapeh" role="tablist" aria-label="MAPEH part">
@@ -217,12 +233,6 @@ export function GradingSheetView({
                 </p>
               </div>
               <div className="roster-page-actions">
-                <button type="button" className="ghost" data-testid="sheet-undo" disabled={!stacks.undo.length} onClick={() => void runUndo()}>
-                  Undo
-                </button>
-                <button type="button" className="ghost" data-testid="sheet-redo" disabled={!stacks.redo.length} onClick={() => void runRedo()}>
-                  Redo
-                </button>
                 <button type="button" className="ghost btn-cyan" data-testid="sheet-quick-grade" onClick={() => setQuickOpen(true)}>
                   Quick Grade Entry
                 </button>

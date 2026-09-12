@@ -8,12 +8,14 @@ export function ActiveClassBar({
   onSelect,
   label = "Active Class",
   children,
+  controls,
 }: {
   loads: TeachingLoad[];
   selectedId: string;
   onSelect: (id: string) => void;
   label?: string;
   children?: ReactNode;
+  controls?: ReactNode;
 }) {
   return (
     <div className="ecr-active-bar">
@@ -28,6 +30,7 @@ export function ActiveClassBar({
           ))}
         </select>
       </label>
+      {controls}
       {children ? <div className="ecr-active-actions">{children}</div> : null}
     </div>
   );

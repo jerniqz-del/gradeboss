@@ -4852,3 +4852,59 @@ button.ghost.back {
     display: none !important;
   }
 }
+
+/* Grading sheet controls follow the class record toolbar order. */
+.sheet-utility-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sheet-page .ecr-active-bar > .sheet-tabs {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.sheet-page .sheet-record-bar .roster-page-actions {
+  width: 100%;
+}
+
+.sheet-page .sheet-record-bar .roster-page-actions button {
+  flex: 1 1 160px;
+}
+
+@media (min-width: 900px) {
+  .sheet-page .ecr-active-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .sheet-page .ecr-active-label {
+    flex: 0 1 390px;
+    flex-direction: row;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .sheet-page .ecr-active-label select {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+  }
+
+  .sheet-page .ecr-active-actions {
+    margin-left: auto;
+  }
+
+  .sheet-page .sheet-record-bar .roster-page-actions {
+    width: auto;
+    margin-left: auto;
+  }
+
+  .sheet-page .sheet-record-bar .roster-page-actions button {
+    flex: 0 0 auto;
+  }
+}
