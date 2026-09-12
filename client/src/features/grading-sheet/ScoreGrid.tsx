@@ -112,6 +112,8 @@ export function ScoreGrid({
             {columns.map((col) => (
               <th
                 key={col.id}
+                title={col.title}
+                aria-label={col.title}
                 className={
                   col.component === "WW"
                     ? "sheet-col--ww"
@@ -120,7 +122,11 @@ export function ScoreGrid({
                       : "sheet-col--qa"
                 }
               >
-                {col.title}
+                {col.component === "WW"
+                  ? `WW${groups.ww.findIndex((item) => item.id === col.id) + 1}`
+                  : col.component === "PT"
+                    ? `PT${groups.pt.findIndex((item) => item.id === col.id) + 1}`
+                    : col.component}
               </th>
             ))}
             <th className="sheet-col--ww">WW</th>
