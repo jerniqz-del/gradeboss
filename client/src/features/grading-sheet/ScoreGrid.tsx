@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { computeTermResult, formatInitialGrade } from "../../domain/grading";
 import { descriptor } from "../../domain/grading/transmutation";
 import type { Assessment } from "../../models/assessment";
@@ -42,6 +42,29 @@ export function ScoreGrid({
   }, [columns]);
 
   const learners = useMemo(() => sortDepEdRoster(load.learners), [load.learners]);
+  const tableRef = useRef<HTMLTableElement>(null);
+  const [learnerColumnWidth, setLearnerColumnWidth] = useState(132);
+
+  useLayoutEffect(() => {
+    const table = tableRef.current;
+    if (!table) return;
+    const contents = Array.from(table.querySelectorAll<HTMLElement>(".sheet-learner"));
+    const measure = () => {
+      const width = contents.reduce((longest, content) => {
+        const cell = content.closest("th")!;
+        const style = getComputedStyle(cell);
+        const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+        const borders = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+        return Math.max(longest, content.getBoundingClientRect().width + padding + borders);
+      }, 132);
+      setLearnerColumnWidth(Math.ceil(width));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    contents.forEach((content) => observer.observe(content));
+    return () => observer.disconnect();
+  }, [learners]);
+
   const focusCell = (row: number, col: number) => {
     const el = document.querySelector<HTMLInputElement>(`[data-score-cell="${row}-${col}"]`);
     el?.focus();
@@ -82,10 +105,10 @@ export function ScoreGrid({
 
   return (
     <div className="table-scroll sheet-scroll">
-      <table className="sheet-table" style={{ minWidth: 384 + (columns.length + 5) * 68 }}>
+      <table ref={tableRef} className="sheet-table" style={{ minWidth: 204 + learnerColumnWidth + (columns.length + 5) * 68 }}>
         <colgroup>
           <col style={{ width: 40 }} />
-          <col style={{ width: 180 }} />
+          <col style={{ width: learnerColumnWidth }} />
           <col style={{ width: 44 }} />
           {columns.map((col) => <col key={col.id} />)}
           <col span={5} />
