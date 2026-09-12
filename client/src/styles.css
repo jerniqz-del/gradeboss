@@ -5104,3 +5104,27 @@ button.ghost.back {
     animation: none;
   }
 }
+.sheet-scroll.sheet-fit {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.sheet-fit > table {
+  width: var(--sheet-fit-width);
+  min-width: 0;
+  max-width: none;
+  table-layout: fixed;
+  zoom: var(--sheet-fit-scale);
+}
+.sheet-fit .summary-table .sheet-learner {
+  width: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+@media print {
+  .sheet-fit > table {
+    width: 100%;
+    zoom: 1;
+  }
+}

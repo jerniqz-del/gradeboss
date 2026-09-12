@@ -1,3 +1,4 @@
+import { FitSheet } from "./FitSheet";
 import { computeClassYearResults, type TermGrade } from "../../domain/grading";
 import { learnerDisplayName } from "../../models/learner";
 import type { TeachingLoad } from "../../models/teaching-load";
@@ -38,7 +39,7 @@ export function SummaryTable({ load }: { load: TeachingLoad }) {
   }));
 
   return (
-    <div className="table-scroll sheet-scroll">
+    <FitSheet minimumWidth={760}>
       <table className="summary-table">
         <thead>
           <tr>
@@ -104,6 +105,6 @@ export function SummaryTable({ load }: { load: TeachingLoad }) {
           )}
         </tbody>
       </table>
-    </div>
+    </FitSheet>
   );
 }

@@ -1,3 +1,4 @@
+import { FitSheet } from "./FitSheet";
 import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { computeTermResult, formatInitialGrade } from "../../domain/grading";
 import { descriptor } from "../../domain/grading/transmutation";
@@ -59,7 +60,7 @@ export function ScoreGrid({
         const style = getComputedStyle(cell);
         const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
         const borders = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
-        return Math.max(longest, content.getBoundingClientRect().width + padding + borders);
+        return Math.max(longest, content.offsetWidth + padding + borders);
       }, 132);
       setLearnerColumnWidth(Math.ceil(width));
     };
@@ -104,8 +105,8 @@ export function ScoreGrid({
   const numericColumns = columns.length + groups.length * 3 + 2;
 
   return (
-    <div className="table-scroll sheet-scroll">
-      <table ref={tableRef} className="sheet-table" style={{ minWidth: 180 + learnerColumnWidth + numericColumns * 56 }}>
+    <FitSheet minimumWidth={180 + learnerColumnWidth + numericColumns * 56}>
+      <table ref={tableRef} className="sheet-table">
         <colgroup>
           <col style={{ width: 40 }} />
           <col style={{ width: learnerColumnWidth }} />
@@ -208,6 +209,6 @@ export function ScoreGrid({
           </tr>}
         </tbody>
       </table>
-    </div>
+    </FitSheet>
   );
 }
