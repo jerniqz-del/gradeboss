@@ -112,11 +112,6 @@ export function GradingSheetView({
     <section className="sheet-page">
       {error && <div className="banner error">{error}</div>}
 
-      <div className="sheet-utility-actions no-print">
-        <button type="button" className="ghost" onClick={() => window.dispatchEvent(new Event("gradeboss:open-changelog"))}>
-          Activity Log
-        </button>
-      </div>
       <ActiveClassBar
         loads={loads}
         selectedId={load?.id || ""}
@@ -138,6 +133,9 @@ export function GradingSheetView({
           </div>
         ) : null}
       >
+        <button type="button" className="ghost" onClick={() => window.dispatchEvent(new Event("gradeboss:open-changelog"))}>
+          Activity Log
+        </button>
         <button type="button" className="ghost btn-cyan" onClick={() => printGradingSheet()}>
           Print
         </button>
