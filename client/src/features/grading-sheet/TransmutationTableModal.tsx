@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { TeachingLoad } from "../../models/teaching-load";
-import type { TermGrade } from "../../models/types";
+import type { TermGrade } from "../../domain/grading/types";
 import {
   DO15_TRANSITION,
   DO8_2015,
