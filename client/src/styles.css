@@ -5383,3 +5383,43 @@ button.ghost.back {
 .sheet-table tr.sheet-learner-row--female:not(.sheet-active-row) > :nth-child(-n + 3) {
   background: color-mix(in srgb, #ffa6c9 58%, var(--surface)) !important;
 }
+.sheet-tools-card {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding: 7px 10px;
+}
+.sheet-tools-label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.sheet-entry-size-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sheet-entry-size-control button {
+  width: 32px;
+  min-height: 32px;
+  padding: 4px;
+}
+.sheet-entry-size-control input {
+  width: clamp(100px, 16vw, 180px);
+}
+.sheet-entry-size-control output {
+  min-width: 34px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+.sheet-page .sheet-table tbody th,
+.sheet-page .sheet-table tbody td,
+.sheet-page .sheet-table .score-input,
+.sheet-page .sheet-table .badge {
+  font-size: var(--sheet-entry-font-size, 11px);
+}

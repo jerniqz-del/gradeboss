@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useState } from "react";
 import { api } from "../../api";
 import { isMapehSubject } from "../../domain/grading";
 import { recordScoreChange } from "../../domain/scores/history";
@@ -37,6 +37,7 @@ export function GradingSheetView({
   const [quickOpen, setQuickOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [entryFontSize, setEntryFontSize] = useState(11);
 
   const refreshList = useCallback(async () => {
     const next = await api.getTeachingLoads();
@@ -109,7 +110,7 @@ export function GradingSheetView({
   }
 
   return (
-    <section className="sheet-page">
+    <section className="sheet-page" style={{ "--sheet-entry-font-size": `${entryFontSize}px` } as CSSProperties}>
       {error && <div className="banner error">{error}</div>}
 
       <ActiveClassBar
@@ -222,15 +223,28 @@ export function GradingSheetView({
           {tab === "summary" ? (
             <SummaryTable load={load} />
           ) : (
-            <ScoreGrid
-              load={load}
-              term={tab}
-              mapePart={activePart}
-              onScoreChange={(learnerId, assessmentId, value) => onScoreChange(learnerId, assessmentId, value)}
-              onHpsChange={onHpsChange}
-            />
+            <>
+              <div className="sheet-tools-card card no-print">
+                <div className="sheet-tools-label">
+                  <strong>Grading Sheet Tools</strong>
+                  <span className="muted small">Entry text and number size</span>
+                </div>
+                <div className="sheet-entry-size-control" role="group" aria-label="Grading sheet entry size">
+                  <button type="button" className="ghost" aria-label="Decrease entry size" onClick={() => setEntryFontSize((size) => Math.max(9, size - 1))}>−</button>
+                  <input type="range" min={9} max={16} step={1} value={entryFontSize} aria-label="Entry text and number size" onChange={(event) => setEntryFontSize(Number(event.target.value))} />
+                  <button type="button" className="ghost" aria-label="Increase entry size" onClick={() => setEntryFontSize((size) => Math.min(16, size + 1))}>+</button>
+                  <output>{entryFontSize}px</output>
+                </div>
+              </div>
+              <ScoreGrid
+                load={load}
+                term={tab}
+                mapePart={activePart}
+                onScoreChange={(learnerId, assessmentId, value) => onScoreChange(learnerId, assessmentId, value)}
+                onHpsChange={onHpsChange}
+              />
+            </>
           )}
-
 
 
           {quickOpen && tab !== "summary" && (
