@@ -121,8 +121,8 @@ export function ScoreGrid({
             <th className="sheet-sticky sheet-learner-column sheet-section-divider" rowSpan={2}>Learner</th>
             <th className="sheet-section-divider" rowSpan={2}>Sex</th>
             {groups.map((group) => <th key={group.key} colSpan={group.items.length + 3} className={`sheet-group sheet-group--${group.key} sheet-section-divider`}>{group.label}</th>)}
-            <th rowSpan={2} title="Initial Grade">IG</th>
-            <th rowSpan={2} title="Transmuted Grade">TG</th>
+            <th className="sheet-section-divider" rowSpan={2} title="Initial Grade">IG</th>
+            <th className="sheet-section-divider" rowSpan={2} title="Transmuted Grade">TG</th>
             <th rowSpan={2}>Desc.</th>
           </tr>
           <tr>
@@ -156,7 +156,7 @@ export function ScoreGrid({
               <td className="sheet-computed">100</td>
               <td className="sheet-computed sheet-section-divider">{group.weight}%</td>
             </Fragment>)}
-            <td /><td /><td />
+            <td className="sheet-section-divider" /><td className="sheet-section-divider" /><td />
           </tr>
           {learners.map((learner, rowIndex) => {
             const result = computeTermResult(load, learner.id, term, mapePart);
@@ -202,8 +202,8 @@ export function ScoreGrid({
                   <td className={`sheet-computed sheet-col--${group.key} sheet-section-divider`}>{stats.hasData ? formatInitialGrade(stats.ps * group.weight / 100) : ""}</td>
                 </Fragment>;
               })}
-              <td className="sheet-computed">{result.hasData ? formatInitialGrade(result.initialGrade) : ""}</td>
-              <td>{result.termGrade === null || result.termGrade === undefined ? "" :
+              <td className="sheet-computed sheet-section-divider">{result.hasData ? formatInitialGrade(result.initialGrade) : ""}</td>
+              <td className="sheet-section-divider">{result.termGrade === null || result.termGrade === undefined ? "" :
                 <span className="badge" style={{ background: gradeTone(result.termGrade) }}>{String(result.termGrade)}</span>}
               </td>
               <td className="sheet-computed">{result.hasData ? descriptor(result.termGrade) : ""}</td>
