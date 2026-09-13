@@ -5277,3 +5277,16 @@ button.ghost.back {
     overscroll-behavior: contain;
   }
 }
+.activity-log-tabs {
+  display: flex;
+  gap: 4px;
+  margin-top: 14px;
+  padding: 4px;
+  overflow-x: auto;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.activity-log-tabs .sheet-tab {
+  flex: 1 0 auto;
+}

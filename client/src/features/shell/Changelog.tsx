@@ -12,6 +12,7 @@ export function Changelog({ user, view }: { user: User; view: string }) {
   const [rows, setRows] = useState<LogEntry[]>([]);
   const [error, setError] = useState("");
   const [filter, setFilter] = useState("");
+  const [category, setCategory] = useState<"actions" | "entries">("actions");
   const modalRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef(view);
   viewRef.current = view;
@@ -22,7 +23,7 @@ export function Changelog({ user, view }: { user: User; view: string }) {
     const show = () => { setOpen(true); refresh(); };
     const failure = (event: Event) => setError(String((event as CustomEvent).detail));
     const saved = (event: Event) => {
-      void logActivity(owner, user.name, "action", String((event as CustomEvent).detail || "Saved changes")).catch(reportHistoryError);
+      void logActivity(owner, user.name, "input", String((event as CustomEvent).detail || "Saved data changes")).catch(reportHistoryError);
     };
     const click = (event: MouseEvent) => {
       const element = event.target instanceof Element ? event.target.closest<HTMLElement>("button, [role=button]") : null;
@@ -66,7 +67,10 @@ export function Changelog({ user, view }: { user: User; view: string }) {
   }, [open]);
 
   if (!open) return error ? <div className="banner error" role="alert">Activity Log: {error} <button onClick={() => setOpen(true)}>Open Activity Log</button></div> : null;
-  const visible = rows.filter((row) => (row.label + " " + row.actor).toLowerCase().includes(filter.toLowerCase()));
+  const actions = rows.filter((row) => row.kind === "action");
+  const entries = rows.filter((row) => row.kind === "input");
+  const categoryRows = category === "actions" ? actions : entries;
+  const visible = categoryRows.filter((row) => (row.label + " " + row.actor).toLowerCase().includes(filter.toLowerCase()));
   return (
     <div className="att-modal-backdrop" data-changelog>
       <div ref={modalRef} className="card att-modal changelog-modal" role="dialog" aria-modal="true" aria-labelledby="changelog-title"
@@ -83,18 +87,44 @@ export function Changelog({ user, view }: { user: User; view: string }) {
           <h3 id="changelog-title">Activity Log</h3>
           <button className="ghost" onClick={() => { setOpen(false); }}>Close</button>
         </div>
-        <p className="muted">The latest 1,000 actions and input changes for this profile on this device, with local date and time. Passwords and PINs are not recorded.</p>
+        <p className="muted">Actions and data entries are stored separately for this profile on this device, with local date and time. Passwords and PINs are not recorded.</p>
         {error && <div className="banner error" role="alert">{error}</div>}
+        <div className="activity-log-tabs" role="tablist" aria-label="Activity log type">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={category === "actions"}
+            className={category === "actions" ? "sheet-tab active" : "sheet-tab"}
+            onClick={() => setCategory("actions")}
+          >
+            Actions / Button Clicks ({actions.length})
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={category === "entries"}
+            className={category === "entries" ? "sheet-tab active" : "sheet-tab"}
+            onClick={() => setCategory("entries")}
+          >
+            Data Entries ({entries.length})
+          </button>
+        </div>
         <div className="changelog-tools">
-          <input autoFocus aria-label="Search activity log" placeholder="Search history…" value={filter} onChange={(event) => setFilter(event.target.value)} />
+          <input
+            autoFocus
+            aria-label={category === "actions" ? "Search actions and button clicks" : "Search data entries"}
+            placeholder={category === "actions" ? "Search actions…" : "Search data entries…"}
+            value={filter}
+            onChange={(event) => setFilter(event.target.value)}
+          />
 
         </div>
         <div className="changelog-entries">
-          {visible.length === 0 && <p className="muted">No matching history yet.</p>}
+          {visible.length === 0 && <p className="muted">No matching {category === "actions" ? "actions" : "data entries"} yet.</p>}
           {visible.map((entry) => <article className="changelog-entry" key={entry.id}>
             <div>
               <time dateTime={entry.at}>{new Date(entry.at).toLocaleString()}</time>
-              <span className="pill">{entry.kind === "input" ? "Input" : "Button / action"}</span>
+              <span className="pill">{category === "entries" ? "Data entry" : "Button / action"}</span>
               <p>{entry.label}</p>
               <small className="muted">{entry.actor}</small>
             </div>
