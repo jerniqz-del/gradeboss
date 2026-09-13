@@ -5376,3 +5376,10 @@ button.ghost.back {
   padding: 24px;
   text-align: center;
 }
+.sheet-table tr.sheet-learner-row--male:not(.sheet-active-row) > :nth-child(-n + 3) {
+  background: color-mix(in srgb, #add8e6 62%, var(--surface)) !important;
+}
+
+.sheet-table tr.sheet-learner-row--female:not(.sheet-active-row) > :nth-child(-n + 3) {
+  background: color-mix(in srgb, #ffa6c9 58%, var(--surface)) !important;
+}

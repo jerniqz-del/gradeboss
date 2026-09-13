@@ -161,7 +161,12 @@ export function ScoreGrid({
           {learners.map((learner, rowIndex) => {
             const result = computeTermResult(load, learner.id, term, mapePart);
             const row = rowIndex + 1;
-            return <tr key={learner.id} className={activeCell?.row === row ? "sheet-active-row" : undefined}>
+            const sexHighlight = String(learner.sex || "").trim().toUpperCase().startsWith("M")
+              ? "sheet-learner-row--male"
+              : String(learner.sex || "").trim().toUpperCase().startsWith("F")
+                ? "sheet-learner-row--female"
+                : "";
+            return <tr key={learner.id} className={[activeCell?.row === row ? "sheet-active-row" : "", sexHighlight].filter(Boolean).join(" ")}>
               <td className="sheet-sticky sheet-number sheet-section-divider">{row}</td>
               <th className="sheet-sticky sheet-learner-column sheet-name sheet-section-divider" scope="row">
                 <span className="sheet-learner">
