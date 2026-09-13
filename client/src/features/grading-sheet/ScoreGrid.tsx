@@ -12,6 +12,7 @@ import { learnerNameCaps } from "../shell/labels";
 import { LearnerAvatar } from "../roster/LearnerAvatar";
 import { sortDepEdRoster } from "../roster/sort";
 import { gradeTone } from "./grade-tone";
+import { TransmutationTableModal } from "./TransmutationTableModal";
 
 function StackedDescription({ value }: { value: string }) {
   const translated = value.match(/^(.+?)\s*\((.+)\)$/);
@@ -60,6 +61,7 @@ export function ScoreGrid({
   const [learnerColumnWidth, setLearnerColumnWidth] = useState(132);
   const [activeCell, setActiveCell] = useState<{ row: number; col: number } | null>(null);
   const [scoreToast, setScoreToast] = useState("");
+  const [selectedTransmutation, setSelectedTransmutation] = useState<{ learnerName: string; initialGrade: number; transmutedGrade: NonNullable<ReturnType<typeof computeTermResult>["termGrade"]> } | null>(null);
   const toastTimerRef = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(toastTimerRef.current), []);
@@ -248,7 +250,18 @@ export function ScoreGrid({
               })}
               <td className="sheet-computed sheet-section-divider">{result.hasData ? formatInitialGrade(result.initialGrade) : ""}</td>
               <td className="sheet-section-divider">{result.termGrade === null || result.termGrade === undefined ? "" :
-                <span className="badge" style={{ background: gradeTone(result.termGrade) }}>{String(result.termGrade)}</span>}
+                <button
+                  type="button"
+                  className="tg-grade-button"
+                  aria-label={`Show transmutation table for ${learnerDisplayName(learner)}, grade ${String(result.termGrade)}`}
+                  onClick={() => setSelectedTransmutation({
+                    learnerName: learnerDisplayName(learner),
+                    initialGrade: result.initialGrade,
+                    transmutedGrade: result.termGrade!,
+                  })}
+                >
+                  <span className="badge" style={{ background: gradeTone(result.termGrade) }}>{String(result.termGrade)}</span>
+                </button>}
               </td>
               <td className="sheet-computed sheet-description">
                 {result.hasData ? <StackedDescription value={descriptor(result.termGrade)} /> : ""}
@@ -262,6 +275,13 @@ export function ScoreGrid({
       </table>
     </FitSheet>
     {scoreToast && <div className="score-limit-toast" role="alert">{scoreToast}</div>}
+    {selectedTransmutation && <TransmutationTableModal
+      load={load}
+      learnerName={selectedTransmutation.learnerName}
+      initialGrade={selectedTransmutation.initialGrade}
+      transmutedGrade={selectedTransmutation.transmutedGrade}
+      onClose={() => setSelectedTransmutation(null)}
+    />}
     </>
   );
 }

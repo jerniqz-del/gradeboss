@@ -5479,3 +5479,58 @@ button.ghost.back {
 .sheet-page .sheet-table thead th {
   font-weight: 700;
 }
+.tg-grade-button {
+  width: 100%;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.tg-grade-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+.transmutation-modal {
+  display: flex;
+  width: min(620px, 100%);
+  max-height: min(88dvh, 760px);
+  flex-direction: column;
+  overflow: hidden;
+}
+.transmutation-modal .att-modal-head {
+  flex: 0 0 auto;
+}
+.transmutation-modal .att-modal-head p {
+  margin: 4px 0 0;
+}
+.transmutation-table-wrap {
+  min-height: 0;
+  margin-top: 14px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.transmutation-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.transmutation-table th,
+.transmutation-table td {
+  padding: 8px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.transmutation-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-2);
+  font-weight: 700;
+}
+.transmutation-table tr.is-selected td {
+  color: var(--text);
+  background: color-mix(in srgb, var(--primary) 24%, var(--surface));
+  box-shadow: inset 0 1px var(--primary), inset 0 -1px var(--primary);
+}
