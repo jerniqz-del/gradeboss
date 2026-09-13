@@ -354,7 +354,7 @@ export function ChecklistView({
               {pinSet && (
                 <button
                   type="button"
-                  className="ghost"
+                  className="ghost destructive-action"
                   onClick={() => {
                     clearToolsPin();
                     setPinSet(false);

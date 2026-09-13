@@ -125,7 +125,7 @@ function PersonalTasks({
                 {task.dueDate ? <span className="muted small"> · {task.dueDate}</span> : null}
               </span>
             </label>
-            <button type="button" className="ghost small" onClick={() => void onRemoveTask(task.id)}>
+            <button type="button" className="ghost small destructive-action" onClick={() => void onRemoveTask(task.id)}>
               Remove
             </button>
           </li>

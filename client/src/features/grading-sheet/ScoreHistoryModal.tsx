@@ -22,7 +22,7 @@ export function ScoreHistoryModal({
       <div className="card att-modal" role="dialog" aria-labelledby="hist-title" onClick={(event) => event.stopPropagation()}>
         <div className="att-modal-head">
           <h3 id="hist-title">Score history · Term {term}</h3>
-          <button type="button" className="ghost" onClick={onClose}>
+          <button type="button" className="ghost destructive-action" onClick={onClose}>
             Close
           </button>
         </div>

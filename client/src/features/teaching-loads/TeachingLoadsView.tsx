@@ -182,7 +182,7 @@ export function TeachingLoadsView({
                 Save class
               </button>
               {loads.length > 0 && (
-                <button type="button" className="ghost" onClick={() => setCreating(false)}>
+                <button type="button" className="ghost destructive-action" onClick={() => setCreating(false)}>
                   Cancel
                 </button>
               )}

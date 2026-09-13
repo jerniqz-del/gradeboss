@@ -329,7 +329,7 @@ function DayModal({
               {!event.immutable && !event.virtual && event.type !== "assessment" && event.type !== "exam" ? (
                 <button
                   type="button"
-                  className="ghost small"
+                  className="ghost small destructive-action"
                   onClick={async () => {
                     await deleteLocalCalendarEvent(event.id);
                     await onSaved();
@@ -379,7 +379,7 @@ function DayModal({
             </select>
           </label>
           <div className="att-modal-foot">
-            <button type="button" className="ghost" onClick={onClose}>
+            <button type="button" className="ghost destructive-action" onClick={onClose}>
               Close
             </button>
             <button type="submit" className="primary" disabled={saving || !title.trim()}>

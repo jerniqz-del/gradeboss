@@ -98,7 +98,7 @@ export function TransmutationTableModal({
             <h3 id="transmutation-title">{table.title}</h3>
             <p className="muted small">{learnerName} · IG {numberLabel(initialGrade)} · TG {String(transmutedGrade)}</p>
           </div>
-          <button type="button" className="ghost" autoFocus onClick={onClose}>Close</button>
+          <button type="button" className="ghost destructive-action" autoFocus onClick={onClose}>Close</button>
         </div>
         <div className="transmutation-table-wrap">
           <table className="transmutation-table">

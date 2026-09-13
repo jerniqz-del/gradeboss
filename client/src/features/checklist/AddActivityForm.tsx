@@ -92,7 +92,7 @@ export function AddActivityForm({
       <button type="submit" className="primary">
         Save activity
       </button>
-      <button type="button" className="ghost" onClick={() => setOpen(false)}>
+      <button type="button" className="ghost destructive-action" onClick={() => setOpen(false)}>
         Cancel
       </button>
     </form>

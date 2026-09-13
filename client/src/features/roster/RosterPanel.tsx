@@ -163,7 +163,7 @@ export function RosterPanel({
             <button type="button" className="primary" onClick={() => void applyCsv()}>
               Import pasted rows
             </button>
-            <button type="button" className="ghost" onClick={() => setMode("list")}>
+            <button type="button" className="ghost destructive-action" onClick={() => setMode("list")}>
               Cancel
             </button>
           </div>
@@ -197,7 +197,7 @@ export function RosterPanel({
             <button type="button" className="primary" disabled={!cloneId} onClick={() => void applyClone()}>
               Clone roster
             </button>
-            <button type="button" className="ghost" onClick={() => setMode("list")}>
+            <button type="button" className="ghost destructive-action" onClick={() => setMode("list")}>
               Cancel
             </button>
           </div>
@@ -235,7 +235,7 @@ export function RosterPanel({
             <button type="button" className="primary" disabled={!transferId} onClick={() => void applyTransfer()}>
               Transfer learner
             </button>
-            <button type="button" className="ghost" onClick={() => { setMode("list"); setEditing(null); }}>
+            <button type="button" className="ghost destructive-action" onClick={() => { setMode("list"); setEditing(null); }}>
               Cancel
             </button>
           </div>

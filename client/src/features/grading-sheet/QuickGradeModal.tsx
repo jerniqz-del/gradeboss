@@ -81,7 +81,7 @@ export function QuickGradeModal({
       <div className="card att-modal qg-modal" role="dialog" aria-labelledby="qg-title" onClick={(event) => event.stopPropagation()}>
         <div className="att-modal-head">
           <h3 id="qg-title">Quick grade</h3>
-          <button type="button" className="ghost" onClick={onClose}>
+          <button type="button" className="ghost destructive-action" onClick={onClose}>
             Close
           </button>
         </div>

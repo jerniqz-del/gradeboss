@@ -14,7 +14,7 @@ export function HelpDialog({
       <div className="ecr-dialog" role="dialog" aria-labelledby="ecr-dialog-title" onClick={(event) => event.stopPropagation()}>
         <div className="ecr-dialog-head">
           <h3 id="ecr-dialog-title">{title}</h3>
-          <button type="button" className="ghost" onClick={onClose}>
+          <button type="button" className="ghost destructive-action" onClick={onClose}>
             Close
           </button>
         </div>

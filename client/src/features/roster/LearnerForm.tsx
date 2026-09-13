@@ -197,7 +197,7 @@ export function LearnerForm({
         <button type="submit" className="primary">
           {learner ? "Save learner" : "Add to roster"}
         </button>
-        <button type="button" className="ghost" onClick={onCancel}>
+        <button type="button" className="ghost destructive-action" onClick={onCancel}>
           Cancel
         </button>
       </div>

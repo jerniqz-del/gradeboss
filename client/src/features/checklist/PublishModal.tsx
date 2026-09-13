@@ -42,7 +42,7 @@ export function PublishModal({
       <div className="card att-modal chk-publish" role="dialog" aria-labelledby="chk-pub-title" onClick={(event) => event.stopPropagation()}>
         <div className="att-modal-head">
           <h3 id="chk-pub-title">Publish to WW / PT</h3>
-          <button type="button" className="ghost" onClick={onClose}>
+          <button type="button" className="ghost destructive-action" onClick={onClose}>
             Close
           </button>
         </div>
@@ -109,7 +109,7 @@ export function PublishModal({
           </label>
         )}
         <div className="att-modal-foot">
-          <button type="button" className="ghost" onClick={onClose}>
+          <button type="button" className="ghost destructive-action" onClick={onClose}>
             Cancel
           </button>
           <button

@@ -5534,3 +5534,67 @@ button.ghost.back {
   background: color-mix(in srgb, var(--primary) 24%, var(--surface));
   box-shadow: inset 0 1px var(--primary), inset 0 -1px var(--primary);
 }
+/* Global button interactions apply automatically to current and future buttons. */
+button:not(:disabled) {
+  transform-origin: center;
+  transition: transform 150ms ease, box-shadow 150ms ease, background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+@media (hover: hover) {
+  button:not(:disabled):hover {
+    z-index: 1;
+    transform: scale(1.045);
+  }
+}
+button:not(:disabled):active {
+  animation: gradeboss-button-press 180ms ease-out;
+}
+@keyframes gradeboss-button-press {
+  0% { transform: scale(1.045); }
+  45% { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+
+button.destructive-action,
+button.danger,
+button.btn-danger,
+button[aria-label="Close" i],
+button[aria-label="Cancel" i],
+button[aria-label*="Delete" i],
+button[aria-label="X" i],
+button[title="Close" i],
+button[title="Cancel" i],
+button[title*="Delete" i],
+button[title="X" i],
+button[data-button-action="cancel"],
+button[data-button-action="close"],
+button[data-button-action="delete"] {
+  color: #fff !important;
+  background: #dc2626 !important;
+  border-color: #b91c1c !important;
+  box-shadow: 0 7px 16px -10px rgba(185, 28, 28, 0.8);
+}
+button.destructive-action:not(:disabled):hover,
+button.danger:not(:disabled):hover,
+button.btn-danger:not(:disabled):hover,
+button[aria-label="Close" i]:not(:disabled):hover,
+button[aria-label="Cancel" i]:not(:disabled):hover,
+button[aria-label*="Delete" i]:not(:disabled):hover,
+button[aria-label="X" i]:not(:disabled):hover,
+button[title="Close" i]:not(:disabled):hover,
+button[title="Cancel" i]:not(:disabled):hover,
+button[title*="Delete" i]:not(:disabled):hover,
+button[title="X" i]:not(:disabled):hover,
+button[data-button-action="cancel"]:not(:disabled):hover,
+button[data-button-action="close"]:not(:disabled):hover,
+button[data-button-action="delete"]:not(:disabled):hover {
+  color: #fff !important;
+  background: #b91c1c !important;
+  border-color: #991b1b !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  button:not(:disabled) {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

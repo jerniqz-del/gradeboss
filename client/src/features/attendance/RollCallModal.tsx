@@ -125,7 +125,7 @@ export function RollCallModal({
             <h3 id="roll-call-title">Roll call</h3>
             <p className="muted">{weekdayShort(date)} {date}</p>
           </div>
-          <button type="button" className="ghost" onClick={onClose}>
+          <button type="button" className="ghost destructive-action" onClick={onClose}>
             Close
           </button>
         </div>

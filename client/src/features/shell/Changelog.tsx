@@ -85,7 +85,7 @@ export function Changelog({ user, view }: { user: User; view: string }) {
         }}>
         <div className="att-modal-head">
           <h3 id="changelog-title">Activity Log</h3>
-          <button className="ghost" onClick={() => { setOpen(false); }}>Close</button>
+          <button className="ghost destructive-action" onClick={() => { setOpen(false); }}>Close</button>
         </div>
         <p className="muted">Actions and data entries are stored separately for this profile on this device, with local date and time. Passwords and PINs are not recorded.</p>
         {error && <div className="banner error" role="alert">{error}</div>}

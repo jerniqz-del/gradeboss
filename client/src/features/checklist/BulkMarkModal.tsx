@@ -28,7 +28,7 @@ export function BulkMarkModal({
       <div className="card att-modal" role="dialog" aria-labelledby="chk-bulk-title" onClick={(event) => event.stopPropagation()}>
         <div className="att-modal-head">
           <h3 id="chk-bulk-title">Bulk mark</h3>
-          <button type="button" className="ghost" onClick={onClose}>
+          <button type="button" className="ghost destructive-action" onClick={onClose}>
             Close
           </button>
         </div>
@@ -65,7 +65,7 @@ export function BulkMarkModal({
           {eligible} eligible learner{eligible === 1 ? "" : "s"} in this class.
         </p>
         <div className="att-modal-foot">
-          <button type="button" className="ghost" onClick={onClose}>
+          <button type="button" className="ghost destructive-action" onClick={onClose}>
             Cancel
           </button>
           <button
