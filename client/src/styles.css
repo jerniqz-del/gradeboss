@@ -5417,8 +5417,8 @@ button.ghost.back {
   font-weight: 700;
   text-align: right;
 }
-.sheet-page .sheet-table tbody th,
-.sheet-page .sheet-table tbody td,
+.sheet-page .sheet-table tbody tr:not(.sheet-hps) > td:nth-child(n + 4),
+.sheet-page .sheet-table .sheet-hps td,
 .sheet-page .sheet-table .score-input,
 .sheet-page .sheet-table .badge {
   font-size: var(--sheet-entry-font-size, 11px);
