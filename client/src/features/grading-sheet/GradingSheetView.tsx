@@ -19,6 +19,18 @@ import { ScoreTransferModal } from "./ScoreTransferModal";
 import { SummaryTable } from "./SummaryTable";
 
 type SheetTab = Term | "summary";
+const ENTRY_FONT_SIZE_KEY = "gradeboss:grading-entry-font-size";
+const ENTRY_FONT_SIZE_MIN = 9;
+const ENTRY_FONT_SIZE_MAX = 16;
+
+function loadEntryFontSize(): number {
+  try {
+    const stored = localStorage.getItem(ENTRY_FONT_SIZE_KEY);
+    const saved = stored === null ? Number.NaN : Number(stored);
+    if (Number.isFinite(saved)) return Math.min(ENTRY_FONT_SIZE_MAX, Math.max(ENTRY_FONT_SIZE_MIN, Math.round(saved)));
+  } catch { /* Use the default when device storage is unavailable. */ }
+  return 11;
+}
 
 export function GradingSheetView({
   selectedLoadId,
@@ -37,7 +49,13 @@ export function GradingSheetView({
   const [quickOpen, setQuickOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [entryFontSize, setEntryFontSize] = useState(11);
+  const [entryFontSize, setEntryFontSize] = useState(loadEntryFontSize);
+
+  const updateEntryFontSize = (value: number) => {
+    const next = Math.min(ENTRY_FONT_SIZE_MAX, Math.max(ENTRY_FONT_SIZE_MIN, Math.round(value)));
+    setEntryFontSize(next);
+    try { localStorage.setItem(ENTRY_FONT_SIZE_KEY, String(next)); } catch { /* Keep the in-session setting. */ }
+  };
 
   const refreshList = useCallback(async () => {
     const next = await api.getTeachingLoads();
@@ -237,9 +255,9 @@ export function GradingSheetView({
                   <span className="muted small">Entry text and number size</span>
                 </div>
                 <div className="sheet-entry-size-control" role="group" aria-label="Grading sheet entry size">
-                  <button type="button" className="ghost" aria-label="Decrease entry size" onClick={() => setEntryFontSize((size) => Math.max(9, size - 1))}>−</button>
-                  <input type="range" min={9} max={16} step={1} value={entryFontSize} aria-label="Entry text and number size" onChange={(event) => setEntryFontSize(Number(event.target.value))} />
-                  <button type="button" className="ghost" aria-label="Increase entry size" onClick={() => setEntryFontSize((size) => Math.min(16, size + 1))}>+</button>
+                  <button type="button" className="ghost" aria-label="Decrease entry size" onClick={() => updateEntryFontSize(entryFontSize - 1)}>−</button>
+                  <input type="range" min={ENTRY_FONT_SIZE_MIN} max={ENTRY_FONT_SIZE_MAX} step={1} value={entryFontSize} aria-label="Entry text and number size" onChange={(event) => updateEntryFontSize(Number(event.target.value))} />
+                  <button type="button" className="ghost" aria-label="Increase entry size" onClick={() => updateEntryFontSize(entryFontSize + 1)}>+</button>
                   <output>{entryFontSize}px</output>
                 </div>
               </div>
