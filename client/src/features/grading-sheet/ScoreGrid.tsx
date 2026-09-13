@@ -41,7 +41,7 @@ export function ScoreGrid({
     return [
       { key: "ww" as const, label: "Written Works", items: assessments.filter((item) => item.component === "WW"), weight: weights[0] },
       { key: "pt" as const, label: "Performance Tasks", items: assessments.filter((item) => item.component === "PT"), weight: weights[1] },
-      { key: "qa" as const, label: "Quarterly Assessment", items: assessments.filter((item) => ["ST1", "ST2", "TE"].includes(item.component)), weight: weights[2] },
+      { key: "qa" as const, label: "Summative Tests & Term Exam", items: assessments.filter((item) => ["ST1", "ST2", "TE"].includes(item.component)), weight: weights[2] },
     ];
   }, [assessments, load]);
   const columns = useMemo(() => groups.flatMap((group) => group.items), [groups]);
@@ -117,10 +117,10 @@ export function ScoreGrid({
         </colgroup>
         <thead>
           <tr>
-            <th className="sheet-sticky sheet-number" rowSpan={2}>No.</th>
-            <th className="sheet-sticky sheet-learner-column" rowSpan={2}>Learner</th>
-            <th rowSpan={2}>Sex</th>
-            {groups.map((group) => <th key={group.key} colSpan={group.items.length + 3} className={`sheet-group sheet-group--${group.key}`}>{group.label}</th>)}
+            <th className="sheet-sticky sheet-number sheet-section-divider" rowSpan={2}>No.</th>
+            <th className="sheet-sticky sheet-learner-column sheet-section-divider" rowSpan={2}>Learner</th>
+            <th className="sheet-section-divider" rowSpan={2}>Sex</th>
+            {groups.map((group) => <th key={group.key} colSpan={group.items.length + 3} className={`sheet-group sheet-group--${group.key} sheet-section-divider`}>{group.label}</th>)}
             <th rowSpan={2} title="Initial Grade">IG</th>
             <th rowSpan={2} title="Transmuted Grade">TG</th>
             <th rowSpan={2}>Desc.</th>
@@ -132,7 +132,7 @@ export function ScoreGrid({
               </th>)}
               <th className={`sheet-col--${group.key}`} title="Total">T</th>
               <th className={`sheet-col--${group.key}`} title="Percentage">%</th>
-              <th className={`sheet-col--${group.key}`} title="Weighted Score">WS</th>
+              <th className={`sheet-col--${group.key} sheet-section-divider`} title="Weighted Score">WS</th>
             </Fragment>)}
           </tr>
         </thead>
@@ -154,7 +154,7 @@ export function ScoreGrid({
               })}
               <td className="sheet-computed">{formatInitialGrade(group.items.reduce((sum, item) => sum + Math.max(0, item.maxScore || 0), 0))}</td>
               <td className="sheet-computed">100</td>
-              <td className="sheet-computed">{group.weight}%</td>
+              <td className="sheet-computed sheet-section-divider">{group.weight}%</td>
             </Fragment>)}
             <td /><td /><td />
           </tr>
@@ -162,8 +162,8 @@ export function ScoreGrid({
             const result = computeTermResult(load, learner.id, term, mapePart);
             const row = rowIndex + 1;
             return <tr key={learner.id} className={activeCell?.row === row ? "sheet-active-row" : undefined}>
-              <td className="sheet-sticky sheet-number">{row}</td>
-              <th className="sheet-sticky sheet-learner-column sheet-name" scope="row">
+              <td className="sheet-sticky sheet-number sheet-section-divider">{row}</td>
+              <th className="sheet-sticky sheet-learner-column sheet-name sheet-section-divider" scope="row">
                 <span className="sheet-learner">
                   <LearnerAvatar presetId={learner.avatarPresetId} size="xs" />
                   <span className="sheet-name-lines">
@@ -176,7 +176,7 @@ export function ScoreGrid({
                   </span>
                 </span>
               </th>
-              <td>{learner.sex || "—"}</td>
+              <td className="sheet-section-divider">{learner.sex || "—"}</td>
               {groups.map((group) => {
                 const stats = group.key === "ww" ? result.ww : group.key === "pt" ? result.pt : {
                   raw: result.st1.raw + result.st2.raw + result.te.raw,
@@ -199,7 +199,7 @@ export function ScoreGrid({
                   })}
                   <td className={`sheet-computed sheet-col--${group.key}`}>{stats.hasData ? formatInitialGrade(stats.raw) : ""}</td>
                   <td className={`sheet-computed sheet-col--${group.key}`}>{stats.hasData ? formatInitialGrade(stats.ps) : ""}</td>
-                  <td className={`sheet-computed sheet-col--${group.key}`}>{stats.hasData ? formatInitialGrade(stats.ps * group.weight / 100) : ""}</td>
+                  <td className={`sheet-computed sheet-col--${group.key} sheet-section-divider`}>{stats.hasData ? formatInitialGrade(stats.ps * group.weight / 100) : ""}</td>
                 </Fragment>;
               })}
               <td className="sheet-computed">{result.hasData ? formatInitialGrade(result.initialGrade) : ""}</td>

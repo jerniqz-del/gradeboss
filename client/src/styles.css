@@ -5312,3 +5312,7 @@ button.ghost.back {
 .sheet-hps .score-input {
   font-weight: 700;
 }
+
+.sheet-table .sheet-section-divider {
+  border-right: 2px solid var(--border) !important;
+}
