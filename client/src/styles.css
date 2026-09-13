@@ -5476,3 +5476,6 @@ button.ghost.back {
   font-size: 0.76em;
   font-weight: 400;
 }
+.sheet-page .sheet-table thead th {
+  font-weight: 700;
+}
