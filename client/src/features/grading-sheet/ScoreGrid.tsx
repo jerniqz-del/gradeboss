@@ -208,6 +208,16 @@ export function ScoreGrid({
                   ps: result.examPS,
                   hasData: examinationHasData(result.st1, result.st2, result.te, examinationComponentsForLoad(load)),
                 };
+                const scoreParts = group.items.map((item, index) => {
+                  const label = group.key === "qa" ? item.component : `${group.key.toUpperCase()}${index + 1}`;
+                  return `${label} ${load.scores[scoreKey(learner.id, item.id)] ?? 0}`;
+                });
+                const totalHps = group.items.reduce((sum, item) => sum + Math.max(0, item.maxScore || 0), 0);
+                const totalCalculation = `Total: ${scoreParts.join(" + ")} = ${formatInitialGrade(stats.raw)}`;
+                const percentageCalculation = totalHps > 0
+                  ? `Percentage: (${formatInitialGrade(stats.raw)} ÷ ${formatInitialGrade(totalHps)}) × 100 = ${formatInitialGrade(stats.ps)}%`
+                  : "Percentage: Enter the highest possible scores first.";
+                const weightedCalculation = `Weighted Score: (${formatInitialGrade(stats.ps)} × ${group.weight}) ÷ 100 = ${formatInitialGrade(stats.ps * group.weight / 100)}`;
                 return <Fragment key={group.key}>
                   {group.items.map((col) => {
                     const colIndex = columns.findIndex((item) => item.id === col.id);
@@ -231,9 +241,9 @@ export function ScoreGrid({
                         onKeyDown={(event) => onKeyDown(event, row, colIndex)} />
                     </td>;
                   })}
-                  <td className={`sheet-computed sheet-col--${group.key}`}>{stats.hasData ? formatInitialGrade(stats.raw) : ""}</td>
-                  <td className={`sheet-computed sheet-col--${group.key}`}>{stats.hasData ? formatInitialGrade(stats.ps) : ""}</td>
-                  <td className={`sheet-computed sheet-col--${group.key} sheet-section-divider`}>{stats.hasData ? formatInitialGrade(stats.ps * group.weight / 100) : ""}</td>
+                  <td className={`sheet-computed sheet-col--${group.key}`} title={totalCalculation}>{stats.hasData ? formatInitialGrade(stats.raw) : ""}</td>
+                  <td className={`sheet-computed sheet-col--${group.key}`} title={percentageCalculation}>{stats.hasData ? formatInitialGrade(stats.ps) : ""}</td>
+                  <td className={`sheet-computed sheet-col--${group.key} sheet-section-divider`} title={weightedCalculation}>{stats.hasData ? formatInitialGrade(stats.ps * group.weight / 100) : ""}</td>
                 </Fragment>;
               })}
               <td className="sheet-computed sheet-section-divider">{result.hasData ? formatInitialGrade(result.initialGrade) : ""}</td>
