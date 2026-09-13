@@ -279,6 +279,8 @@ export default function App() {
 
       <AppTopbar
         title={headerTitle}
+        titlePrimary={view === "calendar" || view === "tools" || !currentLoad ? undefined : `GRADE ${currentLoad.gradeLevel} - ${currentLoad.section.toUpperCase()}`}
+        titleSecondary={view === "calendar" || view === "tools" || !currentLoad ? undefined : currentLoad.subject}
         profile={profile}
         schoolYears={schoolYears}
         zoom={zoom}

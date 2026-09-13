@@ -5,9 +5,11 @@ import { DATA_SAVED } from "../../storage/change-events";
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from "./chrome";
 
 export function AppTopbar({
-  title, profile, schoolYears, zoom, onSchoolYearChange, onZoomChange,
+  title, titlePrimary, titleSecondary, profile, schoolYears, zoom, onSchoolYearChange, onZoomChange,
 }: {
   title: string;
+  titlePrimary?: string;
+  titleSecondary?: string;
   profile: TeacherProfile | null;
   schoolYears: string[];
   zoom: number;
@@ -32,7 +34,12 @@ export function AppTopbar({
   const saveLabel = lastSaved ? "Saved on this device at " + lastSaved : "Automatic saving on this device";
   return (
     <header className="topbar ecr-topbar">
-      <strong className="ecr-topbar-title" title={title}>{title}</strong>
+      <strong className="ecr-topbar-title" title={title}>
+        {titlePrimary && titleSecondary ? <>
+          <span className="ecr-topbar-title-primary">{titlePrimary}</span>
+          <span className="ecr-topbar-title-secondary">{titleSecondary}</span>
+        </> : title}
+      </strong>
       <label className="ecr-year-label">
         <span className="sr-only">School year</span>
         <select value={schoolYear} onChange={(event) => onSchoolYearChange(event.target.value)}>
