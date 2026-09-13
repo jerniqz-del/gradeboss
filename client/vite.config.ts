@@ -12,7 +12,7 @@ export default defineConfig(({ command }) => ({
       selfDestroying: command === "serve",
       includeAssets: ["favicon.ico", "apple-touch-icon-180x180.png", "logo.svg", "data/deped-calendar.json"],
       manifest: {
-        name: "GradeBoss",
+        name: "GradeBoss v1.0.0",
         short_name: "GradeBoss",
         description:
           "The ultimate solution for the most demanding school tasks, from teachers to admins.",

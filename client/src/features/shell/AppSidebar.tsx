@@ -125,7 +125,7 @@ export function AppSidebar({
           <Icon name="book" />
         </div>
         <div className="sidebar-brand-text">
-          <h1>E-Class Record App</h1>
+          <h1>GradeBoss v1.0.0</h1>
           <span>{user.name}</span>
         </div>
       </div>
