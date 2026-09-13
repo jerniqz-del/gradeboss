@@ -49,6 +49,7 @@ export function ScoreGrid({
   const learners = useMemo(() => sortDepEdRoster(load.learners), [load.learners]);
   const tableRef = useRef<HTMLTableElement>(null);
   const [learnerColumnWidth, setLearnerColumnWidth] = useState(132);
+  const [activeCell, setActiveCell] = useState<{ row: number; col: number } | null>(null);
 
   useLayoutEffect(() => {
     const table = tableRef.current;
@@ -126,7 +127,7 @@ export function ScoreGrid({
           </tr>
           <tr>
             {groups.map((group) => <Fragment key={group.key}>
-              {group.items.map((col, index) => <th key={col.id} title={col.title} aria-label={col.title} className={`sheet-col--${group.key}`}>
+              {group.items.map((col, index) => <th key={col.id} title={col.title} aria-label={col.title} className={`sheet-col--${group.key}${activeCell?.col === columns.findIndex((item) => item.id === col.id) ? " sheet-active-column" : ""}`}>
                 {group.key === "ww" ? `WW${index + 1}` : group.key === "pt" ? `PT${index + 1}` : col.component}
               </th>)}
               <th className={`sheet-col--${group.key}`} title="Total">T</th>
@@ -136,15 +137,17 @@ export function ScoreGrid({
           </tr>
         </thead>
         <tbody>
-          <tr className="sheet-hps">
+          <tr className={`sheet-hps${activeCell?.row === 0 ? " sheet-active-row" : ""}`}>
             <th className="sheet-sticky" colSpan={3}>Highest Possible Score</th>
             {groups.map((group) => <Fragment key={group.key}>
               {group.items.map((col) => {
                 const colIndex = columns.findIndex((item) => item.id === col.id);
-                return <td key={col.id}>
+                return <td key={col.id} className={activeCell?.col === colIndex ? "sheet-active-column" : undefined}> 
                   <input className="score-input" inputMode="decimal"
                     data-score-cell={`0-${colIndex}`} aria-label={`${col.title} highest possible score`}
                     value={col.maxScore || ""}
+                    onFocus={() => setActiveCell({ row: 0, col: colIndex })}
+                    onBlur={() => setActiveCell(null)}
                     onChange={(event) => onHpsChange(col.id, Number(event.target.value) || 0)}
                     onKeyDown={(event) => onKeyDown(event, 0, colIndex)} />
                 </td>;
@@ -158,7 +161,7 @@ export function ScoreGrid({
           {learners.map((learner, rowIndex) => {
             const result = computeTermResult(load, learner.id, term, mapePart);
             const row = rowIndex + 1;
-            return <tr key={learner.id}>
+            return <tr key={learner.id} className={activeCell?.row === row ? "sheet-active-row" : undefined}>
               <td className="sheet-sticky sheet-number">{row}</td>
               <th className="sheet-sticky sheet-learner-column sheet-name" scope="row">
                 <span className="sheet-learner">
@@ -184,10 +187,12 @@ export function ScoreGrid({
                   {group.items.map((col) => {
                     const colIndex = columns.findIndex((item) => item.id === col.id);
                     const value = load.scores[scoreKey(learner.id, col.id)];
-                    return <td key={col.id}>
+                    return <td key={col.id} className={activeCell?.col === colIndex ? "sheet-active-column" : undefined}>
                       <input className="score-input" inputMode="decimal"
                         data-score-cell={`${row}-${colIndex}`} aria-label={`${learnerDisplayName(learner)} ${col.title}`}
                         value={value === undefined ? "" : value}
+                        onFocus={() => setActiveCell({ row, col: colIndex })}
+                        onBlur={() => setActiveCell(null)}
                         onChange={(event) => onScoreChange(learner.id, col.id, parseCell(event.target.value))}
                         onKeyDown={(event) => onKeyDown(event, row, colIndex)} />
                     </td>;

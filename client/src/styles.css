@@ -5290,3 +5290,18 @@ button.ghost.back {
 .activity-log-tabs .sheet-tab {
   flex: 1 0 auto;
 }
+
+.sheet-table tr.sheet-active-row > th,
+.sheet-table tr.sheet-active-row > td {
+  background: color-mix(in srgb, var(--primary) 13%, var(--surface)) !important;
+}
+
+.sheet-table .sheet-active-column {
+  background: color-mix(in srgb, var(--primary) 17%, var(--surface)) !important;
+  box-shadow: inset 1px 0 color-mix(in srgb, var(--primary) 35%, transparent), inset -1px 0 color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.sheet-table tr.sheet-active-row > .sheet-active-column {
+  background: color-mix(in srgb, var(--primary) 25%, var(--surface)) !important;
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
