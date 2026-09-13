@@ -13,6 +13,15 @@ import { LearnerAvatar } from "../roster/LearnerAvatar";
 import { sortDepEdRoster } from "../roster/sort";
 import { gradeTone } from "./grade-tone";
 
+function StackedDescription({ value }: { value: string }) {
+  const translated = value.match(/^(.+?)\s*\((.+)\)$/);
+  if (!translated) return <>{value}</>;
+  return <span className="sheet-description-lines">
+    <span>{translated[1]}</span>
+    <em>{translated[2]}</em>
+  </span>;
+}
+
 export function ScoreGrid({
   load,
   term,
@@ -231,7 +240,9 @@ export function ScoreGrid({
               <td className="sheet-section-divider">{result.termGrade === null || result.termGrade === undefined ? "" :
                 <span className="badge" style={{ background: gradeTone(result.termGrade) }}>{String(result.termGrade)}</span>}
               </td>
-              <td className="sheet-computed">{result.hasData ? descriptor(result.termGrade) : ""}</td>
+              <td className="sheet-computed sheet-description">
+                {result.hasData ? <StackedDescription value={descriptor(result.termGrade)} /> : ""}
+              </td>
             </tr>;
           })}
           {learners.length === 0 && <tr>
