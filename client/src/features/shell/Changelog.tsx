@@ -120,16 +120,23 @@ export function Changelog({ user, view }: { user: User; view: string }) {
 
         </div>
         <div className="changelog-entries">
-          {visible.length === 0 && <p className="muted">No matching {category === "actions" ? "actions" : "data entries"} yet.</p>}
-          {visible.map((entry) => <article className="changelog-entry" key={entry.id}>
-            <div>
-              <time dateTime={entry.at}>{new Date(entry.at).toLocaleString()}</time>
-              <span className="pill">{category === "entries" ? "Data entry" : "Button / action"}</span>
-              <p>{entry.label}</p>
-              <small className="muted">{entry.actor}</small>
-            </div>
-
-          </article>)}
+          <table className="activity-log-table">
+            <thead>
+              <tr><th scope="col">Date</th><th scope="col">Time</th><th scope="col">Activity</th><th scope="col">User</th></tr>
+            </thead>
+            <tbody>
+              {visible.length === 0 && <tr><td className="activity-log-empty muted" colSpan={4}>No matching {category === "actions" ? "actions" : "data entries"} yet.</td></tr>}
+              {visible.map((entry) => {
+                const occurredAt = new Date(entry.at);
+                return <tr key={entry.id}>
+                  <td><time dateTime={entry.at}>{occurredAt.toLocaleDateString()}</time></td>
+                  <td><time dateTime={entry.at}>{occurredAt.toLocaleTimeString()}</time></td>
+                  <td>{entry.label}</td>
+                  <td>{entry.actor}</td>
+                </tr>;
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

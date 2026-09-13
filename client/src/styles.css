@@ -5328,3 +5328,51 @@ button.ghost.back {
 .sheet-table .sheet-section-divider {
   border-right: 2px solid var(--border) !important;
 }
+
+.changelog-entries {
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.activity-log-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+.activity-log-table th,
+.activity-log-table td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.activity-log-table th:last-child,
+.activity-log-table td:last-child {
+  border-right: 0;
+}
+.activity-log-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.activity-log-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-2);
+  font-weight: 700;
+}
+.activity-log-table th:nth-child(1),
+.activity-log-table th:nth-child(2),
+.activity-log-table td:nth-child(1),
+.activity-log-table td:nth-child(2) {
+  width: 1%;
+  white-space: nowrap;
+}
+.activity-log-table td:nth-child(3) {
+  overflow-wrap: anywhere;
+}
+.activity-log-table .activity-log-empty {
+  padding: 24px;
+  text-align: center;
+}
