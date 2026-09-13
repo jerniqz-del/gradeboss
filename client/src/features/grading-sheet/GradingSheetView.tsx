@@ -133,9 +133,6 @@ export function GradingSheetView({
           </div>
         ) : null}
       >
-        <button type="button" className="ghost" onClick={() => window.dispatchEvent(new Event("gradeboss:open-changelog"))}>
-          Activity Log
-        </button>
         <button type="button" className="ghost btn-cyan" onClick={() => printGradingSheet()}>
           Print
         </button>
