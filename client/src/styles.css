@@ -5423,3 +5423,23 @@ button.ghost.back {
 .sheet-page .sheet-table .badge {
   font-size: var(--sheet-entry-font-size, 11px);
 }
+.sheet-page .sheet-table tbody tr {
+  height: 44px;
+}
+.sheet-page .sheet-table tbody th,
+.sheet-page .sheet-table tbody td {
+  height: 44px;
+  max-height: 44px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.sheet-page .sheet-table tbody td {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.sheet-page .sheet-table .score-input {
+  height: 34px;
+  min-height: 34px;
+  padding-block: 2px;
+  line-height: 1;
+}
