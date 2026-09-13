@@ -224,6 +224,13 @@ export function GradingSheetView({
             <SummaryTable load={load} />
           ) : (
             <>
+              <ScoreGrid
+                load={load}
+                term={tab}
+                mapePart={activePart}
+                onScoreChange={(learnerId, assessmentId, value) => onScoreChange(learnerId, assessmentId, value)}
+                onHpsChange={onHpsChange}
+              />
               <div className="sheet-tools-card card no-print">
                 <div className="sheet-tools-label">
                   <strong>Grading Sheet Tools</strong>
@@ -236,13 +243,6 @@ export function GradingSheetView({
                   <output>{entryFontSize}px</output>
                 </div>
               </div>
-              <ScoreGrid
-                load={load}
-                term={tab}
-                mapePart={activePart}
-                onScoreChange={(learnerId, assessmentId, value) => onScoreChange(learnerId, assessmentId, value)}
-                onHpsChange={onHpsChange}
-              />
             </>
           )}
 

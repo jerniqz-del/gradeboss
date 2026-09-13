@@ -1,5 +1,5 @@
 import { FitSheet } from "./FitSheet";
-import { Fragment, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { computeTermResult, formatInitialGrade } from "../../domain/grading";
 import { descriptor } from "../../domain/grading/transmutation";
 import { weightsForLoad, examinationComponentsForLoad } from "../../domain/grading/weights";
@@ -50,6 +50,16 @@ export function ScoreGrid({
   const tableRef = useRef<HTMLTableElement>(null);
   const [learnerColumnWidth, setLearnerColumnWidth] = useState(132);
   const [activeCell, setActiveCell] = useState<{ row: number; col: number } | null>(null);
+  const [scoreToast, setScoreToast] = useState("");
+  const toastTimerRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(toastTimerRef.current), []);
+
+  const showScoreToast = (message: string) => {
+    setScoreToast(message);
+    window.clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = window.setTimeout(() => setScoreToast(""), 3200);
+  };
 
   useLayoutEffect(() => {
     const table = tableRef.current;
@@ -106,6 +116,7 @@ export function ScoreGrid({
   const numericColumns = columns.length + groups.length * 3 + 2;
 
   return (
+    <>
     <FitSheet minimumWidth={180 + learnerColumnWidth + numericColumns * 56}>
       <table ref={tableRef} className="sheet-table">
         <colgroup>
@@ -195,10 +206,19 @@ export function ScoreGrid({
                     return <td key={col.id} className={activeCell?.col === colIndex ? "sheet-active-column" : undefined}>
                       <input className="score-input" inputMode="decimal"
                         data-score-cell={`${row}-${colIndex}`} aria-label={`${learnerDisplayName(learner)} ${col.title}`}
+                        disabled={!col.maxScore}
+                        title={!col.maxScore ? "Enter the highest possible score first" : undefined}
                         value={value === undefined ? "" : value}
                         onFocus={() => setActiveCell({ row, col: colIndex })}
                         onBlur={() => setActiveCell(null)}
-                        onChange={(event) => onScoreChange(learner.id, col.id, parseCell(event.target.value))}
+                        onChange={(event) => {
+                          const nextValue = parseCell(event.target.value);
+                          if (nextValue !== "" && nextValue > col.maxScore) {
+                            showScoreToast(`Score cannot exceed the highest possible score of ${col.maxScore} for ${col.title}.`);
+                            return;
+                          }
+                          onScoreChange(learner.id, col.id, nextValue);
+                        }}
                         onKeyDown={(event) => onKeyDown(event, row, colIndex)} />
                     </td>;
                   })}
@@ -220,5 +240,7 @@ export function ScoreGrid({
         </tbody>
       </table>
     </FitSheet>
+    {scoreToast && <div className="score-limit-toast" role="alert">{scoreToast}</div>}
+    </>
   );
 }
