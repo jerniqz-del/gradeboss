@@ -4,6 +4,7 @@ import { exportBackupBundle, importBackupBundle } from "../../storage";
 import { backupFilename, downloadJson } from "./download";
 import { isSealedBackup, sealBackup, unsealBackup } from "./pin";
 import type { BackupMode } from "./types";
+import { FolderDatabasePanel } from "./FolderDatabasePanel";
 
 export function BackupPanel() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -60,6 +61,8 @@ export function BackupPanel() {
   };
 
   return (
+    <>
+    <FolderDatabasePanel />
     <div className="card backup-card">
       <h3>Export &amp; import backup</h3>
       <p className="muted">
@@ -118,5 +121,6 @@ export function BackupPanel() {
         </div>
       </div>
     </div>
+    </>
   );
 }

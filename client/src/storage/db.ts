@@ -6,7 +6,7 @@ import type { TeachingLoad } from "../models/teaching-load";
 import { SCHEMA_VERSION } from "../models/types";
 
 export const DB_NAME = "gradeboss";
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 export interface SchemaMeta {
   version: number;

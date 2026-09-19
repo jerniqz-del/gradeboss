@@ -26,6 +26,7 @@ import { DashboardView } from "./features/dashboard/DashboardView";
 import { BackupPanel } from "./features/exports/BackupPanel";
 import { TeachingLoadsView } from "./features/teaching-loads/TeachingLoadsView";
 import { GradingSheetView } from "./features/grading-sheet/GradingSheetView";
+import { folderDatabaseConnected, restoreRememberedFolderDatabase, syncFolderDatabase } from "./storage/folder-db";
 
 type View =
   | "dashboard"
@@ -125,6 +126,11 @@ export default function App() {
 
   useEffect(() => {
     void refresh();
+    void restoreRememberedFolderDatabase().catch(() => undefined);
+    const timer = window.setInterval(() => {
+      if (folderDatabaseConnected()) void syncFolderDatabase().catch(() => undefined);
+    }, 5000);
+    return () => window.clearInterval(timer);
   }, [refresh]);
 
   const onSignedIn = useCallback((next: User) => {
